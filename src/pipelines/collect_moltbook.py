@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Set
 
-from src.collectors.moltbook_client import MoltBookClient, MoltBookClientConfig
 from src.collectors.moltbook_scraper import MoltBookScraper, MoltBookScraperConfig
 from src.pipelines.normalize_moltbook import normalize_batch
 
@@ -28,8 +27,8 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
     comments_path = output_dir_staged / f"moltbook_comments_with_levels_{run_id}.jsonl"
 
     collector_cfg = config["collector"]
-    source_type = collector_cfg.get("source_type", "api").lower()
-    raw_records, collect_meta = _collect_raw_records(collector_cfg, source_type, output_dir_raw)
+    source_type = "url"
+    raw_records, collect_meta = _collect_raw_records(collector_cfg, output_dir_raw)
     normalized_records = normalize_batch(raw_records)
     comment_rows = _extract_comment_rows(raw_records)
 
@@ -63,49 +62,32 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 def _collect_raw_records(
     collector_cfg: Dict[str, Any],
-    source_type: str,
     output_dir_raw: Path,
 ) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    if source_type == "url":
-        scraper = MoltBookScraper(
-            MoltBookScraperConfig(
-                timeout_seconds=int(collector_cfg.get("timeout_seconds", 30)),
-                user_agent=collector_cfg.get(
-                    "user_agent",
-                    "Mozilla/5.0 (compatible; SentimentAnalysisBot/1.0)",
-                ),
-                use_reader_fallback=bool(collector_cfg.get("use_reader_fallback", True)),
-            )
+    scraper = MoltBookScraper(
+        MoltBookScraperConfig(
+            timeout_seconds=int(collector_cfg.get("timeout_seconds", 30)),
+            user_agent=collector_cfg.get(
+                "user_agent",
+                "Mozilla/5.0 (compatible; SentimentAnalysisBot/1.0)",
+            ),
+            use_reader_fallback=bool(collector_cfg.get("use_reader_fallback", True)),
         )
-        urls = _dedupe_urls(_get_urls(collector_cfg))
-        requested_urls = len(urls)
-
-        skip_existing_urls = bool(collector_cfg.get("skip_existing_urls", True))
-        if skip_existing_urls:
-            existing_urls = _load_existing_urls(output_dir_raw)
-            urls = [u for u in urls if u not in existing_urls]
-
-        records = [scraper.scrape_post(url) for url in urls]
-        return records, {
-            "requested_urls": requested_urls,
-            "scraped_urls": len(urls),
-            "skipped_existing_urls": requested_urls - len(urls),
-        }
-
-    client_cfg = MoltBookClientConfig(
-        base_url=collector_cfg["base_url"],
-        posts_endpoint=collector_cfg.get("posts_endpoint", "/posts"),
-        api_key=collector_cfg.get("api_key"),
-        timeout_seconds=int(collector_cfg.get("timeout_seconds", 30)),
-        page_size=int(collector_cfg.get("page_size", 100)),
-        max_pages=int(collector_cfg.get("max_pages", 10)),
     )
-    client = MoltBookClient(client_cfg)
+    urls = _dedupe_urls(_get_urls(collector_cfg))
+    requested_urls = len(urls)
 
-    since_iso: Optional[str] = collector_cfg.get("since_iso")
-    topic: Optional[str] = collector_cfg.get("topic")
-    records = list(client.fetch_posts(since_iso=since_iso, topic=topic))
-    return records, {}
+    skip_existing_urls = bool(collector_cfg.get("skip_existing_urls", True))
+    if skip_existing_urls:
+        existing_urls = _load_existing_urls(output_dir_raw)
+        urls = [u for u in urls if u not in existing_urls]
+
+    records = [scraper.scrape_post(url) for url in urls]
+    return records, {
+        "requested_urls": requested_urls,
+        "scraped_urls": len(urls),
+        "skipped_existing_urls": requested_urls - len(urls),
+    }
 
 
 def _get_urls(collector_cfg: Dict[str, Any]) -> List[str]:

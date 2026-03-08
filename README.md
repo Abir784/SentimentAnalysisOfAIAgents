@@ -5,11 +5,10 @@
 This repository now includes a first-pass MoltBook collector and normalized schema writer.
 
 ### Files
-- `src/collectors/moltbook_client.py`: API client for fetching paginated posts.
 - `src/pipelines/normalize_moltbook.py`: Maps source payloads into canonical schema.
 - `src/pipelines/collect_moltbook.py`: Orchestrates collection + writes JSONL outputs.
 - `scripts/run_moltbook_collection.py`: CLI entry point.
-- `configs/moltbook_collection.example.json`: Example run configuration.
+- `configs/moltbook_collection.url.json`: URL-mode run configuration.
 
 ### Install
 ```powershell
@@ -18,7 +17,7 @@ pip install -r requirements.txt
 
 ### Run
 ```powershell
-python scripts/run_moltbook_collection.py --config configs/moltbook_collection.example.json
+python scripts/run_moltbook_collection.py --config configs/moltbook_collection.url.json
 ```
 
 Direct URL mode (no config edits required):
