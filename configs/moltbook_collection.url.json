@@ -1,0 +1,17 @@
+{
+  "collector": {
+    "source_type": "url",
+    "urls": [
+      "https://www.moltbook.com/post/eb903a50-4dc9-4a27-ab21-bdc0d9752e1a",
+      "https://www.moltbook.com/post/64d4b72b-9f28-4485-89b5-3c660ba6d56a"
+    ],
+    "skip_existing_urls": true,
+    "timeout_seconds": 30,
+    "user_agent": "Mozilla/5.0 (compatible; SentimentAnalysisBot/1.0)",
+    "use_reader_fallback": true
+  },
+  "output": {
+    "raw_dir": "data/raw",
+    "staged_dir": "data/staged"
+  }
+}
