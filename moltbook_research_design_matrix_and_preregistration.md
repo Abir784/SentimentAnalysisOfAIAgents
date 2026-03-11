@@ -2,21 +2,22 @@
 
 Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational Analysis of MoltBook Conversations`
 
-## Full Research Design Matrix
+## Phase 1 Research Design Matrix
 
 ### Study Scope
-Primary objective: characterize sentiment in AI-agent discourse, compare it with human discourse, and test one dynamic mechanism (contagion) plus safety implications.
+Primary objective: characterize sentiment structure in AI-agent discourse on MoltBook using a transparent, reproducible NLP pipeline.
+
+Phase 1 focus: descriptive and methodological analysis only.
+
+Out of Phase 1 scope: causal contagion claims, full thread-dynamics inference, and safety early-warning deployment.
 
 ### Matrix
 
 | Module | Research Question | Testable Hypotheses | Unit of Analysis | Required Data Fields | Operationalization | Methods | Evaluation / Outputs | Key Validity Risks | Mitigations |
 |---|---|---|---|---|---|---|---|---|---|
-| M0: Data and Sampling | Can we build a representative MoltBook corpus and matched human baseline corpus? | H0.1: Sampling frame reproduces platform-level topic/time distribution. | Post, thread, topic-week | `post_id`, `thread_id`, `agent_id`, `timestamp`, `topic`, `text`, `reply_to`, `upvotes`, `agent_model` (if available), plus matched Reddit/X fields | Stratified sampling by topic and week; matched topic taxonomy across platforms | Data audit, distribution checks, KL divergence and chi-square for sample vs population | Reproducible dataset card; representativeness report | API/scrape bias, missing metadata, bot filtering differences | Multi-source collection, missingness diagnostics, sensitivity subsets |
-| M1: Descriptive Sentiment Atlas | What is overall sentiment distribution and how does it vary by topic/time? | H1.1: MoltBook has higher neutral share than human baseline. H1.2: Topic-level sentiment variance is lower in MoltBook. | Post and topic-week | M0 + sentiment labels/scores | Polarity (`neg/neu/pos`) + intensity score; topic-week aggregates | Ensemble sentiment pipeline (lexicon + transformer + calibration); mixed-effects regression by topic/time | Distribution plots, topic heatmaps, temporal trend estimates | Domain shift in sentiment models | Manual validation set, calibration curves, robustness across models |
-| M2: Thread Dynamics | How does sentiment evolve across multi-turn AI threads? | H2.1: AI threads converge to neutral faster than human threads. H2.2: Escalation probability increases with thread length and participant count. | Thread-turn sequence | M0 + turn index + sentiment per turn | Trajectory classes: `stable`, `escalating`, `de-escalating`, `oscillating` | Sequence clustering, Markov transition models, survival models for escalation events | Transition matrices, hazard ratios, trajectory typology | Confounding from topic mix and thread truncation | Topic-stratified models, censoring corrections, fixed effects |
-| M3: Comparative Benchmark (AI vs Human) | How do AI-agent sentiment patterns differ from human discourse on comparable topics? | H3.1: MoltBook has lower negative tail risk. H3.2: Sentiment persistence (autocorrelation) is higher in MoltBook. | Topic-week, thread | Matched corpora from M0, same preprocessing | Matched topic-time bins; length-controlled subsets | Propensity score matching / exact matching, distributional tests, effect sizes, permutation tests | Cross-platform effect size table with CIs | Non-equivalent platform affordances (votes, moderation) | Include platform controls, run placebo topics, report residual confounding bounds |
-| M4: Contagion Mechanism | Does sentiment in one agent message influence subsequent replies? | H4.1: Exposure to negative sentiment increases probability of negative next-turn response. H4.2: Influence decays with lag. | Reply edge and lagged turn | `reply_to`, timestamps, sentiment lag features, agent IDs | Exposure variables from parent and recent thread context; outcome = next-turn sentiment | Temporal logistic models, Hawkes process, Granger-style lag tests, randomization inference | Causal-style influence estimates by lag and topic | Homophily vs contagion, simultaneity | Matched exposure windows, agent fixed effects, placebo lag tests |
-| M5: Safety and Risk Layer | Can sentiment dynamics reveal emergent safety concerns? | H5.1: Certain topics show persistent high-polarization/high-negativity risk states. | Topic-week, thread | Sentiment + toxicity/abuse classifiers + upvotes/report signals if available | Composite `Safety Stress Index` = weighted z-scores (negativity, volatility, polarization, toxicity co-signal) | Risk scoring, changepoint detection, early-warning model | Topic risk dashboard, top-risk episodes, false-alarm analysis | Classifier bias and threshold sensitivity | Threshold sweep, human spot-check, subgroup fairness checks |
+| M0: Data and Sampling | Can we build a reproducible MoltBook corpus for AI-agent discourse? | H0.1: Current crawl captures stable descriptive estimates under re-sampling. | Post, thread | `post_id`, `thread_id`, `comment_id`, `author_id`, `text`, `upvotes`, `is_verified`, `fetched_at` | Repeated-batch collection and deduped consolidated staging | Data audit, missingness checks, duplicate diagnostics, sensitivity re-sampling | Reproducible dataset card and limitations report | Scrape bias, missing metadata | Multi-batch collection, explicit missingness reporting |
+| M1: Descriptive Sentiment Atlas | What is overall sentiment distribution in MoltBook? | H1.1: Positive sentiment is the modal class. H1.2: Distribution is robust to stricter preprocessing choices. | Comment and post | M0 + polarity scores | Polarity (`neg/neu/pos`) + compound intensity; post-level aggregation | Lexicon pipeline (VADER) on raw text and strict preprocessed text; bootstrap CIs | Distribution plots, post-level summaries, robustness deltas | Domain shift in sentiment models | Manual spot-checking and model-choice transparency |
+| M2: Exploratory Structure (Non-causal) | Which interaction signatures appear in available metadata? | H2.1: Verified and non-verified agent comments differ in score distribution. H2.2: High-volume posts show heterogeneous sentiment patterns. | Comment and post | M0 + polarity + `is_verified` + `upvotes` | Grouped descriptive contrasts only (no causal interpretation) | Non-parametric tests, effect sizes, visualization | Exploratory appendix tables and plots | Confounding and missing thread structure | Clearly label exploratory and non-causal scope |
 
 ### Measurement Plan
 
@@ -24,33 +25,28 @@ Primary objective: characterize sentiment in AI-agent discourse, compare it with
 |---|---|---|
 | Sentiment polarity | `P(pos), P(neu), P(neg)` | Report with 95% CI |
 | Sentiment intensity | Continuous score in [-1, 1] or [0, 1] | Keep model-specific scale mapping |
-| Polarization | Bimodality index / variance / entropy complement | Topic-week level |
-| Volatility | Standard deviation of sentiment in rolling windows | Thread and topic-week |
-| Persistence | Lag-1 autocorrelation | Thread level |
-| Escalation | `Pr(neg_t+1 | context_t)` | Event definition preregistered |
-| Contagion strength | Marginal effect of parent sentiment on reply sentiment | With fixed effects |
-| Safety stress | Composite index percentile | Publish full formula |
+| Polarization (exploratory) | Variance / entropy complement | Post-level aggregates |
+| Robustness shift | `processed_compound - raw_compound` | Preprocessing sensitivity metric |
 
 ### Data Requirements Checklist
 
 | Priority | Field | Required For |
 |---|---|---|
-| Critical | `text`, `timestamp`, `thread_id`, `reply_to`, `topic` | All modules |
-| Critical | `post_id`, `agent_id` | Dynamics + contagion |
-| High | `upvotes` / engagement | Predictive controls, safety interpretation |
-| High | Human baseline corpus with aligned topics/time | Comparative module |
+| Critical | `text`, `post_id`, `thread_id`, `comment_id`, `author_id` | Core Phase 1 analyses |
+| High | `upvotes`, `is_verified`, `fetched_at` | Stratified descriptive analyses |
+| Future-critical | `timestamp`, `reply_to`, `topic` | Phase 2 dynamics and mechanism tests |
 | Optional but high-value | `agent_model` / agent type metadata | Model-stratified analysis |
-| Optional | Moderation/report labels | Safety validation |
+| Optional | Moderation/report labels | Future safety validation |
 
 ### Identification and Inference Strategy
 
 | Question Type | Preferred Inference |
 |---|---|
-| Descriptive prevalence | Weighted estimates by topic-time strata |
-| Group differences (AI vs human) | Matched comparisons + robust effect sizes |
+| Descriptive prevalence | Bootstrap confidence intervals on corpus and post-level estimates |
+| Group differences (within MoltBook) | Stratified comparisons + robust effect sizes |
 | Predictors of shifts | Interpretable supervised models + SHAP |
-| Mechanism (contagion) | Lagged models with agent/thread fixed effects + placebo tests |
-| Safety monitoring | Out-of-sample early-warning performance |
+| Mechanism (contagion) | Deferred to Phase 2 pending reply/timestamp coverage |
+| Safety monitoring | Deferred to Phase 2 pending topic and toxicity signals |
 
 ### Quality Control and Reproducibility
 
@@ -68,17 +64,43 @@ Primary objective: characterize sentiment in AI-agent discourse, compare it with
 | Paper Section | Deliverable |
 |---|---|
 | Data | Dataset card + collection protocol |
-| Methods | Sentiment pipeline and causal/temporal modeling spec |
-| Results 1 | Sentiment atlas across topics and time |
-| Results 2 | AI-vs-human comparative effect sizes |
-| Results 3 | Thread trajectory taxonomy and contagion estimates |
-| Applied | Safety Stress Index and risk episodes |
-| Appendix | Robustness, ablations, error analysis, limitations |
+| Methods | Sentiment pipeline and robustness methodology |
+| Results 1 | Sentiment distribution atlas within MoltBook |
+| Results 2 | Raw-vs-preprocessed robustness analysis |
+| Appendix | Exploratory subgroup analyses and limitations |
 
 ### Minimal Feasible Version
-1. M0 + M1 + M3 only (descriptive + comparative core).
-2. Add one dynamic test from M2 (`escalation hazard`) instead of full M4.
-3. Keep M5 as exploratory appendix.
+1. M0 + M1 with strict reproducibility controls.
+2. Include M2 exploratory subgroup analyses as non-causal appendix.
+3. Defer dynamics, contagion, and safety forecasting to Phase 2.
+
+### Current Data Limits and Identifiable Claims
+- Identifiable now:
+  - Corpus-level sentiment prevalence and compound-score distribution.
+  - Post-level sentiment aggregation and subgroup contrasts (`is_verified`, engagement, high-volume posts).
+  - Sensitivity of conclusions to preprocessing policy (raw vs strict traditional NLP pipeline).
+- Not identifiable now:
+  - Reply-edge contagion effects.
+  - Turn-level escalation/convergence dynamics.
+  - Topic-week safety stress trajectories.
+- Main blockers:
+  - Missing reliable `reply_to` structure.
+  - Missing canonical `timestamp` and topic taxonomy for each comment.
+  - No toxicity/moderation signal integration.
+
+### Phase 2 Roadmap
+1. Data schema upgrade:
+  - Add canonical timestamps, topic labels, and reply-edge extraction.
+  - Preserve backwards compatibility with current staged schema.
+2. Annotation and validation:
+  - Build a stratified gold set for sentiment (and optional toxicity).
+  - Report inter-annotator agreement and calibration curves.
+3. Dynamics and mechanism modeling:
+  - Estimate escalation hazard and lagged reply influence using fixed-effects models.
+  - Add placebo lag tests and shuffled exposure tests.
+4. Safety layer:
+  - Construct topic-week Safety Stress Index with changepoint detection.
+  - Validate thresholds through false-alarm analysis.
 
 ---
 
@@ -86,66 +108,71 @@ Primary objective: characterize sentiment in AI-agent discourse, compare it with
 Project: `Sentiment Dynamics in AI-to-AI Social Networks (MoltBook)`
 
 ### 1. Study Overview
-- Objective: Quantify sentiment structure and dynamics in AI-to-AI discourse on MoltBook, compare with matched human discourse, and test whether sentiment contagion-like effects exist.
-- Design: Observational computational social science study with descriptive, comparative, and mechanism-testing components.
+- Objective: Quantify sentiment structure in AI-to-AI discourse on MoltBook with transparent preprocessing and robustness checks.
+- Design: Observational computational social science study with descriptive and methodological components.
 - Primary platform: MoltBook (AI-only social network).
-- Comparator platforms: Reddit and/or X (topic- and time-matched subsets).
 
 ### 2. Research Questions
-1. What is the sentiment distribution in MoltBook overall and by topic/time?
-2. How does sentiment evolve within multi-turn AI-agent threads?
-3. How does MoltBook sentiment differ from matched human discourse?
-4. Does prior sentiment exposure in-thread predict subsequent reply sentiment (contagion test)?
-5. Which topics/time windows show elevated sentiment-related safety risk?
+1. What is the sentiment distribution in MoltBook overall and across available metadata strata?
+2. How sensitive are sentiment outcomes to stricter NLP preprocessing choices?
+3. Which descriptive subgroup differences are observable with current metadata?
 
 ### 3. Hypotheses
-- H1: MoltBook has a higher neutral-sentiment proportion than matched human discourse.
-- H2: MoltBook threads show lower escalation rate (negative drift) than matched human threads.
-- H3: Sentiment autocorrelation within threads is higher in MoltBook than human baselines.
-- H4: Parent-turn negative sentiment increases probability of negative reply sentiment (contagion-consistent effect), with decay across lag.
-- H5: A subset of topics exhibits persistent high sentiment volatility/polarization, indicating elevated safety stress.
+- H1: Positive sentiment is the modal class in MoltBook comments after quality filtering.
+- H2: Core sentiment distribution findings remain directionally stable under strict preprocessing.
+- H3: Verified-status and engagement strata exhibit measurable descriptive differences in sentiment.
 
 ### 4. Data Sources and Inclusion Rules
 - Inclusion:
   - Public posts only.
   - Language: English (or explicitly multilingual with language-specific models).
-  - Threads with at least 3 turns for dynamics analyses.
   - Time window: predefined fixed interval (for example, 12 months).
 - Exclusion:
   - Deleted/inaccessible content.
   - Duplicates/near-duplicates beyond threshold.
   - Non-text or empty-text posts.
-- Matching constraints for human baseline:
-  - Topic mapping to MoltBook taxonomy.
-  - Similar post-length bins.
-  - Similar calendar periods.
-  - Optional engagement matching (upvote/reply strata).
 
 ### 5. Units of Analysis
-- Post-level: sentiment prevalence and intensity.
-- Thread-turn level: trajectory and lag effects.
-- Topic-week level: temporal trends and safety index.
-- Reply-edge level: parent-to-child sentiment influence.
+- Comment-level: primary descriptive sentiment outcomes.
+- Post-level: aggregated comment sentiment profiles.
 
 ### 6. Variables
-- Core IDs: `post_id`, `thread_id`, `reply_to`, `agent_id/user_id`.
-- Context: `timestamp`, `topic`, `text`, `upvotes`, `reply_count`.
+- Core IDs: `post_id`, `thread_id`, `comment_id`, `agent_id/user_id`.
+- Context: `text`, `upvotes`, `is_verified`, `fetched_at`.
 - Optional: `agent_model`, moderation/report signals.
 - Derived:
   - `sent_polarity` (`neg/neu/pos`)
   - `sent_intensity` (continuous)
-  - `turn_index`
-  - `lagged_sentiment` (parent and k-lag context)
-  - `thread_participant_count`, `thread_length`
+  - `preprocessing_variant` (`raw`, `strict`)
+  - `sent_delta_raw_to_strict`
+
+### 6A. Methodology (Phase 1)
+1. Data ingestion and quality control:
+  - Read consolidated staged comments.
+  - Remove exact duplicate comments and malformed/empty rows.
+  - Restrict to English via deterministic language filter.
+2. Dual-path preprocessing:
+  - Raw path: minimal normalization before scoring.
+  - Strict path: lemmatization, negation-scope handling, and policy-based stopword removal.
+3. Sentiment scoring:
+  - Score both paths with the same VADER model to isolate preprocessing effects.
+  - Produce polarity labels and compound scores for each comment.
+4. Statistical analysis:
+  - Estimate corpus-level label shares and compound-score summaries with bootstrap CIs.
+  - Compare subgroup distributions (`is_verified`, engagement bins, top-volume posts).
+  - Report effect sizes and practical differences before significance tests.
+5. Reproducibility controls:
+  - Fixed random seeds and versioned scripts.
+  - Export machine-readable artifacts (`jsonl`, `csv`, summary `json`) for auditability.
 
 ### 7. Sentiment Measurement Plan
-- Primary model: transformer sentiment classifier fine-tuned/calibrated for short social text.
-- Secondary model: lexicon/rule-based baseline.
+- Primary model: lexicon/rule-based baseline (VADER) with strict and raw preprocessing variants.
+- Secondary model: transformer sentiment classifier for Phase 2 robustness extension.
 - Calibration:
-  - Gold labeled subset (stratified by topic/platform/time).
+  - Gold labeled subset (stratified by post volume, verification status, and time windows where available).
   - Report macro-F1, calibration error, confusion matrix.
 - Primary outcome metric:
-  - Polarity distribution by platform/topic/time.
+  - Polarity distribution across comments and post-level aggregates within MoltBook.
 - Secondary metrics:
   - Intensity mean/variance, entropy, polarization index, volatility.
 
@@ -159,23 +186,16 @@ Project: `Sentiment Dynamics in AI-to-AI Social Networks (MoltBook)`
 
 ### 9. Primary Analyses
 1. Descriptive atlas:
-   - Weighted prevalence estimates by topic-week.
-   - Mixed-effects regression (`sentiment ~ topic + time + (1|thread)` as appropriate).
-2. Comparative analysis:
-   - Matched sample tests (propensity/exact matching).
-   - Effect sizes with 95% CI and permutation robustness.
-3. Thread dynamics:
-   - Transition matrices; hazard/survival model for escalation event.
-4. Contagion test:
-   - Lagged logistic/ordinal models with thread and agent fixed effects.
-   - Hawkes-style sensitivity analysis.
-5. Safety layer:
-   - Composite Safety Stress Index from negativity, volatility, polarization, and toxicity co-signal.
+  - Label shares and compound distributions with confidence intervals.
+  - Post-level aggregated sentiment summaries.
+2. Robustness analysis:
+  - Raw vs strict preprocessing deltas in scores and labels.
+3. Exploratory subgroup analysis:
+  - Descriptive contrasts by verification status and engagement strata.
 
 ### 10. Event Definitions (Preregistered)
-- Escalation event: sentiment drops by predefined threshold within `n` turns and remains below baseline for at least `m` turns.
-- Convergence event: rolling sentiment variance falls below threshold by turn `t`.
-- Polarization episode: topic-week exceeds percentile cutoff on bimodality/dispersion metric.
+- Phase 1 does not preregister causal or turn-level events due to current schema limits.
+- Event definitions for escalation, convergence, and contagion are deferred to Phase 2 after reply-edge and timestamp upgrades.
 
 ### 11. Statistical Plan
 - Confidence intervals: bootstrap or robust sandwich standard errors.
@@ -189,11 +209,10 @@ Project: `Sentiment Dynamics in AI-to-AI Social Networks (MoltBook)`
 ### 12. Robustness and Ablations
 - Alternate sentiment models and thresholds.
 - Topic-removal sensitivity (drop largest topics).
-- Platform-affordance sensitivity (engagement-controlled subsets).
+- Preprocessing-policy sensitivity (raw vs strict path).
+- Engagement-controlled subsets.
 - Temporal robustness (early vs late period splits).
-- Placebo tests for contagion:
-  - Future-lag placebo.
-  - Shuffled within-thread exposure.
+- Contagion placebo tests deferred to Phase 2.
 
 ### 13. Bias, Ethics, and Safety
 - Respect platform terms and legal constraints.
@@ -212,22 +231,20 @@ Project: `Sentiment Dynamics in AI-to-AI Social Networks (MoltBook)`
 - Construct validity: sentiment models may misread AI style, irony, role-play.
 - Internal validity: homophily and topic drift can mimic contagion.
 - External validity: MoltBook may not represent all AI-agent ecosystems.
-- Platform confounds: moderation/UI differences across MoltBook and Reddit/X.
+- Platform-specific affordances may shape discourse in ways that limit generalization beyond MoltBook.
 
 ### 16. Minimum Success Criteria
 - Reliable sentiment measurement on validation set (predefined performance floor).
-- Statistically and practically interpretable AI-vs-human differences.
-- At least one robust dynamic finding (trajectory or contagion) surviving sensitivity checks.
+- Stable descriptive conclusions across preprocessing variants.
 - Transparent limitations and failure modes documented.
 
 ### 17. Planned Outputs
 - Main paper tables:
-  - Sentiment distribution by platform/topic.
-  - Dynamics and contagion model coefficients.
-  - Safety index top-risk topics/time windows.
+  - Sentiment distribution by topic within MoltBook.
+  - Raw-vs-strict preprocessing robustness deltas.
+  - Exploratory subgroup contrasts (verification/engagement).
 - Figures:
-  - Topic-time heatmap.
-  - Thread trajectory archetypes.
-  - Comparative distribution overlays.
+  - Corpus-level polarity distributions.
+  - Raw-vs-strict comparison plots.
 - Appendix:
-  - Annotation guidelines, ablations, placebo tests, diagnostics.
+  - Annotation guidelines, ablations, diagnostics, and Phase 2 roadmap.

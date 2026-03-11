@@ -22,9 +22,12 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
     output_dir_staged.mkdir(parents=True, exist_ok=True)
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    
+    # Raw files remain timestamped for audit trail
     raw_path = output_dir_raw / f"moltbook_raw_{run_id}.jsonl"
-    staged_path = output_dir_staged / f"moltbook_normalized_{run_id}.jsonl"
-    comments_path = output_dir_staged / f"moltbook_comments_with_levels_{run_id}.jsonl"
+    
+    # Comments appended to consolidated file
+    comments_path = output_dir_staged / "moltbook_comments_all.jsonl"
 
     collector_cfg = config["collector"]
     source_type = "url"
@@ -33,21 +36,19 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
     comment_rows = _extract_comment_rows(raw_records)
 
     if raw_records:
+        # Write timestamped raw file (original behavior)
         _write_jsonl(raw_path, raw_records)
-        _write_jsonl(staged_path, normalized_records)
-        _write_jsonl(comments_path, comment_rows)
+        # Append comments to consolidated file
+        _append_jsonl(comments_path, comment_rows)
     else:
         raw_path = None
-        staged_path = None
         comments_path = None
 
     result = {
         "run_id": run_id,
         "raw_path": str(raw_path) if raw_path else "",
-        "staged_path": str(staged_path) if staged_path else "",
         "comments_path": str(comments_path) if comments_path else "",
         "raw_count": len(raw_records),
-        "normalized_count": len(normalized_records),
         "comments_extracted": len(comment_rows),
         "source_type": source_type,
         "requested_urls": collect_meta.get("requested_urls", 0),
@@ -55,8 +56,8 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
         "skipped_existing_urls": collect_meta.get("skipped_existing_urls", 0),
     }
 
-    # Report cumulative rows/files so each run shows data stored till now.
-    result.update(_build_storage_totals(output_dir_raw, output_dir_staged))
+    # Report storage totals
+    result.update(_build_storage_totals(output_dir_raw, comments_path))
     return result
 
 
@@ -119,6 +120,7 @@ def _load_existing_urls(raw_dir: Path) -> Set[str]:
     if not raw_dir.exists():
         return existing_urls
 
+    # Read from timestamped raw files
     for path in raw_dir.glob("moltbook_raw_*.jsonl"):
         with path.open("r", encoding="utf-8") as f:
             for line in f:
@@ -144,18 +146,14 @@ def _load_config(config_path: Path) -> Dict[str, Any]:
         return json.load(f)
 
 
-def _build_storage_totals(output_dir_raw: Path, output_dir_staged: Path) -> Dict[str, int]:
+def _build_storage_totals(output_dir_raw: Path, comments_path: Path) -> Dict[str, int]:
+    """Report storage totals for timestamped raw files and consolidated comments file."""
     raw_files = list(output_dir_raw.glob("moltbook_raw_*.jsonl"))
-    normalized_files = list(output_dir_staged.glob("moltbook_normalized_*.jsonl"))
-    comments_files = list(output_dir_staged.glob("moltbook_comments_with_levels_*.jsonl"))
-
+    
     return {
         "stored_raw_files_total": len(raw_files),
         "stored_raw_rows_total": _count_jsonl_rows(raw_files),
-        "stored_normalized_files_total": len(normalized_files),
-        "stored_normalized_rows_total": _count_jsonl_rows(normalized_files),
-        "stored_comments_files_total": len(comments_files),
-        "stored_comments_rows_total": _count_jsonl_rows(comments_files),
+        "total_comments_rows": _count_jsonl_rows([comments_path]) if comments_path.exists() else 0,
     }
 
 
@@ -171,6 +169,13 @@ def _count_jsonl_rows(paths: List[Path]) -> int:
 
 def _write_jsonl(path: Path, rows: List[Dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=True) + "\n")
+
+
+def _append_jsonl(path: Path, rows: List[Dict[str, Any]]) -> None:
+    """Append rows to a JSONL file, creating it if it doesn't exist."""
+    with path.open("a", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=True) + "\n")
 
