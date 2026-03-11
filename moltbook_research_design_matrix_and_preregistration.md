@@ -2,6 +2,94 @@
 
 Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational Analysis of MoltBook Conversations`
 
+## Executive Summary (Short Abstract)
+This project builds a reproducible sentiment analysis pipeline for AI-to-AI social interaction data from MoltBook. The goal is to characterize polarity patterns (negative, neutral, positive), test how robust findings are to preprocessing choices, and benchmark lightweight machine learning models that can run on constrained hardware. The workflow covers data collection, cleaning, preprocessing, feature extraction, cross-validated model training, and transparent reporting with visual diagnostics. Current results show stable overall accuracy in the low-to-mid 0.70 range, but weaker performance for minority classes (especially neutral), indicating that class imbalance remains a key methodological challenge for Phase 1.
+
+## Data Source and Data Summary
+- Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
+- Unit of analysis: comment-level text, with post/thread context fields retained for aggregation.
+- Current modeling dataset: 366 labeled comments after preprocessing and quality filtering.
+- Label space: three-class sentiment (`negative`, `neutral`, `positive`).
+- Core fields used: `comment_id`, `post_id`, `thread_id`, `author_id`, `text`, `upvotes`, `is_verified`, `fetched_at`.
+- Data pipeline structure: raw collection -> staged consolidated comments -> preprocessed text -> polarity and training-ready CSV artifacts.
+
+## Packages and Technologies Used
+- Programming language: Python 3.x
+- Data handling: pandas, numpy
+- NLP preprocessing and sentiment: nltk, langdetect, vaderSentiment
+- ML modeling (lightweight): scikit-learn
+  - TF-IDF features: `TfidfVectorizer`
+  - Models: Logistic Regression, Linear SVM, SGDClassifier, Multinomial Naive Bayes
+  - Validation: StratifiedKFold, CalibratedClassifierCV
+- Visualization: matplotlib, seaborn
+- File formats and storage: JSONL, CSV, JSON
+- Workflow environment: Jupyter notebooks + Python scripts (VS Code workspace)
+
+## Methodology: Data Collection to Model Training
+### 1. Data Collection and Staging
+1. Collect raw MoltBook conversations into JSONL batches from public pages.
+2. Consolidate raw batches into a staged comments file.
+3. Preserve core metadata fields (comment_id, post_id, thread_id, author_id, text, upvotes, verification status, fetch timestamp).
+
+### 2. Data Quality Control and Preprocessing
+1. Remove malformed, empty, duplicate, and low-signal records.
+2. Normalize text with lowercase conversion, punctuation/special-character cleanup, URL/hashtag/number/emoji removal, abbreviation expansion, tokenization, stopword policy, and lemmatization.
+3. Store processed text and intermediate artifacts for reproducibility and audit.
+
+### 3. Label Construction
+1. Generate sentiment-oriented target labels from processed polarity outputs.
+2. Use the training-ready CSV as the modeling input dataset.
+3. Keep labels in three classes: negative, neutral, positive.
+
+### 4. Feature Engineering and Modeling
+1. Transform text to TF-IDF features (unigram + bigram).
+2. Train lightweight models suitable for local devices:
+  - Logistic Regression (calibrated)
+  - Linear SVM
+  - SGD linear classifier
+  - Multinomial Naive Bayes
+3. Use stratified 5-fold cross-validation for robust estimates.
+4. Apply minority-threshold tuning for probabilistic models to improve sensitivity on underrepresented classes.
+
+### 5. Evaluation and Reporting
+1. Report five key metrics: Accuracy, F1 Score (macro), Precision (macro), Recall (macro), Sustainability.
+2. Define Sustainability as a runtime-efficiency indicator normalized to [0, 1], where higher means faster and more device-friendly.
+3. Export prediction tables, summary JSON, and visual diagnostics for comparison and interpretation.
+
+## Short Results (Current Run)
+Data: 366 labeled comments, 5-fold stratified cross-validation.
+
+1. Best Accuracy: Linear SVM (0.7486)
+2. Best Macro F1: SGD linear model (0.4990)
+3. Best Sustainability: Linear SVM (1.0000)
+4. Strongest overall balance (performance + efficiency): Linear SVM and SGD linear
+
+### Relevant Graphs
+Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
+
+![Requested metrics dashboard](data/modeling/moltbook_model_requested_metrics_20260311T185208Z.png)
+
+Confusion matrices across models:
+
+![Confusion matrices](data/modeling/moltbook_model_confusion_matrices_20260311T185208Z.png)
+
+Class-wise F1 comparison:
+
+![Class-wise F1](data/modeling/moltbook_model_classwise_f1_20260311T185208Z.png)
+
+## Shortcomings in Current Results
+1. Neutral class performance is still weak because class support is low relative to positive samples.
+2. Accuracy is acceptable, but macro-level metrics show imbalance sensitivity and limited minority recall.
+3. Lexical TF-IDF features can miss nuanced pragmatic meaning in AI-agent dialog (irony, role-play, intent shifts).
+4. Current Sustainability score is runtime-based only; it does not yet include memory footprint and energy measurements.
+
+
+## Immediate Improvement Plan
+1. Increase minority-class coverage via targeted data collection and/or controlled resampling.
+2. Add memory-usage logging to extend Sustainability beyond runtime.
+3. Build a small manually reviewed validation subset to audit neutral-label quality and error patterns.
+4. Keep lightweight models as deployment baseline and use larger models only for periodic robustness checks.
+<!-- 
 ## Phase 1 Research Design Matrix
 
 ### Study Scope
@@ -247,4 +335,4 @@ Project: `Sentiment Dynamics in AI-to-AI Social Networks (MoltBook)`
   - Corpus-level polarity distributions.
   - Raw-vs-strict comparison plots.
 - Appendix:
-  - Annotation guidelines, ablations, diagnostics, and Phase 2 roadmap.
+  - Annotation guidelines, ablations, diagnostics, and Phase 2 roadmap. -->

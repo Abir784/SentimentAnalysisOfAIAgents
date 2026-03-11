@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 
 from src.collectors.moltbook_scraper import MoltBookScraper, MoltBookScraperConfig
 from src.pipelines.normalize_moltbook import normalize_batch
@@ -146,14 +146,18 @@ def _load_config(config_path: Path) -> Dict[str, Any]:
         return json.load(f)
 
 
-def _build_storage_totals(output_dir_raw: Path, comments_path: Path) -> Dict[str, int]:
+def _build_storage_totals(output_dir_raw: Path, comments_path: Optional[Path]) -> Dict[str, int]:
     """Report storage totals for timestamped raw files and consolidated comments file."""
     raw_files = list(output_dir_raw.glob("moltbook_raw_*.jsonl"))
     
+    comments_rows = 0
+    if comments_path is not None and comments_path.exists():
+        comments_rows = _count_jsonl_rows([comments_path])
+
     return {
         "stored_raw_files_total": len(raw_files),
         "stored_raw_rows_total": _count_jsonl_rows(raw_files),
-        "total_comments_rows": _count_jsonl_rows([comments_path]) if comments_path.exists() else 0,
+        "total_comments_rows": comments_rows,
     }
 
 
