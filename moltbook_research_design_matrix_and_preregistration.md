@@ -56,13 +56,22 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 2. Define Sustainability as a runtime-efficiency indicator normalized to [0, 1], where higher means faster and more device-friendly.
 3. Export prediction tables, summary JSON, and visual diagnostics for comparison and interpretation.
 
-## Short Results (Current Run)
+## Results (Current Run)
 Data: 366 labeled comments, 5-fold stratified cross-validation.
 
 1. Best Accuracy: Linear SVM (0.7486)
 2. Best Macro F1: SGD linear model (0.4990)
 3. Best Sustainability: Linear SVM (1.0000)
 4. Strongest overall balance (performance + efficiency): Linear SVM and SGD linear
+
+### Model Results Table
+
+| Model | Accuracy | F1 Score (Macro) | Precision (Macro) | Recall (Macro) | Sustainability |
+|---|---:|---:|---:|---:|---:|
+| Logistic Regression (calibrated) | 0.7432 | 0.4477 | 0.4678 | 0.4439 | 0.0000 |
+| Linear SVM | 0.7486 | 0.4535 | 0.4700 | 0.4505 | 1.0000 |
+| SGD Linear | 0.7240 | 0.4990 | 0.5588 | 0.4894 | 0.8451 |
+| Multinomial Naive Bayes | 0.7186 | 0.3461 | 0.5050 | 0.3694 | 0.9703 |
 
 ### Relevant Graphs
 Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
@@ -84,11 +93,11 @@ Class-wise F1 comparison:
 4. Current Sustainability score is runtime-based only; it does not yet include memory footprint and energy measurements.
 
 
-## Immediate Improvement Plan
+<!-- ## Immediate Improvement Plan
 1. Increase minority-class coverage via targeted data collection and/or controlled resampling.
 2. Add memory-usage logging to extend Sustainability beyond runtime.
 3. Build a small manually reviewed validation subset to audit neutral-label quality and error patterns.
-4. Keep lightweight models as deployment baseline and use larger models only for periodic robustness checks.
+4. Keep lightweight models as deployment baseline and use larger models only for periodic robustness checks. -->
 <!-- 
 ## Phase 1 Research Design Matrix
 
