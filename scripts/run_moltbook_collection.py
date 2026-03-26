@@ -28,8 +28,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--urls-file",
-        default="",
-        help="Optional text file with one URL per line.",
+        default="moltbook_urls.txt",
+        help="Text file with one URL per line. Defaults to moltbook_urls.txt.",
     )
     args = parser.parse_args()
 

@@ -13,7 +13,64 @@ data/
 └── polarity/         # Polarity-scored comments with sentiment labels
 ```
 
+## Unified NLP System (Single Command Interface)
+
+Use one orchestrator to run the full research pipeline, selected stages, or specific notebook cells:
+
+```powershell
+python scripts/run_nlp_pipeline.py list
+```
+
+Run the full script-only pipeline (fast default):
+
+```powershell
+python scripts/run_nlp_pipeline.py run --all
+```
+
+Run the full research pipeline including notebooks:
+
+```powershell
+python scripts/run_nlp_pipeline.py run --all --include-notebooks
+```
+
+Run a stage range in pipeline order:
+
+```powershell
+python scripts/run_nlp_pipeline.py run --from-stage raw_to_staged --to-stage polarity
+```
+
+Run specific stages only:
+
+```powershell
+python scripts/run_nlp_pipeline.py run --stages collect,raw_to_staged,polarity,modeling
+```
+
+Run one notebook with selected cell numbers:
+
+```powershell
+python scripts/run_nlp_pipeline.py run-notebook --notebook notebooks/moltbook_preprocessing_steps.ipynb --cells 1-6,8
+```
+
+Run notebook stages with stage-specific cell selectors:
+
+```powershell
+python scripts/run_nlp_pipeline.py run --stages preprocess_notebook,polarity_notebook --include-notebooks --notebook-cells preprocess_notebook:1-10 polarity_notebook:1-7
+```
+
+Pipeline order is aligned to the research motive (reproducibility, preprocessing robustness, and lightweight model benchmarking):
+
+1. `collect`
+2. `raw_to_staged`
+3. `eda_summary`
+4. `eda_notebook`
+5. `preprocess_notebook`
+6. `polarity`
+7. `polarity_notebook`
+8. `modeling`
+
 ## Step 1: Collect Data
+
+By default, collection reads URLs from `moltbook_urls.txt` at the repository root.
 
 ```powershell
 python scripts/run_moltbook_collection.py --config configs/moltbook_collection.url.json
@@ -25,6 +82,11 @@ Outputs:
 Direct URL mode:
 ```powershell
 python scripts/run_moltbook_collection.py --url https://www.moltbook.com/post/<id>
+```
+
+Explicit file mode:
+```powershell
+python scripts/run_moltbook_collection.py --urls-file moltbook_urls.txt
 ```
 
 ## Step 2: Process Raw to Staged

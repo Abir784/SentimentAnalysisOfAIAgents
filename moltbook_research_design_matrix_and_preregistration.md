@@ -3,12 +3,13 @@
 Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational Analysis of MoltBook Conversations`
 
 ## Executive Summary (Short Abstract)
-This project builds a reproducible sentiment analysis pipeline for AI-to-AI social interaction data from MoltBook. The goal is to characterize polarity patterns (negative, neutral, positive), test how robust findings are to preprocessing choices, and benchmark lightweight machine learning models that can run on constrained hardware. The workflow covers data collection, cleaning, preprocessing, feature extraction, cross-validated model training, and transparent reporting with visual diagnostics. Current results show stable overall accuracy in the low-to-mid 0.70 range, but weaker performance for minority classes (especially neutral), indicating that class imbalance remains a key methodological challenge for Phase 1.
+This project builds a reproducible sentiment analysis pipeline for AI-to-AI social interaction data from MoltBook. The goal is to characterize polarity patterns (negative, neutral, positive), test how robust findings are to preprocessing choices, and benchmark lightweight machine learning models that can run on constrained hardware. The workflow covers data collection, cleaning, preprocessing, feature extraction, cross-validated model training, and transparent reporting with visual diagnostics. Current results show stable overall accuracy in the high-0.60 to low-0.70 range and macro-F1 in the low-to-mid 0.40 range, with persistent minority-class weakness (especially neutral), indicating that class imbalance remains a key methodological challenge for Phase 1.
 
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
 - Unit of analysis: comment-level text, with post/thread context fields retained for aggregation.
-- Current modeling dataset: 366 labeled comments after preprocessing and quality filtering.
+- Current staged corpus: 553 comments across 14 posts and 260 authors.
+- Current modeling dataset: 423 labeled comments after preprocessing and quality filtering.
 - Label space: three-class sentiment (`negative`, `neutral`, `positive`).
 - Core fields used: `comment_id`, `post_id`, `thread_id`, `author_id`, `text`, `upvotes`, `is_verified`, `fetched_at`.
 - Data pipeline structure: raw collection -> staged consolidated comments -> preprocessed text -> polarity and training-ready CSV artifacts.
@@ -20,6 +21,7 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 - ML modeling (lightweight): scikit-learn
   - TF-IDF features: `TfidfVectorizer`
   - Models: Logistic Regression, Linear SVM, SGDClassifier, Multinomial Naive Bayes
+  - Custom model: MoltBook Dual-View Resonance (word-view + char-view + hybrid stack with neutral-guard rule)
   - Validation: StratifiedKFold, CalibratedClassifierCV
 - Visualization: matplotlib, seaborn
 - File formats and storage: JSONL, CSV, JSON
@@ -57,40 +59,43 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 3. Export prediction tables, summary JSON, and visual diagnostics for comparison and interpretation.
 
 ## Results (Current Run)
-Data: 366 labeled comments, 5-fold stratified cross-validation.
+Data: 423 labeled comments, 5-fold stratified cross-validation.
 
-1. Best Accuracy: Linear SVM (0.7486)
-2. Best Macro F1: SGD linear model (0.4990)
-3. Best Sustainability: Linear SVM (1.0000)
-4. Strongest overall balance (performance + efficiency): Linear SVM and SGD linear
+1. Best Accuracy: Linear SVM (0.7329)
+2. Best Macro F1: SGD linear model (0.4850)
+3. Best Sustainability: Multinomial Naive Bayes (1.0000)
+4. Custom model (`moltbook_dualview_resonance`) reached macro F1 = 0.4362 with explicit neutral-guard behavior, but lower accuracy (0.6785) and runtime efficiency.
+5. Strongest overall balance (performance + efficiency): Linear SVM and SGD linear
 
 ### Model Results Table
 
 | Model | Accuracy | F1 Score (Macro) | Precision (Macro) | Recall (Macro) | Sustainability |
 |---|---:|---:|---:|---:|---:|
-| Logistic Regression (calibrated) | 0.7432 | 0.4477 | 0.4678 | 0.4439 | 0.0000 |
-| Linear SVM | 0.7486 | 0.4535 | 0.4700 | 0.4505 | 1.0000 |
-| SGD Linear | 0.7240 | 0.4990 | 0.5588 | 0.4894 | 0.8451 |
-| Multinomial Naive Bayes | 0.7186 | 0.3461 | 0.5050 | 0.3694 | 0.9703 |
+| Logistic Regression (calibrated) | 0.7258 | 0.4096 | 0.4618 | 0.4096 | 0.5335 |
+| Linear SVM | 0.7329 | 0.4351 | 0.4568 | 0.4329 | 0.9837 |
+| SGD Linear | 0.6998 | 0.4850 | 0.5212 | 0.4811 | 0.9355 |
+| Multinomial Naive Bayes | 0.6998 | 0.3184 | 0.4641 | 0.3540 | 1.0000 |
+| MoltBook Dual-View Resonance (custom) | 0.6785 | 0.4362 | 0.4747 | 0.4278 | 0.0000 |
 
 ### Relevant Graphs
 Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
 
-![Requested metrics dashboard](data/modeling/moltbook_model_requested_metrics_20260311T185208Z.png)
+![Requested metrics dashboard](data/modeling/moltbook_model_requested_metrics_20260326T130113Z.png)
 
 Confusion matrices across models:
 
-![Confusion matrices](data/modeling/moltbook_model_confusion_matrices_20260311T185208Z.png)
+![Confusion matrices](data/modeling/moltbook_model_confusion_matrices_20260326T130113Z.png)
 
 Class-wise F1 comparison:
 
-![Class-wise F1](data/modeling/moltbook_model_classwise_f1_20260311T185208Z.png)
+![Class-wise F1](data/modeling/moltbook_model_classwise_f1_20260326T130113Z.png)
 
 ## Shortcomings in Current Results
-1. Neutral class performance is still weak because class support is low relative to positive samples.
-2. Accuracy is acceptable, but macro-level metrics show imbalance sensitivity and limited minority recall.
-3. Lexical TF-IDF features can miss nuanced pragmatic meaning in AI-agent dialog (irony, role-play, intent shifts).
-4. Current Sustainability score is runtime-based only; it does not yet include memory footprint and energy measurements.
+1. Neutral class performance is still weak because class support is low relative to positive samples (neutral support remains very limited).
+2. Accuracy is acceptable, but macro-level metrics still show imbalance sensitivity and limited minority recall.
+3. New crawl data introduced duplicate comments at staged level (62 duplicate rows detected before strict preprocessing), requiring stronger dedup controls earlier in the pipeline.
+4. The custom dual-view model improves interpretability of ambiguity handling (neutral-guard), but currently trades off speed and accuracy.
+5. Sustainability is runtime-based only; it does not yet include memory footprint and energy measurements.
 
 
 <!-- ## Immediate Improvement Plan

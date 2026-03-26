@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from scipy.sparse import hstack
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression, SGDClassifier
@@ -107,6 +108,189 @@ def _build_model(model_name: str):
     if model_name == "naive_bayes":
         return MultinomialNB(alpha=0.5)
     raise ValueError(f"Unsupported model: {model_name}")
+
+
+def _resolve_text_series(df: pd.DataFrame, preferred_col: str, fallback_col: str) -> pd.Series:
+    if preferred_col in df.columns:
+        return df[preferred_col].fillna("").astype(str)
+    if fallback_col in df.columns:
+        return df[fallback_col].fillna("").astype(str)
+    return pd.Series([""] * len(df), index=df.index, dtype=str)
+
+
+def _neutral_guard_threshold(train_max_proba: np.ndarray, y_train: np.ndarray) -> float:
+    neutral_mask = y_train == "neutral"
+    if neutral_mask.sum() == 0:
+        return 0.45
+
+    neutral_probs = train_max_proba[neutral_mask]
+    if len(neutral_probs) == 0:
+        return 0.45
+
+    return float(np.clip(np.quantile(neutral_probs, 0.7), 0.34, 0.62))
+
+
+def _run_moltbook_dualview_resonance_oof(
+    model_df: pd.DataFrame,
+    y: pd.Series,
+    cv: StratifiedKFold,
+) -> Tuple[np.ndarray, Dict[str, Any]]:
+    y_arr = y.astype(str).values
+    oof_pred = np.empty(len(y_arr), dtype=object)
+
+    fold_acc: List[float] = []
+    fold_f1: List[float] = []
+    fold_time_sec: List[float] = []
+    neutral_thresholds: List[float] = []
+
+    basic_text = _resolve_text_series(model_df, "text_basic_clean", "text_traditional_clean")
+    trad_text = _resolve_text_series(model_df, "text_traditional_clean", "text_basic_clean")
+    text_len_words = pd.to_numeric(
+        model_df.get("text_len_words_traditional_clean", pd.Series([0] * len(model_df))),
+        errors="coerce",
+    ).fillna(0.0)
+    abs_delta = pd.to_numeric(
+        model_df.get("polarity_compound_delta", pd.Series([0.0] * len(model_df))),
+        errors="coerce",
+    ).fillna(0.0).abs()
+
+    for fold_id, (train_idx, test_idx) in enumerate(cv.split(trad_text, y_arr), start=1):
+        t0 = perf_counter()
+        y_train = y_arr[train_idx]
+        y_test = y_arr[test_idx]
+
+        trad_train = trad_text.iloc[train_idx]
+        trad_test = trad_text.iloc[test_idx]
+        basic_train = basic_text.iloc[train_idx]
+        basic_test = basic_text.iloc[test_idx]
+
+        # Two lexical views + character morphology view.
+        vec_word = TfidfVectorizer(
+            ngram_range=(1, 2),
+            min_df=2,
+            max_df=0.95,
+            sublinear_tf=True,
+            max_features=3500,
+        )
+        vec_char = TfidfVectorizer(
+            analyzer="char_wb",
+            ngram_range=(3, 5),
+            min_df=2,
+            max_df=0.98,
+            sublinear_tf=True,
+            max_features=3000,
+        )
+
+        x_word_train = vec_word.fit_transform(trad_train)
+        x_word_test = vec_word.transform(trad_test)
+        x_char_train = vec_char.fit_transform(basic_train)
+        x_char_test = vec_char.transform(basic_test)
+
+        base_word = SGDClassifier(
+            loss="log_loss",
+            alpha=1e-5,
+            class_weight="balanced",
+            max_iter=2500,
+            random_state=42,
+        )
+        base_char = LogisticRegression(
+            max_iter=3000,
+            class_weight="balanced",
+            random_state=42,
+        )
+        base_hybrid = MultinomialNB(alpha=0.35)
+
+        x_hybrid_train = hstack([x_word_train, x_char_train])
+        x_hybrid_test = hstack([x_word_test, x_char_test])
+
+        base_word.fit(x_word_train, y_train)
+        base_char.fit(x_char_train, y_train)
+        base_hybrid.fit(x_hybrid_train, y_train)
+
+        classes = np.array(sorted(list(set(y_train))))
+
+        p_word_train = base_word.predict_proba(x_word_train)
+        p_char_train = base_char.predict_proba(x_char_train)
+        p_hybrid_train = base_hybrid.predict_proba(x_hybrid_train)
+
+        p_word_test = base_word.predict_proba(x_word_test)
+        p_char_test = base_char.predict_proba(x_char_test)
+        p_hybrid_test = base_hybrid.predict_proba(x_hybrid_test)
+
+        max_word_train = np.max(p_word_train, axis=1)
+        max_char_train = np.max(p_char_train, axis=1)
+        max_hybrid_train = np.max(p_hybrid_train, axis=1)
+
+        max_word_test = np.max(p_word_test, axis=1)
+        max_char_test = np.max(p_char_test, axis=1)
+        max_hybrid_test = np.max(p_hybrid_test, axis=1)
+
+        consensus_train = np.abs(max_word_train - max_char_train)
+        consensus_test = np.abs(max_word_test - max_char_test)
+
+        train_meta = np.column_stack(
+            [
+                p_word_train,
+                p_char_train,
+                p_hybrid_train,
+                consensus_train,
+                abs_delta.iloc[train_idx].values,
+                text_len_words.iloc[train_idx].values,
+            ]
+        )
+        test_meta = np.column_stack(
+            [
+                p_word_test,
+                p_char_test,
+                p_hybrid_test,
+                consensus_test,
+                abs_delta.iloc[test_idx].values,
+                text_len_words.iloc[test_idx].values,
+            ]
+        )
+
+        meta = LogisticRegression(
+            max_iter=3000,
+            class_weight="balanced",
+            random_state=42,
+        )
+        meta.fit(train_meta, y_train)
+
+        train_meta_proba = meta.predict_proba(train_meta)
+        test_meta_proba = meta.predict_proba(test_meta)
+        max_meta_train = np.max(train_meta_proba, axis=1)
+        max_meta_test = np.max(test_meta_proba, axis=1)
+
+        neutral_threshold = _neutral_guard_threshold(max_meta_train, y_train)
+        neutral_thresholds.append(neutral_threshold)
+
+        raw_pred = meta.classes_[np.argmax(test_meta_proba, axis=1)]
+        force_neutral = (max_meta_test < neutral_threshold) & (consensus_test < 0.22)
+        fold_pred = raw_pred.astype(object)
+        fold_pred[force_neutral] = "neutral"
+
+        oof_pred[test_idx] = fold_pred
+        fold_acc.append(float(accuracy_score(y_test, fold_pred)))
+        fold_f1.append(float(f1_score(y_test, fold_pred, average="macro", zero_division=0)))
+        fold_time_sec.append(float(perf_counter() - t0))
+
+        print(
+            f"  moltbook_dualview_resonance fold={fold_id} "
+            f"acc={fold_acc[-1]:.4f} f1_macro={fold_f1[-1]:.4f} "
+            f"neutral_guard={neutral_threshold:.3f}"
+        )
+
+    extra: Dict[str, Any] = {
+        "cv_accuracy_std": float(np.std(np.array(fold_acc), ddof=0)),
+        "cv_f1_macro_std": float(np.std(np.array(fold_f1), ddof=0)),
+        "runtime_mean_sec": float(np.mean(np.array(fold_time_sec))),
+        "neutral_guard_threshold_mean": float(np.mean(np.array(neutral_thresholds))),
+        "model_notes": (
+            "Custom dual-view resonance stack: word TF-IDF + char TF-IDF + hybrid NB with "
+            "confidence-consensus neutral guard for minority stabilization."
+        ),
+    }
+    return oof_pred, extra
 
 
 def _run_model_oof(
@@ -314,7 +498,13 @@ def main() -> None:
     parser.add_argument(
         "--models",
         nargs="+",
-        default=["logistic_lr", "linear_svm", "sgd_linear", "naive_bayes"],
+        default=[
+            "logistic_lr",
+            "linear_svm",
+            "sgd_linear",
+            "naive_bayes",
+            "moltbook_dualview_resonance",
+        ],
         help="Lightweight models to run.",
     )
     args = parser.parse_args()
@@ -330,7 +520,17 @@ def main() -> None:
     if missing:
         raise KeyError(f"Missing required columns: {missing}")
 
-    model_df = df[["comment_id", args.text_col, args.label_col]].copy()
+    optional_cols = [
+        "text_basic_clean",
+        "text_traditional_clean",
+        "text_len_words_traditional_clean",
+        "polarity_compound_delta",
+    ]
+    keep_cols = ["comment_id", args.text_col, args.label_col] + [
+        c for c in optional_cols if c in df.columns and c not in {"comment_id", args.text_col, args.label_col}
+    ]
+
+    model_df = df[keep_cols].copy()
     model_df = model_df.dropna(subset=[args.text_col, args.label_col])
     model_df[args.text_col] = model_df[args.text_col].astype(str)
     model_df[args.label_col] = model_df[args.label_col].astype(str)
@@ -353,7 +553,10 @@ def main() -> None:
     print(f"Rows: {len(model_df)} | CV folds: {n_splits} | Labels: {labels}")
 
     for model_name in args.models:
-        preds, extra = _run_model_oof(model_name, x_all, y_all, cv, thresholds)
+        if model_name == "moltbook_dualview_resonance":
+            preds, extra = _run_moltbook_dualview_resonance_oof(model_df, y_all, cv)
+        else:
+            preds, extra = _run_model_oof(model_name, x_all, y_all, cv, thresholds)
         m = _metrics(y_all.values, preds, labels)
         m.update(extra)
         preds_by_model[model_name] = preds
