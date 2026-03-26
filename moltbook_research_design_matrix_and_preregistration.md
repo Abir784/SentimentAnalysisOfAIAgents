@@ -7,6 +7,8 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
+- MoltBook context: MoltBook is an AI-native social platform where AI agents publish posts and interact through threaded comments, making it a suitable environment for studying machine-to-machine discourse patterns.
+- Official website: https://www.moltbook.com/
 - Unit of analysis: comment-level text, with post/thread context fields retained for aggregation.
 - Current staged corpus: 553 comments across 14 posts and 260 authors.
 - Current modeling dataset: 423 labeled comments after preprocessing and quality filtering.
@@ -21,7 +23,7 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 - ML modeling (lightweight): scikit-learn
   - TF-IDF features: `TfidfVectorizer`
   - Models: Logistic Regression, Linear SVM, SGDClassifier, Multinomial Naive Bayes
-  - Custom model: MoltBook Dual-View Resonance (word-view + char-view + hybrid stack with neutral-guard rule)
+  - Custom model: Dual View Resonance (word-view + char-view + hybrid stack with neutral-guard rule)
   - Validation: StratifiedKFold, CalibratedClassifierCV
 - Visualization: matplotlib, seaborn
 - File formats and storage: JSONL, CSV, JSON
@@ -53,6 +55,33 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 3. Use stratified 5-fold cross-validation for robust estimates.
 4. Apply minority-threshold tuning for probabilistic models to improve sensitivity on underrepresented classes.
 
+### 4A. Dual View Resonance Model Specification
+Official model name: **Dual View Resonance (DVR)**
+
+Core idea:
+1. Learn sentiment from two synchronized text views of the same comment (`text_traditional_clean` and `text_basic_clean`) rather than a single lexical representation.
+2. Use cross-view agreement/disagreement as an ambiguity signal and explicitly route low-confidence, high-ambiguity cases toward neutral-safe predictions.
+
+Architecture:
+1. View A encoder: TF-IDF word n-grams (1,2) over `text_traditional_clean` + SGD (`log_loss`, class-balanced).
+2. View B encoder: TF-IDF character n-grams (3,5) over `text_basic_clean` + Logistic Regression (class-balanced).
+3. Hybrid encoder: concatenated sparse matrix `[word_view || char_view]` + Multinomial Naive Bayes.
+4. Meta-fusion layer: Logistic Regression over stacked probability outputs from the three base encoders plus auxiliary features:
+  - confidence disagreement between word and char views,
+  - `|polarity_compound_delta|`,
+  - `text_len_words_traditional_clean`.
+5. Neutral-guard rule: if meta confidence is below a fold-calibrated threshold and cross-view disagreement is small, prediction is mapped to `neutral`.
+
+Algorithm (fold-level):
+1. Split training data with stratified K-fold.
+2. Fit word-view, char-view, and hybrid encoders on fold-train only.
+3. Obtain train/test class probabilities from each base encoder.
+4. Build meta-feature vectors by concatenating probabilities and auxiliary resonance features.
+5. Fit a class-balanced meta Logistic Regression on fold-train meta-features.
+6. Estimate neutral-guard threshold from fold-train confidence distribution.
+7. Generate fold-test predictions via meta-model and apply neutral-guard post-rule.
+8. Aggregate out-of-fold predictions across all folds and compute final metrics.
+
 ### 5. Evaluation and Reporting
 1. Report five key metrics: Accuracy, F1 Score (macro), Precision (macro), Recall (macro), Sustainability.
 2. Define Sustainability as a runtime-efficiency indicator normalized to [0, 1], where higher means faster and more device-friendly.
@@ -64,7 +93,7 @@ Data: 423 labeled comments, 5-fold stratified cross-validation.
 1. Best Accuracy: Linear SVM (0.7329)
 2. Best Macro F1: SGD linear model (0.4850)
 3. Best Sustainability: Multinomial Naive Bayes (1.0000)
-4. Custom model (`moltbook_dualview_resonance`) reached macro F1 = 0.4362 with explicit neutral-guard behavior, but lower accuracy (0.6785) and runtime efficiency.
+4. Custom model (Dual View Resonance) reached macro F1 = 0.4362 with explicit neutral-guard behavior, but lower accuracy (0.6785) and runtime efficiency.
 5. Strongest overall balance (performance + efficiency): Linear SVM and SGD linear
 
 ### Model Results Table
@@ -75,7 +104,7 @@ Data: 423 labeled comments, 5-fold stratified cross-validation.
 | Linear SVM | 0.7329 | 0.4351 | 0.4568 | 0.4329 | 0.9837 |
 | SGD Linear | 0.6998 | 0.4850 | 0.5212 | 0.4811 | 0.9355 |
 | Multinomial Naive Bayes | 0.6998 | 0.3184 | 0.4641 | 0.3540 | 1.0000 |
-| MoltBook Dual-View Resonance (custom) | 0.6785 | 0.4362 | 0.4747 | 0.4278 | 0.0000 |
+| Dual View Resonance (custom) | 0.6785 | 0.4362 | 0.4747 | 0.4278 | 0.0000 |
 
 ### Relevant Graphs
 Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
@@ -93,7 +122,7 @@ Class-wise F1 comparison:
 ## Shortcomings in Current Results
 1. Neutral class performance is still weak because class support is low relative to positive samples (neutral support remains very limited).
 2. Accuracy is acceptable, but macro-level metrics still show imbalance sensitivity and limited minority recall.
-3. New crawl data introduced duplicate comments at staged level (62 duplicate rows detected before strict preprocessing), requiring stronger dedup controls earlier in the pipeline.
+<!-- 3. New crawl data introduced duplicate comments at staged level (62 duplicate rows detected before strict preprocessing), requiring stronger dedup controls earlier in the pipeline. -->
 4. The custom dual-view model improves interpretability of ambiguity handling (neutral-guard), but currently trades off speed and accuracy.
 5. Sustainability is runtime-based only; it does not yet include memory footprint and energy measurements.
 
