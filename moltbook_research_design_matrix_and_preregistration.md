@@ -56,7 +56,7 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 4. Apply minority-threshold tuning for probabilistic models to improve sensitivity on underrepresented classes.
 
 ### 4A. Dual View Resonance Model Specification
-Official model name: **Dual View Resonance (DVR)**
+Proposed model: **Dual View Resonance (DVR)**
 
 Core idea:
 1. Learn sentiment from two synchronized text views of the same comment (`text_traditional_clean` and `text_basic_clean`) rather than a single lexical representation.
@@ -81,6 +81,60 @@ Algorithm (fold-level):
 6. Estimate neutral-guard threshold from fold-train confidence distribution.
 7. Generate fold-test predictions via meta-model and apply neutral-guard post-rule.
 8. Aggregate out-of-fold predictions across all folds and compute final metrics.
+
+Pseudocode:
+```text
+Input:
+  D = {(text_traditional_clean_i, text_basic_clean_i, y_i)} for i=1..N
+  K = number of stratified folds
+
+Initialize OOF predictions P_hat of size N
+
+for each fold f in StratifiedKFold(D, K):
+    Train, Test <- split(D, fold=f)
+
+    # View encoders
+    Xw_train <- TFIDF_word_ngrams(Train.text_traditional_clean)
+    Xw_test  <- transform_word_ngrams(Test.text_traditional_clean)
+
+    Xc_train <- TFIDF_char_ngrams(Train.text_basic_clean)
+    Xc_test  <- transform_char_ngrams(Test.text_basic_clean)
+
+    Xh_train <- concat_sparse(Xw_train, Xc_train)
+    Xh_test  <- concat_sparse(Xw_test, Xc_test)
+
+    M_word   <- fit SGD(log_loss, class_balanced) on (Xw_train, y_train)
+    M_char   <- fit LogisticRegression(class_balanced) on (Xc_train, y_train)
+    M_hybrid <- fit MultinomialNB on (Xh_train, y_train)
+
+    Pw_train, Pw_test <- predict_proba(M_word, Xw_train, Xw_test)
+    Pc_train, Pc_test <- predict_proba(M_char, Xc_train, Xc_test)
+    Ph_train, Ph_test <- predict_proba(M_hybrid, Xh_train, Xh_test)
+
+    R_train <- |max(Pw_train) - max(Pc_train)|
+    R_test  <- |max(Pw_test) - max(Pc_test)|
+
+    Z_train <- concat(Pw_train, Pc_train, Ph_train, R_train,
+                      abs(polarity_compound_delta_train),
+                      text_len_words_traditional_clean_train)
+    Z_test  <- concat(Pw_test, Pc_test, Ph_test, R_test,
+                      abs(polarity_compound_delta_test),
+                      text_len_words_traditional_clean_test)
+
+    M_meta <- fit LogisticRegression(class_balanced) on (Z_train, y_train)
+    Q_test <- predict_proba(M_meta, Z_test)
+
+    tau_neutral <- calibrate_threshold(max_confidence_train(M_meta, Z_train), y_train)
+
+    y_pred <- argmax_labels(Q_test)
+    for each sample j in Test:
+        if max(Q_test[j]) < tau_neutral and R_test[j] < resonance_cutoff:
+            y_pred[j] <- neutral
+
+    write y_pred into OOF slots of fold f
+
+Return OOF predictions P_hat and evaluation metrics
+```
 
 ### 5. Evaluation and Reporting
 1. Report five key metrics: Accuracy, F1 Score (macro), Precision (macro), Recall (macro), Sustainability.
@@ -123,8 +177,8 @@ Class-wise F1 comparison:
 1. Neutral class performance is still weak because class support is low relative to positive samples (neutral support remains very limited).
 2. Accuracy is acceptable, but macro-level metrics still show imbalance sensitivity and limited minority recall.
 <!-- 3. New crawl data introduced duplicate comments at staged level (62 duplicate rows detected before strict preprocessing), requiring stronger dedup controls earlier in the pipeline. -->
-4. The custom dual-view model improves interpretability of ambiguity handling (neutral-guard), but currently trades off speed and accuracy.
-5. Sustainability is runtime-based only; it does not yet include memory footprint and energy measurements.
+3. The custom dual-view model improves interpretability of ambiguity handling (neutral-guard), but currently trades off speed and accuracy.
+4. Sustainability is runtime-based only; it does not yet include memory footprint and energy measurements.
 
 
 <!-- ## Immediate Improvement Plan
