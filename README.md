@@ -171,6 +171,29 @@ Outputs:
 pip install -r requirements.txt
 ```
 
+## Dashboard (Streamlit + Tableau-Ready Exports)
+
+Launch the interactive dashboard:
+
+```powershell
+streamlit run dashboard/app.py
+```
+
+The dashboard automatically reads the latest artifacts from:
+- `data/preprocessed/moltbook_training_ready_*.csv`
+- `data/polarity/moltbook_polarity_summary_*.json`
+- `data/modeling/moltbook_model_summary_*.json`
+- `data/modeling/moltbook_model_predictions_*.csv`
+- `data/eda/moltbook_eda_summary_*.json`
+
+Built-in dashboard views:
+- Overview KPIs and label distribution
+- Data quality and preprocessing drop counts
+- Polarity comparison (raw vs processed)
+- Model performance and confusion matrices
+- Predictions explorer with filtering and CSV download
+- Tableau-ready table exports (`model_metrics`, `confusion_matrix_long`, `polarity_label_share`, `dataset_kpis`, `training_label_distribution`)
+
 ## File Structure
 
 - `src/pipelines/collect_moltbook.py`: Data collection orchestration

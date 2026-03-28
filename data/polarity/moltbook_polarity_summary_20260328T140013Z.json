@@ -1,0 +1,58 @@
+{
+  "run_id": "20260328T140013Z",
+  "generated_at": "2026-03-28T14:00:31.259954+00:00",
+  "raw_row_count": 1533,
+  "row_count_after_preprocessing": 767,
+  "english_only": true,
+  "scoring_comparison": {
+    "raw_mean_compound": 0.3037,
+    "processed_mean_compound": 0.3499,
+    "mean_compound_delta": 0.0462,
+    "label_change_rate": 0.1278,
+    "raw_label_share": {
+      "positive": 0.6832,
+      "negative": 0.2816,
+      "neutral": 0.0352
+    },
+    "processed_label_share": {
+      "positive": 0.7145,
+      "negative": 0.249,
+      "neutral": 0.0365
+    }
+  },
+  "preprocessing": {
+    "language_filter": "detected_language == en",
+    "remove_spam_marker_rows": true,
+    "remove_duplicate_comments": true,
+    "min_traditional_token_count": 3,
+    "min_traditional_char_count": 20,
+    "negation_scope_size": 3,
+    "stopword_policy": "NLTK English stopwords removed except negators and intensity/contrast terms needed for sentiment and modeling semantics.",
+    "drop_counts": {
+      "raw_rows": 1533,
+      "non_english_removed": 92,
+      "spam_marker_removed_after_language_filter": 264,
+      "duplicate_removed_after_spam_filter": 405,
+      "short_or_empty_removed_after_previous_filters": 5,
+      "english_rows_kept": 767
+    },
+    "cleaning_steps": [
+      "html_unescape",
+      "unicode_normalize_nfkc",
+      "strip_markdown_links",
+      "strip_urls",
+      "strip_continue_reading_tail",
+      "strip_more_from_tail",
+      "strip_ui_vote_glyphs",
+      "remove_non_word_symbols",
+      "collapse_whitespace",
+      "expand_negation_forms",
+      "pos_aware_lemmatization",
+      "negation_scope_prefixing",
+      "policy_driven_stopword_removal"
+    ]
+  },
+  "preprocessed_output": "data/preprocessed/moltbook_comments_preprocessed_20260328T140013Z.jsonl",
+  "polarity_output": "data/polarity/moltbook_comments_polarity_20260328T140013Z.jsonl",
+  "training_ready_csv": "data/preprocessed/moltbook_training_ready_20260328T140013Z.csv"
+}

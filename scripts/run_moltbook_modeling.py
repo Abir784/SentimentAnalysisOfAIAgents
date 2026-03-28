@@ -49,6 +49,12 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from time import perf_counter
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.utils.file_management import cleanup_old_files
+
 
 def _find_latest_training_csv(explicit_path: str) -> Path:
     if explicit_path:
@@ -788,25 +794,35 @@ def main() -> None:
         metrics_by_model[model_name]["sustainability"] = float(sustainability)
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    out_dir = Path("data/modeling")
-    out_dir.mkdir(parents=True, exist_ok=True)
+    modeling_dir = Path("data/modeling")
+    modeling_dir.mkdir(parents=True, exist_ok=True)
+    eda_dir = Path("data/eda")
+    eda_dir.mkdir(parents=True, exist_ok=True)
 
     pred_df = pd.DataFrame({"comment_id": ids_all.values, "y_true": y_all.values, "text": x_all.values})
     for model_name, preds in preds_by_model.items():
         pred_df[f"pred_{model_name}"] = preds
 
-    pred_path = out_dir / f"moltbook_model_predictions_{run_id}.csv"
+    pred_path = modeling_dir / f"moltbook_model_predictions_{run_id}.csv"
     pred_df.to_csv(pred_path, index=False, encoding="utf-8")
 
-    metric_plot_path = out_dir / f"moltbook_model_metrics_bar_{run_id}.png"
-    requested_metrics_plot_path = out_dir / f"moltbook_model_requested_metrics_{run_id}.png"
-    confusion_plot_path = out_dir / f"moltbook_model_confusion_matrices_{run_id}.png"
-    classwise_plot_path = out_dir / f"moltbook_model_classwise_f1_{run_id}.png"
+    metric_plot_path = eda_dir / f"moltbook_model_metrics_bar_{run_id}.png"
+    requested_metrics_plot_path = eda_dir / f"moltbook_model_requested_metrics_{run_id}.png"
+    confusion_plot_path = eda_dir / f"moltbook_model_confusion_matrices_{run_id}.png"
+    classwise_plot_path = eda_dir / f"moltbook_model_classwise_f1_{run_id}.png"
 
     _plot_metric_bars(metrics_by_model, metric_plot_path)
     _plot_requested_metrics(metrics_by_model, requested_metrics_plot_path)
     _plot_confusion_matrices(metrics_by_model, labels, confusion_plot_path)
     _plot_classwise_f1(metrics_by_model, classwise_plot_path)
+
+    # Clean up old modeling files and EDA plots, keeping only the latest version
+    cleanup_old_files(modeling_dir, "moltbook_model_predictions_*.csv", keep_latest=1)
+    cleanup_old_files(modeling_dir, "moltbook_model_summary_*.json", keep_latest=1)
+    cleanup_old_files(eda_dir, "moltbook_model_metrics_bar_*.png", keep_latest=1)
+    cleanup_old_files(eda_dir, "moltbook_model_requested_metrics_*.png", keep_latest=1)
+    cleanup_old_files(eda_dir, "moltbook_model_confusion_matrices_*.png", keep_latest=1)
+    cleanup_old_files(eda_dir, "moltbook_model_classwise_f1_*.png", keep_latest=1)
 
     summary = {
         "run_id": run_id,
@@ -824,7 +840,7 @@ def main() -> None:
             "classwise_f1": str(classwise_plot_path).replace("\\", "/"),
         },
     }
-    summary_path = out_dir / f"moltbook_model_summary_{run_id}.json"
+    summary_path = modeling_dir / f"moltbook_model_summary_{run_id}.json"
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=True), encoding="utf-8")
     _append_result_log(summary, summary_path)
 

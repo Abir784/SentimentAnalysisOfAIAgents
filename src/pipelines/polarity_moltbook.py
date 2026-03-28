@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import sys
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,6 +12,12 @@ from typing import Any, Dict, Iterable, List, Sequence, Tuple
 import pandas as pd
 from langdetect import DetectorFactory, LangDetectException, detect
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.utils.file_management import cleanup_old_files
 
 DetectorFactory.seed = 0
 
@@ -423,6 +430,12 @@ def write_polarity_outputs(
     df_final[preprocessed_cols].to_json(paths["preprocessed"], orient="records", lines=True, force_ascii=True)
     df_final[polarity_cols].to_json(paths["polarity"], orient="records", lines=True, force_ascii=True)
     df_final[training_cols].to_csv(paths["training_csv"], index=False, encoding="utf-8")
+
+    # Clean up old files, keeping only the latest version
+    cleanup_old_files(preprocessed_dir, "moltbook_comments_preprocessed_*.jsonl", keep_latest=1)
+    cleanup_old_files(preprocessed_dir, "moltbook_training_ready_*.csv", keep_latest=1)
+    cleanup_old_files(polarity_dir, "moltbook_comments_polarity_*.jsonl", keep_latest=1)
+    cleanup_old_files(polarity_dir, "moltbook_polarity_summary_*.json", keep_latest=1)
 
     raw_label_share = df_final["raw_polarity_label"].value_counts(normalize=True).to_dict()
     processed_label_share = df_final["processed_polarity_label"].value_counts(normalize=True).to_dict()
