@@ -2,9 +2,31 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+
+
+def _reinvoke_with_venv_if_needed() -> None:
+    workspace = Path(__file__).resolve().parents[1]
+    preferred_python = workspace / ".venv" / "Scripts" / "python.exe"
+    current_python = Path(sys.executable).resolve()
+
+    if not preferred_python.exists():
+        return
+    if current_python == preferred_python.resolve():
+        return
+
+    cmd = [str(preferred_python), str(Path(__file__).resolve()), *sys.argv[1:]]
+    completed = subprocess.run(cmd, cwd=str(workspace), check=False)
+    raise SystemExit(completed.returncode)
+
+
+_reinvoke_with_venv_if_needed()
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -367,6 +389,103 @@ def _run_model_oof(
     return oof_pred, extra
 
 
+def _safe_model_key(model_name: str) -> str:
+    normalized = re.sub(r"[^a-zA-Z0-9]+", "_", model_name).strip("_").lower()
+    return f"deep_{normalized}" if normalized else "deep_model"
+
+
+def _map_hf_label_to_polarity(label: str, id2label: Dict[int, str]) -> str:
+    raw = (label or "").strip()
+    low = raw.lower()
+
+    if any(token in low for token in ["negative", "neg"]):
+        return "negative"
+    if any(token in low for token in ["neutral", "neu"]):
+        return "neutral"
+    if any(token in low for token in ["positive", "pos"]):
+        return "positive"
+
+    if low.startswith("label_"):
+        try:
+            idx = int(low.split("_", 1)[1])
+        except ValueError:
+            idx = None
+
+        if idx is not None and idx in id2label:
+            mapped = _map_hf_label_to_polarity(str(id2label[idx]), {})
+            if mapped in {"negative", "neutral", "positive"}:
+                return mapped
+
+        # Common fallback for 3-way and 2-way sentiment label ids.
+        if idx == 0:
+            return "negative"
+        if idx == 1:
+            return "neutral" if len(id2label) >= 3 else "positive"
+        if idx == 2:
+            return "positive"
+
+    return "neutral"
+
+
+def _run_deep_model_benchmark(
+    hf_model_name: str,
+    x_text: pd.Series,
+) -> Tuple[np.ndarray, Dict[str, Any]]:
+    try:
+        from transformers import pipeline
+    except ImportError as exc:
+        raise ImportError(
+            "Deep-model benchmarking requires transformers and torch. "
+            "Install them in your venv, for example: pip install transformers torch"
+        ) from exc
+
+    t0 = perf_counter()
+    classifier = pipeline(
+        task="text-classification",
+        model=hf_model_name,
+        tokenizer=hf_model_name,
+    )
+
+    model_cfg = getattr(getattr(classifier, "model", None), "config", None)
+    id2label_raw = getattr(model_cfg, "id2label", {}) or {}
+    id2label: Dict[int, str] = {}
+    for k, v in id2label_raw.items():
+        try:
+            id2label[int(k)] = str(v)
+        except (TypeError, ValueError):
+            continue
+
+    texts = x_text.fillna("").astype(str).tolist()
+    batch_size = 16
+    preds: List[str] = []
+    confs: List[float] = []
+
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i : i + batch_size]
+        outputs = classifier(batch, truncation=True, batch_size=batch_size)
+        for item in outputs:
+            row = item[0] if isinstance(item, list) and item else item
+            label = str(row.get("label", ""))
+            score = float(row.get("score", 0.0))
+            preds.append(_map_hf_label_to_polarity(label, id2label))
+            confs.append(score)
+
+    runtime = float(perf_counter() - t0)
+    extra: Dict[str, Any] = {
+        "cv_accuracy_std": 0.0,
+        "cv_f1_macro_std": 0.0,
+        "runtime_mean_sec": runtime,
+        "runtime_total_sec": runtime,
+        "model_notes": (
+            "Pretrained transformer inference benchmark mapped to 3-way polarity labels "
+            "(negative/neutral/positive)."
+        ),
+        "mean_confidence": float(np.mean(np.array(confs))) if confs else 0.0,
+        "hf_model_name": hf_model_name,
+    }
+    return np.array(preds, dtype=object), extra
+
+
 def _plot_metric_bars(metrics_by_model: Dict[str, Dict[str, Any]], out_path: Path) -> None:
     model_names = list(metrics_by_model.keys())
     acc = [metrics_by_model[m]["accuracy"] for m in model_names]
@@ -401,7 +520,14 @@ def _plot_requested_metrics(metrics_by_model: Dict[str, Dict[str, Any]], out_pat
     for i, (metric_name, metric_title) in enumerate(zip(metric_names, metric_titles)):
         ax = axes_flat[i]
         values = [metrics_by_model[m].get(metric_name, 0.0) for m in model_names]
-        sns.barplot(x=model_names, y=values, ax=ax, palette="Blues_d")
+        sns.barplot(
+            x=model_names,
+            y=values,
+            hue=model_names,
+            ax=ax,
+            palette="Blues_d",
+            legend=False,
+        )
         ax.set_title(metric_title)
         ax.set_ylim(0, 1)
         ax.set_xlabel("Model")
@@ -470,6 +596,64 @@ def _plot_classwise_f1(metrics_by_model: Dict[str, Dict[str, Any]], out_path: Pa
     plt.close()
 
 
+def _append_result_log(summary: Dict[str, Any], summary_path: Path) -> None:
+    out_dir = Path("data/modeling")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    result_path = out_dir / "result.txt"
+
+    models = summary.get("models", {})
+    if not models:
+        return
+
+    best_acc_name, best_acc_metrics = max(
+        models.items(),
+        key=lambda kv: float(kv[1].get("accuracy", 0.0)),
+    )
+    best_f1_name, best_f1_metrics = max(
+        models.items(),
+        key=lambda kv: float(kv[1].get("f1_macro", 0.0)),
+    )
+
+    lines: List[str] = []
+    lines.append("=" * 80)
+    lines.append(f"Run ID: {summary.get('run_id', '')}")
+    lines.append(f"Saved At (UTC): {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}")
+    lines.append(f"Input CSV: {summary.get('input_path', '')}")
+    lines.append(f"Rows Used: {summary.get('rows_used', 0)}")
+    lines.append(f"CV Folds: {summary.get('cv_folds', 0)}")
+    lines.append("")
+    lines.append("Model Metrics:")
+
+    for model_name, model_metrics in models.items():
+        lines.append(
+            "- "
+            f"{model_name} | "
+            f"accuracy={float(model_metrics.get('accuracy', 0.0)):.4f} | "
+            f"f1_macro={float(model_metrics.get('f1_macro', 0.0)):.4f} | "
+            f"precision_macro={float(model_metrics.get('precision_macro', 0.0)):.4f} | "
+            f"recall_macro={float(model_metrics.get('recall_macro', 0.0)):.4f} | "
+            f"sustainability={float(model_metrics.get('sustainability', 0.0)):.4f}"
+        )
+
+    lines.append("")
+    lines.append(f"Best Accuracy: {best_acc_name} ({float(best_acc_metrics.get('accuracy', 0.0)):.4f})")
+    lines.append(f"Best Macro F1: {best_f1_name} ({float(best_f1_metrics.get('f1_macro', 0.0)):.4f})")
+    lines.append("")
+    lines.append("Artifacts:")
+    lines.append(f"- Summary JSON: {str(summary_path).replace('\\', '/')}")
+    lines.append(f"- Predictions CSV: {summary.get('predictions_path', '')}")
+
+    plots = summary.get("plots", {})
+    lines.append(f"- Metrics Plot: {plots.get('metrics_bar', '')}")
+    lines.append(f"- Requested Metrics Plot: {plots.get('requested_metrics', '')}")
+    lines.append(f"- Confusion Matrices Plot: {plots.get('confusion_matrices', '')}")
+    lines.append(f"- Class-wise F1 Plot: {plots.get('classwise_f1', '')}")
+    lines.append("")
+
+    with result_path.open("a", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train and evaluate lightweight ML sentiment models for MoltBook comments."
@@ -507,10 +691,26 @@ def main() -> None:
         ],
         help="Lightweight models to run.",
     )
+    parser.add_argument(
+        "--no-deep-models",
+        action="store_false",
+        dest="run_deep_models",
+        help="Disable pretrained transformer sentiment benchmarks.",
+    )
+    parser.set_defaults(run_deep_models=True)
+    parser.add_argument(
+        "--deep-models",
+        nargs="+",
+        default=[
+            "cardiffnlp/twitter-roberta-base-sentiment-latest",
+            "finiteautomata/bertweet-base-sentiment-analysis",
+        ],
+        help="Hugging Face model IDs for deep-model benchmarking.",
+    )
     args = parser.parse_args()
 
-    if len(args.models) < 3:
-        raise ValueError("Specify at least three lightweight models in --models.")
+    if not args.models and not args.run_deep_models:
+        raise ValueError("Specify --models and/or keep deep models enabled (do not pass --no-deep-models).")
 
     input_path = _find_latest_training_csv(args.input)
     df = pd.read_csv(input_path)
@@ -562,6 +762,20 @@ def main() -> None:
         preds_by_model[model_name] = preds
         metrics_by_model[model_name] = m
 
+    if args.run_deep_models:
+        print("Running deep-model benchmarks (pretrained transformers)...")
+        for hf_model_name in args.deep_models:
+            model_key = _safe_model_key(hf_model_name)
+            deep_preds, deep_extra = _run_deep_model_benchmark(hf_model_name, x_all)
+            deep_metrics = _metrics(y_all.values, deep_preds, labels)
+            deep_metrics.update(deep_extra)
+            preds_by_model[model_key] = deep_preds
+            metrics_by_model[model_key] = deep_metrics
+            print(
+                f"  {model_key} ({hf_model_name}) "
+                f"acc={deep_metrics['accuracy']:.4f} f1_macro={deep_metrics['f1_macro']:.4f}"
+            )
+
     runtimes = [metrics_by_model[m].get("runtime_mean_sec", 0.0) for m in metrics_by_model]
     rt_min = min(runtimes)
     rt_max = max(runtimes)
@@ -612,6 +826,7 @@ def main() -> None:
     }
     summary_path = out_dir / f"moltbook_model_summary_{run_id}.json"
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=True), encoding="utf-8")
+    _append_result_log(summary, summary_path)
 
     print("Modeling complete")
     print(f"input_file: {input_path}")

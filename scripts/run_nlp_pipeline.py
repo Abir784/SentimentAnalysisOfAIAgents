@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pprint
 import subprocess
 import sys
@@ -11,6 +12,14 @@ from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK_DIR = REPO_ROOT / "notebooks"
+REINVOCATION_FLAG = "MOLTBOOK_PIPELINE_VENV_REINVOCATION"
+
+
+def _preferred_python_executable() -> str:
+    venv_python = REPO_ROOT / ".venv" / "Scripts" / "python.exe"
+    if venv_python.exists():
+        return str(venv_python)
+    return sys.executable
 
 
 @dataclass(frozen=True)
@@ -258,7 +267,7 @@ def _run_script(script_rel_path: str, extra_args: Optional[Sequence[str]] = None
     if not script_path.exists():
         raise FileNotFoundError(f"Script not found: {script_rel_path}")
 
-    cmd = [sys.executable, str(script_path)]
+    cmd = [_preferred_python_executable(), str(script_path)]
     if extra_args:
         cmd.extend(extra_args)
 
@@ -317,6 +326,19 @@ def _parse_notebook_cells_arg(values: Sequence[str]) -> Dict[str, str]:
 
 
 def main() -> None:
+    preferred_python = _preferred_python_executable()
+    current_python = str(Path(sys.executable).resolve())
+    preferred_python_resolved = str(Path(preferred_python).resolve())
+    if (
+        preferred_python_resolved != current_python
+        and os.environ.get(REINVOCATION_FLAG) != "1"
+    ):
+        env = os.environ.copy()
+        env[REINVOCATION_FLAG] = "1"
+        cmd = [preferred_python_resolved, str(Path(__file__).resolve())] + sys.argv[1:]
+        completed = subprocess.run(cmd, cwd=str(REPO_ROOT), check=False, env=env)
+        raise SystemExit(completed.returncode)
+
     parser = argparse.ArgumentParser(
         description="Unified MoltBook NLP system: ordered pipeline execution + notebook cell control."
     )

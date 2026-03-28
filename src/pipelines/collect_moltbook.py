@@ -31,7 +31,7 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
     collector_cfg = config["collector"]
     source_type = "url"
-    raw_records, collect_meta = _collect_raw_records(collector_cfg, output_dir_raw)
+    raw_records, collect_meta = _collect_raw_records(collector_cfg, output_dir_raw, output_dir_staged)
     normalized_records = normalize_batch(raw_records)
     comment_rows = _extract_comment_rows(raw_records)
 
@@ -64,6 +64,7 @@ def run_collection_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
 def _collect_raw_records(
     collector_cfg: Dict[str, Any],
     output_dir_raw: Path,
+    output_dir_staged: Path,
 ) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
     scraper = MoltBookScraper(
         MoltBookScraperConfig(
@@ -75,15 +76,28 @@ def _collect_raw_records(
             use_reader_fallback=bool(collector_cfg.get("use_reader_fallback", True)),
         )
     )
-    urls = _dedupe_urls(_get_urls(collector_cfg))
-    requested_urls = len(urls)
+    input_urls = _dedupe_urls(_get_urls(collector_cfg))
+    requested_urls = len(input_urls)
+
+    processed_urls_path = _resolve_processed_urls_path(collector_cfg, output_dir_staged)
+    processed_urls = _load_processed_urls_registry(processed_urls_path)
+
+    urls = list(input_urls)
 
     skip_existing_urls = bool(collector_cfg.get("skip_existing_urls", True))
     if skip_existing_urls:
         existing_urls = _load_existing_urls(output_dir_raw)
-        urls = [u for u in urls if u not in existing_urls]
+        seen_urls = existing_urls.union(processed_urls)
+        urls = [u for u in urls if u not in seen_urls]
 
     records = [scraper.scrape_post(url) for url in urls]
+
+    # Persist successfully processed links so repeated entries in moltbook_urls.txt
+    # are not scraped again in subsequent runs.
+    if input_urls:
+        processed_urls.update(input_urls)
+        _save_processed_urls_registry(processed_urls_path, processed_urls)
+
     return records, {
         "requested_urls": requested_urls,
         "scraped_urls": len(urls),
@@ -107,12 +121,19 @@ def _dedupe_urls(urls: List[str]) -> List[str]:
     seen: Set[str] = set()
     out: List[str] = []
     for url in urls:
-        cleaned = str(url).strip()
+        cleaned = _normalize_url(url)
         if not cleaned or cleaned in seen:
             continue
         seen.add(cleaned)
         out.append(cleaned)
     return out
+
+
+def _normalize_url(url: str) -> str:
+    cleaned = str(url).strip()
+    if not cleaned:
+        return ""
+    return cleaned.rstrip("/")
 
 
 def _load_existing_urls(raw_dir: Path) -> Set[str]:
@@ -135,10 +156,41 @@ def _load_existing_urls(raw_dir: Path) -> Set[str]:
                 if not isinstance(payload, dict):
                     continue
                 url = payload.get("url")
-                if isinstance(url, str) and url.strip():
-                    existing_urls.add(url.strip())
+                normalized = _normalize_url(str(url)) if isinstance(url, str) else ""
+                if normalized:
+                    existing_urls.add(normalized)
 
     return existing_urls
+
+
+def _resolve_processed_urls_path(collector_cfg: Dict[str, Any], output_dir_staged: Path) -> Path:
+    configured = str(collector_cfg.get("processed_urls_path", "")).strip()
+    if configured:
+        return Path(configured)
+    return output_dir_staged / ".processed_moltbook_urls.json"
+
+
+def _load_processed_urls_registry(path: Path) -> Set[str]:
+    if not path.exists():
+        return set()
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return set()
+
+    urls = payload.get("processed_urls", [])
+    if not isinstance(urls, list):
+        return set()
+    return {u for u in (_normalize_url(str(x)) for x in urls) if u}
+
+
+def _save_processed_urls_registry(path: Path, urls: Set[str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "processed_urls": sorted(urls),
+    }
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True), encoding="utf-8")
 
 
 def _load_config(config_path: Path) -> Dict[str, Any]:

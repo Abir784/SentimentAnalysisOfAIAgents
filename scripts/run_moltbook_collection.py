@@ -40,6 +40,7 @@ def main() -> None:
         config["collector"]["source_type"] = "url"
         config["collector"]["urls"] = cli_urls
         config["collector"]["skip_existing_urls"] = True
+        config["collector"].setdefault("processed_urls_path", "data/staged/.processed_moltbook_urls.json")
         result = run_collection_from_config(config)
     else:
         result = run_collection(Path(args.config))
