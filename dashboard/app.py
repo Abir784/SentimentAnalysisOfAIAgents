@@ -119,7 +119,24 @@ def _tableau_export_frames(data: Dict[str, Any]) -> Dict[str, pd.DataFrame]:
                     "share": float(share),
                 }
             )
+    if not label_rows:
+        for label, share in polarity_summary.get("label_share", {}).items():
+            label_rows.append(
+                {
+                    "stage": "processed",
+                    "label": label,
+                    "share": float(share),
+                }
+            )
     exports["polarity_label_share"] = pd.DataFrame(label_rows)
+
+    rows_after_preprocess = polarity_summary.get("row_count_after_preprocessing")
+    if rows_after_preprocess is None:
+        rows_after_preprocess = polarity_summary.get("row_count_scored", len(training_df))
+
+    raw_rows = polarity_summary.get("raw_row_count")
+    if raw_rows is None:
+        raw_rows = eda_summary.get("row_count", 0)
 
     dataset_rows = [
         {
@@ -128,11 +145,11 @@ def _tableau_export_frames(data: Dict[str, Any]) -> Dict[str, pd.DataFrame]:
         },
         {
             "metric": "rows_after_preprocessing",
-            "value": float(polarity_summary.get("row_count_after_preprocessing", 0)),
+            "value": float(rows_after_preprocess),
         },
         {
             "metric": "raw_rows",
-            "value": float(polarity_summary.get("raw_row_count", 0)),
+            "value": float(raw_rows),
         },
         {
             "metric": "eda_row_count",
@@ -232,6 +249,11 @@ def main() -> None:
         st.write(f"Predictions CSV: {data['predictions_csv']}")
         st.write(f"EDA Summary: {data['eda_summary_json']}")
         st.divider()
+        st.subheader("Loaded Run IDs")
+        st.write(f"Polarity Run: {data['polarity_summary'].get('run_id', 'N/A')}")
+        st.write(f"Modeling Run: {data['modeling_summary'].get('run_id', 'N/A')}")
+        st.write(f"EDA Run: {data['eda_summary'].get('run_id', 'N/A')}")
+        st.divider()
         if st.button("Refresh cache"):
             st.cache_data.clear()
             st.rerun()
@@ -279,6 +301,12 @@ def main() -> None:
 
     with tabs[0]:
         st.subheader("Dataset Overview")
+        st.caption(
+            "Latest runs: "
+            f"model={modeling_summary.get('run_id', 'N/A')} | "
+            f"polarity={polarity_summary.get('run_id', 'N/A')} | "
+            f"eda={eda_summary.get('run_id', 'N/A')}"
+        )
         c1, c2 = st.columns(2)
 
         label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
