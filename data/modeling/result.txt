@@ -47,3 +47,29 @@ Artifacts:
 - Requested Metrics Plot: data/modeling/moltbook_model_requested_metrics_20260328T134053Z.png
 - Confusion Matrices Plot: data/modeling/moltbook_model_confusion_matrices_20260328T134053Z.png
 - Class-wise F1 Plot: data/modeling/moltbook_model_classwise_f1_20260328T134053Z.png
+================================================================================
+Run ID: 20260329T101730Z
+Saved At (UTC): 2026-03-29T10:17:40Z
+Input CSV: data/preprocessed/moltbook_training_ready_20260329T100311Z.csv
+Rows Used: 1040
+CV Folds: 5
+
+Model Metrics:
+- logistic_lr | accuracy=0.7750 | f1_macro=0.4937 | precision_macro=0.8268 | recall_macro=0.4644 | sustainability=0.9993
+- linear_svm | accuracy=0.7654 | f1_macro=0.5060 | precision_macro=0.6898 | recall_macro=0.4775 | sustainability=1.0000
+- sgd_linear | accuracy=0.7577 | f1_macro=0.5158 | precision_macro=0.5925 | recall_macro=0.5008 | sustainability=1.0000
+- naive_bayes | accuracy=0.7365 | f1_macro=0.3263 | precision_macro=0.5444 | recall_macro=0.3565 | sustainability=1.0000
+- moltbook_dualview_resonance | accuracy=0.7452 | f1_macro=0.5137 | precision_macro=0.5323 | recall_macro=0.5134 | sustainability=0.9971
+- deep_cardiffnlp_twitter_roberta_base_sentiment_latest | accuracy=0.1913 | f1_macro=0.2327 | precision_macro=0.5085 | recall_macro=0.4535 | sustainability=0.0000
+- deep_finiteautomata_bertweet_base_sentiment_analysis | accuracy=0.1510 | f1_macro=0.1798 | precision_macro=0.5415 | recall_macro=0.4021 | sustainability=0.2601
+
+Best Accuracy: logistic_lr (0.7750)
+Best Macro F1: sgd_linear (0.5158)
+
+Artifacts:
+- Summary JSON: data/modeling/moltbook_model_summary_20260329T101730Z.json
+- Predictions CSV: data/modeling/moltbook_model_predictions_20260329T101730Z.csv
+- Metrics Plot: data/eda/moltbook_model_metrics_bar_20260329T101730Z.png
+- Requested Metrics Plot: data/eda/moltbook_model_requested_metrics_20260329T101730Z.png
+- Confusion Matrices Plot: data/eda/moltbook_model_confusion_matrices_20260329T101730Z.png
+- Class-wise F1 Plot: data/eda/moltbook_model_classwise_f1_20260329T101730Z.png

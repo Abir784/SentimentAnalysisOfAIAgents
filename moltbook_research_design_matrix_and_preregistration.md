@@ -10,8 +10,8 @@ This project builds a reproducible sentiment analysis pipeline for AI-to-AI soci
 - MoltBook context: MoltBook is an AI-native social platform where AI agents publish posts and interact through threaded comments, making it a suitable environment for studying machine-to-machine discourse patterns.
 - Official website: https://www.moltbook.com/
 - Unit of analysis: comment-level text, with post/thread context fields retained for aggregation.
-- Current staged corpus: 1533 comments across 21 posts and 599 authors.
-- Current modeling dataset: 767 labeled comments after preprocessing and quality filtering.
+- Current staged corpus: 2163 comments across 55 posts and 548 authors.
+- Current modeling dataset: 1040 labeled comments after preprocessing and quality filtering.
 - Label space: three-class sentiment (`negative`, `neutral`, `positive`).
 - Core fields used: `comment_id`, `post_id`, `thread_id`, `author_id`, `text`, `upvotes`, `is_verified`, `fetched_at`.
 - Data pipeline structure: raw collection -> staged consolidated comments -> preprocessed text -> polarity and training-ready CSV artifacts.
@@ -142,43 +142,43 @@ Return OOF predictions P_hat and evaluation metrics
 3. Export prediction tables, summary JSON, and visual diagnostics for comparison and interpretation.
 
 ## Results (Latest Deep-Enabled Run)
-Data: 767 labeled comments, 5-fold stratified cross-validation for lightweight models, plus full-dataset pretrained inference for deep models.
+Data: 1040 labeled comments, 5-fold stratified cross-validation for lightweight models, plus full-dataset pretrained inference for deep models.
 
-Run ID: `20260328T123234Z` (latest run with deep models enabled)
+Run ID: `20260329T101730Z` (latest run with deep models enabled)
 
-1. Best Accuracy: Linear SVM (0.7718)
-2. Best Macro F1: Linear SVM (0.5229)
+1. Best Accuracy: Logistic Regression (0.7750)
+2. Best Macro F1: SGD Linear (0.5158)
 3. Best Sustainability: Multinomial Naive Bayes (1.0000)
-4. Custom model (Dual View Resonance) reached macro F1 = 0.4982 with explicit neutral-guard behavior, accuracy = 0.7445, and moderate runtime cost.
-5. Deep transformer baselines underperformed on this dataset under current zero-shot label mapping (accuracy: 0.2060 and 0.1630), indicating domain adaptation and label calibration are needed before deployment.
+4. Custom model (Dual View Resonance) reached macro F1 = 0.5137 with explicit neutral-guard behavior, accuracy = 0.7452, and moderate runtime cost.
+5. Deep transformer baselines still underperformed on this dataset under current label mapping (accuracy: 0.1913 and 0.1510), indicating domain adaptation and label calibration are still needed before deployment.
 
 ### Model Results Table
 
 | Model | Accuracy | F1 Score (Macro) | Precision (Macro) | Recall (Macro) | Sustainability |
 |---|---:|---:|---:|---:|---:|
-| Logistic Regression (calibrated) | 0.7523 | 0.4692 | 0.8117 | 0.4394 | 0.9997 |
-| Linear SVM | 0.7718 | 0.5229 | 0.7309 | 0.4906 | 1.0000 |
-| SGD Linear | 0.7432 | 0.5159 | 0.5783 | 0.5034 | 1.0000 |
-| Multinomial Naive Bayes | 0.7366 | 0.3435 | 0.5340 | 0.3664 | 1.0000 |
-| Dual View Resonance (custom) | 0.7445 | 0.4982 | 0.5214 | 0.4936 | 0.9989 |
-| Deep: CardiffNLP Twitter-RoBERTa | 0.2060 | 0.2447 | 0.5201 | 0.4730 | 0.4999 |
-| Deep: BERTweet Sentiment | 0.1630 | 0.1955 | 0.5529 | 0.4152 | 0.0000 |
+| Logistic Regression (calibrated) | 0.7750 | 0.4937 | 0.8268 | 0.4644 | 0.9993 |
+| Linear SVM | 0.7654 | 0.5060 | 0.6898 | 0.4775 | 1.0000 |
+| SGD Linear | 0.7577 | 0.5158 | 0.5925 | 0.5008 | 1.0000 |
+| Multinomial Naive Bayes | 0.7365 | 0.3263 | 0.5444 | 0.3565 | 1.0000 |
+| Dual View Resonance (custom) | 0.7452 | 0.5137 | 0.5323 | 0.5134 | 0.9971 |
+| Deep: CardiffNLP Twitter-RoBERTa | 0.1913 | 0.2327 | 0.5085 | 0.4535 | 0.0000 |
+| Deep: BERTweet Sentiment | 0.1510 | 0.1798 | 0.5415 | 0.4021 | 0.2601 |
 
 ### Relevant Graphs
 Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
 
-![Requested metrics dashboard](data/modeling/moltbook_model_requested_metrics_20260328T123234Z.png)
+![Requested metrics dashboard](data/eda/moltbook_model_requested_metrics_20260329T101730Z.png)
 
 Confusion matrices across models:
 
-![Confusion matrices](data/modeling/moltbook_model_confusion_matrices_20260328T123234Z.png)
+![Confusion matrices](data/eda/moltbook_model_confusion_matrices_20260329T101730Z.png)
 
 Class-wise F1 comparison:
 
-![Class-wise F1](data/modeling/moltbook_model_classwise_f1_20260328T123234Z.png)
+![Class-wise F1](data/eda/moltbook_model_classwise_f1_20260329T101730Z.png)
 
-Latest summary artifact: `data/modeling/moltbook_model_summary_20260328T123234Z.json`
-Latest predictions artifact: `data/modeling/moltbook_model_predictions_20260328T123234Z.csv`
+Latest summary artifact: `data/modeling/moltbook_model_summary_20260329T101730Z.json`
+Latest predictions artifact: `data/modeling/moltbook_model_predictions_20260329T101730Z.csv`
 
 ## Shortcomings in Current Results
 1. Neutral class performance is still weak because class support is low relative to positive samples (neutral support remains very limited).

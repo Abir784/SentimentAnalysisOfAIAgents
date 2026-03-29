@@ -197,6 +197,21 @@ def _author_counts_frame(df: pd.DataFrame) -> tuple[pd.DataFrame, str | None]:
     return counts, author_col
 
 
+def _first_existing(df: pd.DataFrame, columns: List[str]) -> str | None:
+    """Return first column name that exists in dataframe."""
+    return next((c for c in columns if c in df.columns), None)
+
+
+def _fmt_metric(value: Any, decimals: int = 4) -> str:
+    """Format optional numeric metric for Streamlit cards."""
+    if value is None:
+        return "N/A"
+    try:
+        return f"{float(value):.{decimals}f}"
+    except (TypeError, ValueError):
+        return "N/A"
+
+
 def main() -> None:
     st.set_page_config(
         page_title="MoltBook Sentiment Dashboard",
@@ -231,10 +246,18 @@ def main() -> None:
         st.error("No training data found under data/preprocessed. Run polarity pipeline first.")
         return
 
+    raw_rows = polarity_summary.get("raw_row_count")
+    if raw_rows is None:
+        raw_rows = eda_summary.get("row_count", 0)
+
+    rows_after_preprocess = polarity_summary.get("row_count_after_preprocessing")
+    if rows_after_preprocess is None:
+        rows_after_preprocess = polarity_summary.get("row_count_scored", len(training_df))
+
     k1, k2, k3, k4 = st.columns(4)
     k1.metric("Training Rows", f"{len(training_df):,}")
-    k2.metric("Raw Rows", f"{polarity_summary.get('raw_row_count', 0):,}")
-    k3.metric("Rows After Preprocess", f"{polarity_summary.get('row_count_after_preprocessing', 0):,}")
+    k2.metric("Raw Rows", f"{int(raw_rows):,}")
+    k3.metric("Rows After Preprocess", f"{int(rows_after_preprocess):,}")
 
     model_metrics = _model_metrics_frame(modeling_summary)
     best_model = "N/A"
@@ -258,14 +281,18 @@ def main() -> None:
         st.subheader("Dataset Overview")
         c1, c2 = st.columns(2)
 
-        label_dist = (
-            training_df["processed_polarity_label"]
-            .value_counts()
-            .rename_axis("label")
-            .reset_index(name="count")
-        )
-        fig_pie = px.pie(label_dist, values="count", names="label", title="Processed Polarity Distribution")
-        c1.plotly_chart(fig_pie, use_container_width=True)
+        label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+        if label_col:
+            label_dist = (
+                training_df[label_col]
+                .value_counts()
+                .rename_axis("label")
+                .reset_index(name="count")
+            )
+            fig_pie = px.pie(label_dist, values="count", names="label", title=f"Polarity Distribution ({label_col})")
+            c1.plotly_chart(fig_pie, use_container_width=True)
+        else:
+            c1.info("No polarity label column found for overview chart.")
 
         if "text_len_words_traditional_clean" in training_df.columns:
             fig_hist = px.histogram(
@@ -287,6 +314,8 @@ def main() -> None:
             )
             fig_drop = px.bar(drop_df, x="step", y="count", title="Preprocessing Drop Counts")
             st.plotly_chart(fig_drop, use_container_width=True)
+        else:
+            st.info("Detailed preprocessing drop counts are not available in the latest polarity summary format.")
 
         if eda_summary:
             c1, c2, c3 = st.columns(3)
@@ -328,16 +357,26 @@ def main() -> None:
         st.subheader("Polarity Analysis")
         scoring = polarity_summary.get("scoring_comparison", {})
 
+        raw_mean = scoring.get("raw_mean_compound")
+        processed_mean = scoring.get("processed_mean_compound")
+        if processed_mean is None:
+            processed_mean = polarity_summary.get("mean_compound")
+        label_change_rate = scoring.get("label_change_rate")
+
         c1, c2, c3 = st.columns(3)
-        c1.metric("Raw Mean Compound", f"{float(scoring.get('raw_mean_compound', 0.0)):.4f}")
-        c2.metric("Processed Mean Compound", f"{float(scoring.get('processed_mean_compound', 0.0)):.4f}")
-        c3.metric("Label Change Rate", f"{float(scoring.get('label_change_rate', 0.0)):.4f}")
+        c1.metric("Raw Mean Compound", _fmt_metric(raw_mean))
+        c2.metric("Processed Mean Compound", _fmt_metric(processed_mean))
+        c3.metric("Label Change Rate", _fmt_metric(label_change_rate))
 
         share_rows = []
         for label, val in scoring.get("raw_label_share", {}).items():
             share_rows.append({"stage": "raw", "label": label, "share": float(val)})
         for label, val in scoring.get("processed_label_share", {}).items():
             share_rows.append({"stage": "processed", "label": label, "share": float(val)})
+
+        if not share_rows:
+            for label, val in polarity_summary.get("label_share", {}).items():
+                share_rows.append({"stage": "processed", "label": label, "share": float(val)})
 
         if share_rows:
             share_df = pd.DataFrame(share_rows)
@@ -350,6 +389,8 @@ def main() -> None:
                 title="Raw vs Processed Label Share",
             )
             st.plotly_chart(fig_share, use_container_width=True)
+        else:
+            st.info("No polarity share data available in current summary artifact.")
 
     with tabs[3]:
         st.subheader("Model Performance")
