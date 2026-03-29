@@ -442,6 +442,10 @@ def main() -> None:
                 "Duplicate Rows (stage)",
                 f"{eda_summary.get('duplicate_rows_by_platform_post_comment', 0):,}",
             )
+            st.caption(
+                "Duplicate rows in staged data are handled during preprocessing "
+                "(duplicate comments are removed before training and polarity outputs are produced)."
+            )
 
             missing_rate = eda_summary.get("missing_rate", {})
             if missing_rate:

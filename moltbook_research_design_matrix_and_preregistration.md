@@ -42,6 +42,8 @@ Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 2. Normalize text with lowercase conversion, punctuation/special-character cleanup, URL/hashtag/number/emoji removal, abbreviation expansion, tokenization, stopword policy, and lemmatization.
 3. Store processed text and intermediate artifacts for reproducibility and audit.
 
+Note: duplicate rows detected at staging are explicitly handled in preprocessing, and duplicate comments are removed before polarity scoring and model training.
+
 ### 3. Label Construction
 1. Generate sentiment-oriented target labels from processed polarity outputs.
 2. Use the training-ready CSV as the modeling input dataset.
