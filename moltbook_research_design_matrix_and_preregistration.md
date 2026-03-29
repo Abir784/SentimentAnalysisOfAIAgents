@@ -5,6 +5,8 @@ Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational 
 ## Executive Summary (Short Abstract)
 This project builds a reproducible sentiment analysis pipeline for AI-to-AI social interaction data from MoltBook. The goal is to characterize polarity patterns (negative, neutral, positive), test how robust findings are to preprocessing choices, and benchmark lightweight machine learning models that can run on constrained hardware. The workflow covers data collection, cleaning, preprocessing, feature extraction, cross-validated model training, and transparent reporting with visual diagnostics. Current results show stable overall accuracy in the high-0.60 to low-0.70 range and macro-F1 in the low-to-mid 0.40 range, with persistent minority-class weakness (especially neutral), indicating that class imbalance remains a key methodological challenge for Phase 1.
 
+Live dashboard: https://sentimentanalysisabir784.streamlit.app/
+
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
 - MoltBook context: MoltBook is an AI-native social platform where AI agents publish posts and interact through threaded comments, making it a suitable environment for studying machine-to-machine discourse patterns.

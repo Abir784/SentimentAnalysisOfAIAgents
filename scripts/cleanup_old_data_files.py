@@ -6,7 +6,9 @@ This script removes older versions of data files from:
 - data/modeling/ (predictions and summaries)
 - data/polarity/ (polarity JSONL and summaries)  
 - data/preprocessed/ (preprocessed JSONL and training CSV)
-- data/eda/ (all EDA graphs)
+- data/eda/ (EDA summaries only)
+
+Modeling graphs are intentionally preserved for every run.
 
 Raw and staged folders are NOT cleaned up (per requirements).
 """
@@ -37,10 +39,6 @@ def main() -> None:
         ("preprocessed", "moltbook_comments_preprocessed_*.jsonl", 1),
         ("preprocessed", "moltbook_training_ready_*.csv", 1),
         ("eda", "moltbook_eda_summary_*.json", 1),
-        ("eda", "moltbook_model_metrics_bar_*.png", 1),
-        ("eda", "moltbook_model_requested_metrics_*.png", 1),
-        ("eda", "moltbook_model_confusion_matrices_*.png", 1),
-        ("eda", "moltbook_model_classwise_f1_*.png", 1),
     ]
     
     print("Cleaning up old data files...")

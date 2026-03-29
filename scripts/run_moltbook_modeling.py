@@ -816,13 +816,9 @@ def main() -> None:
     _plot_confusion_matrices(metrics_by_model, labels, confusion_plot_path)
     _plot_classwise_f1(metrics_by_model, classwise_plot_path)
 
-    # Clean up old modeling files and EDA plots, keeping only the latest version
+    # Clean up tabular modeling artifacts only; keep all run-specific plots.
     cleanup_old_files(modeling_dir, "moltbook_model_predictions_*.csv", keep_latest=1)
     cleanup_old_files(modeling_dir, "moltbook_model_summary_*.json", keep_latest=1)
-    cleanup_old_files(eda_dir, "moltbook_model_metrics_bar_*.png", keep_latest=1)
-    cleanup_old_files(eda_dir, "moltbook_model_requested_metrics_*.png", keep_latest=1)
-    cleanup_old_files(eda_dir, "moltbook_model_confusion_matrices_*.png", keep_latest=1)
-    cleanup_old_files(eda_dir, "moltbook_model_classwise_f1_*.png", keep_latest=1)
 
     summary = {
         "run_id": run_id,

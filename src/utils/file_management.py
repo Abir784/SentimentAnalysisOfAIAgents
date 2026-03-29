@@ -89,10 +89,6 @@ def cleanup_data_folders() -> Dict[str, List[Path]]:
         "modeling": [
             ("moltbook_model_predictions_*.csv", 1),
             ("moltbook_model_summary_*.json", 1),
-            ("moltbook_model_metrics_bar_*.png", 1),
-            ("moltbook_model_requested_metrics_*.png", 1),
-            ("moltbook_model_confusion_matrices_*.png", 1),
-            ("moltbook_model_classwise_f1_*.png", 1),
         ],
         "polarity": [
             ("moltbook_comments_polarity_*.jsonl", 1),
