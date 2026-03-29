@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -11,6 +12,7 @@ import streamlit as st
 
 
 DATA_ROOT = Path("data")
+MODELING_RESULT_LOG = DATA_ROOT / "modeling" / "result.txt"
 
 
 def _latest_file(folder: Path, pattern: str) -> Path | None:
@@ -229,6 +231,92 @@ def _fmt_metric(value: Any, decimals: int = 4) -> str:
         return "N/A"
 
 
+def _parse_result_log(log_path: Path) -> tuple[pd.DataFrame, pd.DataFrame, str]:
+    """Parse modeling result.txt into run-level and metric-level dataframes."""
+    if not log_path.exists():
+        empty_runs = pd.DataFrame(
+            columns=[
+                "run_id",
+                "saved_at_utc",
+                "input_csv",
+                "rows_used",
+                "cv_folds",
+                "best_accuracy_model",
+                "best_accuracy",
+                "best_f1_model",
+                "best_f1_macro",
+            ]
+        )
+        empty_metrics = pd.DataFrame(
+            columns=["run_id", "model", "accuracy", "f1_macro", "precision_macro", "recall_macro", "sustainability"]
+        )
+        return empty_runs, empty_metrics, ""
+
+    raw = log_path.read_text(encoding="utf-8")
+    chunks = [c.strip() for c in re.split(r"\n={20,}\n", raw) if c.strip()]
+
+    runs_rows: List[Dict[str, Any]] = []
+    metric_rows: List[Dict[str, Any]] = []
+
+    for chunk in chunks:
+        run_match = re.search(r"^Run ID:\s*(\S+)", chunk, flags=re.MULTILINE)
+        if not run_match:
+            continue
+        run_id = run_match.group(1)
+
+        saved_at = re.search(r"^Saved At \(UTC\):\s*(.+)$", chunk, flags=re.MULTILINE)
+        input_csv = re.search(r"^Input CSV:\s*(.+)$", chunk, flags=re.MULTILINE)
+        rows_used = re.search(r"^Rows Used:\s*(\d+)$", chunk, flags=re.MULTILINE)
+        cv_folds = re.search(r"^CV Folds:\s*(\d+)$", chunk, flags=re.MULTILINE)
+        best_acc = re.search(r"^Best Accuracy:\s*(\S+)\s*\(([-+]?[0-9]*\.?[0-9]+)\)$", chunk, flags=re.MULTILINE)
+        best_f1 = re.search(r"^Best Macro F1:\s*(\S+)\s*\(([-+]?[0-9]*\.?[0-9]+)\)$", chunk, flags=re.MULTILINE)
+
+        runs_rows.append(
+            {
+                "run_id": run_id,
+                "saved_at_utc": saved_at.group(1).strip() if saved_at else "",
+                "input_csv": input_csv.group(1).strip() if input_csv else "",
+                "rows_used": int(rows_used.group(1)) if rows_used else 0,
+                "cv_folds": int(cv_folds.group(1)) if cv_folds else 0,
+                "best_accuracy_model": best_acc.group(1) if best_acc else "",
+                "best_accuracy": float(best_acc.group(2)) if best_acc else 0.0,
+                "best_f1_model": best_f1.group(1) if best_f1 else "",
+                "best_f1_macro": float(best_f1.group(2)) if best_f1 else 0.0,
+            }
+        )
+
+        for line in chunk.splitlines():
+            line = line.strip()
+            if not line.startswith("- "):
+                continue
+            if "| accuracy=" not in line:
+                continue
+
+            model_name = line[2:].split("|")[0].strip()
+
+            def _extract(name: str) -> float:
+                m = re.search(rf"{name}=([-+]?[0-9]*\.?[0-9]+)", line)
+                return float(m.group(1)) if m else 0.0
+
+            metric_rows.append(
+                {
+                    "run_id": run_id,
+                    "model": model_name,
+                    "accuracy": _extract("accuracy"),
+                    "f1_macro": _extract("f1_macro"),
+                    "precision_macro": _extract("precision_macro"),
+                    "recall_macro": _extract("recall_macro"),
+                    "sustainability": _extract("sustainability"),
+                }
+            )
+
+    runs_df = pd.DataFrame(runs_rows)
+    metrics_df = pd.DataFrame(metric_rows)
+    if not runs_df.empty:
+        runs_df = runs_df.sort_values("saved_at_utc", ascending=False).reset_index(drop=True)
+    return runs_df, metrics_df, raw
+
+
 def main() -> None:
     st.set_page_config(
         page_title="MoltBook Sentiment Dashboard",
@@ -297,6 +385,7 @@ def main() -> None:
         "Modeling",
         "Predictions",
         "Tableau Export",
+        "Run History",
     ])
 
     with tabs[0]:
@@ -385,16 +474,28 @@ def main() -> None:
         st.subheader("Polarity Analysis")
         scoring = polarity_summary.get("scoring_comparison", {})
 
-        raw_mean = scoring.get("raw_mean_compound")
-        processed_mean = scoring.get("processed_mean_compound")
-        if processed_mean is None:
-            processed_mean = polarity_summary.get("mean_compound")
-        label_change_rate = scoring.get("label_change_rate")
-
         c1, c2, c3 = st.columns(3)
-        c1.metric("Raw Mean Compound", _fmt_metric(raw_mean))
-        c2.metric("Processed Mean Compound", _fmt_metric(processed_mean))
-        c3.metric("Label Change Rate", _fmt_metric(label_change_rate))
+        if scoring:
+            raw_mean = scoring.get("raw_mean_compound")
+            processed_mean = scoring.get("processed_mean_compound")
+            label_change_rate = scoring.get("label_change_rate")
+
+            c1.metric("Raw Mean Compound", _fmt_metric(raw_mean))
+            c2.metric("Processed Mean Compound", _fmt_metric(processed_mean))
+            c3.metric("Label Change Rate", _fmt_metric(label_change_rate))
+        else:
+            processed_mean = polarity_summary.get("mean_compound")
+            rows_scored = polarity_summary.get("row_count_scored", len(training_df))
+            compact_shares = polarity_summary.get("label_share", {})
+
+            top_label = "N/A"
+            top_share = None
+            if compact_shares:
+                top_label, top_share = max(compact_shares.items(), key=lambda kv: float(kv[1]))
+
+            c1.metric("Processed Mean Compound", _fmt_metric(processed_mean))
+            c2.metric("Rows Scored", f"{int(rows_scored):,}")
+            c3.metric("Top Label Share", _fmt_metric(top_share), delta=f"label={top_label}")
 
         share_rows = []
         for label, val in scoring.get("raw_label_share", {}).items():
@@ -502,6 +603,47 @@ def main() -> None:
             file_name=f"{export_name}.csv",
             mime="text/csv",
         )
+
+    with tabs[6]:
+        st.subheader("Model Run History")
+        st.caption("Historical run log parsed from data/modeling/result.txt")
+
+        runs_df, run_metrics_df, run_log_raw = _parse_result_log(MODELING_RESULT_LOG)
+
+        if runs_df.empty:
+            st.warning("No run history found in data/modeling/result.txt")
+        else:
+            s1, s2, s3 = st.columns(3)
+            s1.metric("Total Runs", f"{len(runs_df):,}")
+            s2.metric("Latest Run", str(runs_df.iloc[0]["run_id"]))
+            s3.metric("Best Accuracy (All Runs)", f"{runs_df['best_accuracy'].max():.4f}")
+
+            st.markdown("### Runs Table")
+            st.dataframe(runs_df, use_container_width=True)
+
+            selected_run = st.selectbox("Inspect Run", runs_df["run_id"].tolist())
+            selected_metrics = run_metrics_df[run_metrics_df["run_id"] == selected_run].copy()
+
+            if selected_metrics.empty:
+                st.info("No model metric lines found for selected run.")
+            else:
+                st.markdown("### Per-Model Metrics")
+                st.dataframe(
+                    selected_metrics.sort_values("accuracy", ascending=False),
+                    use_container_width=True,
+                )
+
+                fig_hist = px.bar(
+                    selected_metrics.sort_values("accuracy", ascending=False),
+                    x="model",
+                    y=["accuracy", "f1_macro", "precision_macro", "recall_macro"],
+                    barmode="group",
+                    title=f"Run {selected_run}: Model Metric Comparison",
+                )
+                st.plotly_chart(fig_hist, use_container_width=True)
+
+        with st.expander("Show Raw result.txt"):
+            st.text(run_log_raw if run_log_raw else "(empty)")
 
 
 if __name__ == "__main__":
