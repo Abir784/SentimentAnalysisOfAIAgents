@@ -456,20 +456,38 @@ def main() -> None:
                 st.plotly_chart(fig_mr, use_container_width=True)
 
         st.markdown("### Author Activity")
-        show_author_counts = st.checkbox("Show unique authors and their comment counts", value=False)
-        if show_author_counts:
+        top_authors_stage = eda_summary.get("top_authors_by_comment_count", [])
+        if top_authors_stage:
+            top_stage_df = pd.DataFrame(top_authors_stage, columns=["author", "comment_count"])
+            fig_stage_authors = px.bar(
+                top_stage_df.sort_values("comment_count", ascending=True),
+                x="comment_count",
+                y="author",
+                orientation="h",
+                title="Top Authors by Comment Count (Staged Data)",
+            )
+            st.plotly_chart(fig_stage_authors, use_container_width=True)
+            st.dataframe(top_stage_df, use_container_width=True)
+        else:
+            st.info("Top-author summary is not available in the EDA artifact.")
+
+        show_preprocessed_author_counts = st.checkbox(
+            "Also show author counts after preprocessing",
+            value=False,
+        )
+        if show_preprocessed_author_counts:
             author_counts_df, author_col = _author_counts_frame(training_df)
             if author_counts_df.empty:
                 st.info("No author-like column found in the training dataset.")
             else:
-                top_n = st.slider("Number of authors to display", min_value=10, max_value=200, value=30, step=10)
+                top_n = st.slider("Number of preprocessed authors to display", min_value=10, max_value=200, value=30, step=10)
                 shown_authors = author_counts_df.head(top_n)
                 fig_authors = px.bar(
                     shown_authors.sort_values("comment_count", ascending=True),
                     x="comment_count",
                     y="author",
                     orientation="h",
-                    title=f"Top {top_n} Authors by Comment Count ({author_col})",
+                    title=f"Top {top_n} Authors after Preprocessing ({author_col})",
                 )
                 st.plotly_chart(fig_authors, use_container_width=True)
                 st.dataframe(shown_authors, use_container_width=True)
