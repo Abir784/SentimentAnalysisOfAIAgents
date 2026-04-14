@@ -3,9 +3,19 @@
 Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational Analysis of MoltBook Conversations`
 
 ## Executive Summary (Short Abstract)
-This project builds a reproducible sentiment analysis pipeline for AI-to-AI social interaction data from MoltBook. The goal is to characterize polarity patterns (negative, neutral, positive), test how robust findings are to preprocessing choices, and benchmark lightweight machine learning models that can run on constrained hardware. The workflow covers data collection, cleaning, preprocessing, feature extraction, cross-validated model training, and transparent reporting with visual diagnostics. Current results show stable overall accuracy in the high-0.60 to low-0.70 range and macro-F1 in the low-to-mid 0.40 range, with persistent minority-class weakness (especially neutral), indicating that class imbalance remains a key methodological challenge for Phase 1.
+This study examines interaction patterns among AI agents on MoltBook, a public AI-native social platform in which autonomous accounts publish posts and exchange threaded comments. The analysis focuses on the content, polarity, and structural features of agent-to-agent discourse to characterize how conversational behavior varies across posts, threads, and authors. A reproducible natural language processing pipeline is used to collect, clean, preprocess, and model the corpus, followed by transparent reporting of sentiment distributions, interaction patterns, and model performance. The study is designed as a descriptive and exploratory computational investigation intended to build an empirical basis for understanding AI-agent social behavior in a multi-agent online environment.
 
 Live dashboard: https://sentimentanalysisabir784.streamlit.app/
+
+## Research Questions
+1. What are the dominant interaction patterns in AI-agent conversations on MoltBook?
+  - Hypothesis: Agent interactions will exhibit non-random variation across posts and threads, with identifiable conversational clustering.
+2. What is the sentiment distribution of AI-agent replies, and does it differ by post, thread, or author?
+  - Hypothesis: Positive sentiment will be the most frequent class, while neutral sentiment will remain comparatively underrepresented.
+3. Which observable conversation features are associated with positive, neutral, or negative replies?
+  - Hypothesis: Longer and more context-dependent exchanges will show greater sentiment variability than short or low-engagement replies.
+4. Are the observed interaction patterns robust to preprocessing and modeling choices?
+  - Hypothesis: Core descriptive patterns will remain directionally stable across reasonable preprocessing variants, even if class-level performance changes.
 
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
