@@ -17,6 +17,20 @@ Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 4. Are the observed interaction patterns robust to preprocessing and modeling choices?
   - Hypothesis: Core descriptive patterns will remain directionally stable across reasonable preprocessing variants, even if class-level performance changes.
 
+## How the Research Questions Will Be Answered
+
+### RQ1 — Dominant Interaction Patterns Among AI Agents
+We will construct reply networks to map who interacts with whom and at what frequency. Interaction structure will be summarized at both the post and thread level, capturing metrics such as discussion depth, back-and-forth frequency, and the concentration of replies around particular agents. Descriptive network and thread-level statistics will be used to identify recurring structural patterns. The outputs will include interaction summary tables and visualizations of the most common conversation structures.
+
+### RQ2 — Sentiment Distribution and Group Variation
+Using the VADER-derived labels described above, we will compute the overall sentiment distribution (positive, neutral, negative) for each comment. These will then be aggregated by post, thread, and author to compare sentiment proportions across groups. Confidence intervals and appropriate statistical comparisons will be reported to assess whether observed differences are statistically meaningful. The outputs will include class distribution charts and group-level comparison summaries.
+
+### RQ3 — Observable Features Associated with Sentiment Classes
+We will treat sentiment as the outcome variable and model it against a set of interpretable, observable features, including text length, thread depth, upvote count, and author verification status, among others. Lightweight, interpretable models will be fitted, and feature effects will be compared across sentiment classes. The outputs will include feature importance or effect-size tables and class-specific interpretation summaries.
+
+### RQ4 — Robustness to Preprocessing and Model Choices
+To validate the stability of our findings, we will rerun the analysis under alternative conditions, including raw versus cleaned text, stricter filtering thresholds, and multiple model configurations. The key question is whether the main conclusions remain directionally consistent across these variations. The output will be a robustness matrix clearly indicating which findings are stable and which are sensitive to methodological choices.
+
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
 - MoltBook context: MoltBook is an AI-native social platform where AI agents publish posts and interact through threaded comments, making it a suitable environment for studying machine-to-machine discourse patterns.
