@@ -40,9 +40,37 @@ def load_dashboard_data() -> Dict[str, Any]:
     modeling_summary_json = _latest_file(modeling_dir, "moltbook_model_summary_*.json")
     predictions_csv = _latest_file(modeling_dir, "moltbook_model_predictions_*.csv")
     eda_summary_json = _latest_file(eda_dir, "moltbook_eda_summary_*.json")
+    interaction_summary_json = _latest_file(eda_dir, "moltbook_interaction_network_summary_*.json")
+    interaction_nodes_csv = _latest_file(eda_dir, "moltbook_interaction_network_nodes_*.csv")
+    interaction_edges_csv = _latest_file(eda_dir, "moltbook_interaction_network_edges_*.csv")
+    interaction_thread_csv = _latest_file(eda_dir, "moltbook_interaction_network_thread_stats_*.csv")
+    interaction_topology_png = _latest_file(eda_dir, "moltbook_interaction_network_topology_*.png")
+    interaction_distributions_png = _latest_file(eda_dir, "moltbook_interaction_network_distributions_*.png")
+
+    topology_latest = eda_dir / "moltbook_interaction_network_topology_latest.png"
+    distributions_latest = eda_dir / "moltbook_interaction_network_distributions_latest.png"
+    if topology_latest.exists():
+        interaction_topology_png = topology_latest
+    if distributions_latest.exists():
+        interaction_distributions_png = distributions_latest
 
     training_df = pd.read_csv(training_csv) if training_csv and training_csv.exists() else pd.DataFrame()
     predictions_df = pd.read_csv(predictions_csv) if predictions_csv and predictions_csv.exists() else pd.DataFrame()
+    interaction_nodes_df = (
+        pd.read_csv(interaction_nodes_csv)
+        if interaction_nodes_csv and interaction_nodes_csv.exists()
+        else pd.DataFrame()
+    )
+    interaction_edges_df = (
+        pd.read_csv(interaction_edges_csv)
+        if interaction_edges_csv and interaction_edges_csv.exists()
+        else pd.DataFrame()
+    )
+    interaction_thread_df = (
+        pd.read_csv(interaction_thread_csv)
+        if interaction_thread_csv and interaction_thread_csv.exists()
+        else pd.DataFrame()
+    )
 
     return {
         "training_csv": training_csv,
@@ -55,6 +83,16 @@ def load_dashboard_data() -> Dict[str, Any]:
         "predictions_df": predictions_df,
         "eda_summary_json": eda_summary_json,
         "eda_summary": _load_json(eda_summary_json),
+        "interaction_summary_json": interaction_summary_json,
+        "interaction_summary": _load_json(interaction_summary_json),
+        "interaction_nodes_csv": interaction_nodes_csv,
+        "interaction_nodes_df": interaction_nodes_df,
+        "interaction_edges_csv": interaction_edges_csv,
+        "interaction_edges_df": interaction_edges_df,
+        "interaction_thread_csv": interaction_thread_csv,
+        "interaction_thread_df": interaction_thread_df,
+        "interaction_topology_png": interaction_topology_png,
+        "interaction_distributions_png": interaction_distributions_png,
     }
 
 
@@ -317,6 +355,51 @@ def _parse_result_log(log_path: Path) -> tuple[pd.DataFrame, pd.DataFrame, str]:
     return runs_df, metrics_df, raw
 
 
+def _rq1_techniques() -> None:
+    st.markdown(
+        """
+**Techniques Used (RQ1)**
+- Directed graph modeling (`author -> replied author`) with weighted edges.
+- Automatic edge strategy: direct parent-child links, then sequential thread fallback.
+- Graph metrics: in-degree, out-degree, reciprocity, clustering coefficient.
+- Thread structure metrics: reply edges per thread, reciprocal author-pair counts.
+"""
+    )
+
+
+def _rq2_techniques() -> None:
+    st.markdown(
+        """
+**Techniques Used (RQ2)**
+- VADER-derived three-class labels (`negative`, `neutral`, `positive`).
+- Group aggregation by post, thread, and author.
+- Comparative descriptive statistics with share distributions.
+"""
+    )
+
+
+def _rq3_techniques() -> None:
+    st.markdown(
+        """
+**Techniques Used (RQ3)**
+- Interpretable lightweight models from cross-validated benchmarks.
+- Observable feature proxies: text length, verification, and interaction attributes.
+- Class-wise performance interpretation from confusion matrices and F1 reports.
+"""
+    )
+
+
+def _rq4_techniques() -> None:
+    st.markdown(
+        """
+**Techniques Used (RQ4)**
+- Raw-versus-processed polarity comparison.
+- Multi-model robustness checks (linear models, Naive Bayes, dual-view stack).
+- Stability assessment via metric consistency and class-wise sensitivity.
+"""
+    )
+
+
 def main() -> None:
     st.set_page_config(
         page_title="MoltBook Sentiment Dashboard",
@@ -384,6 +467,7 @@ def main() -> None:
         "Polarity",
         "Modeling",
         "Predictions",
+        "RQ Analysis",
         "Tableau Export",
         "Run History",
     ])
@@ -612,6 +696,161 @@ def main() -> None:
                 st.dataframe(predictions_df.head(500), use_container_width=True)
 
     with tabs[5]:
+        st.subheader("Research Questions (RQ1-RQ4)")
+        rq_tabs = st.tabs(["RQ1 Interaction Network", "RQ2 Sentiment Variation", "RQ3 Feature Signals", "RQ4 Robustness"])
+
+        interaction_summary = data.get("interaction_summary", {})
+        interaction_nodes_df = data.get("interaction_nodes_df", pd.DataFrame())
+        interaction_edges_df = data.get("interaction_edges_df", pd.DataFrame())
+        interaction_thread_df = data.get("interaction_thread_df", pd.DataFrame())
+
+        with rq_tabs[0]:
+            _rq1_techniques()
+
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Authors (nodes)", f"{int(interaction_summary.get('node_count', 0)):,}")
+            c2.metric("Reply edges", f"{int(interaction_summary.get('edge_count', 0)):,}")
+            c3.metric("Reciprocity", _fmt_metric(interaction_summary.get("reciprocity"), 3))
+            c4.metric("Clustering", _fmt_metric(interaction_summary.get("average_undirected_clustering"), 3))
+
+            st.caption(
+                f"Edge mode: {interaction_summary.get('edge_construction_mode', 'N/A')} | "
+                f"Fallback triggered: {interaction_summary.get('fallback_triggered', 'N/A')}"
+            )
+
+            topo_png = data.get("interaction_topology_png")
+            dist_png = data.get("interaction_distributions_png")
+            if topo_png and Path(topo_png).exists():
+                st.image(str(topo_png), caption="Top interaction topology snapshot", use_container_width=True)
+            if dist_png and Path(dist_png).exists():
+                st.image(str(dist_png), caption="Interaction metric distributions", use_container_width=True)
+
+            if not interaction_nodes_df.empty:
+                st.markdown("Top Authors by Weighted In-Degree")
+                st.dataframe(interaction_nodes_df.head(20), use_container_width=True)
+
+            if not interaction_thread_df.empty:
+                fig_thread_edges = px.histogram(
+                    interaction_thread_df,
+                    x="reply_edges",
+                    nbins=30,
+                    title="Reply Edges per Thread",
+                )
+                st.plotly_chart(fig_thread_edges, use_container_width=True)
+
+            if interaction_edges_df.empty:
+                st.info("No interaction edge table found yet. Run the interaction network stage.")
+
+        with rq_tabs[1]:
+            _rq2_techniques()
+
+            label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+            if not label_col:
+                st.warning("No polarity label column available for RQ2 analysis.")
+            else:
+                overall = (
+                    training_df[label_col].value_counts(normalize=True).rename_axis("label").reset_index(name="share")
+                )
+                fig_overall = px.bar(overall, x="label", y="share", title="Overall Sentiment Share")
+                st.plotly_chart(fig_overall, use_container_width=True)
+
+                post_top = (
+                    training_df.groupby(["post_id", label_col]).size().reset_index(name="count")
+                    if "post_id" in training_df.columns
+                    else pd.DataFrame()
+                )
+                if not post_top.empty:
+                    post_counts = (
+                        post_top.pivot(index="post_id", columns=label_col, values="count")
+                        .fillna(0)
+                        .sum(axis=1)
+                        .sort_values(ascending=False)
+                    )
+                    top_posts = post_counts.head(10).index.tolist()
+                    shown = post_top[post_top["post_id"].isin(top_posts)]
+                    fig_post = px.bar(
+                        shown,
+                        x="post_id",
+                        y="count",
+                        color=label_col,
+                        title="Top Posts: Sentiment Composition",
+                    )
+                    st.plotly_chart(fig_post, use_container_width=True)
+
+                if "author_id" in training_df.columns:
+                    author_sent = (
+                        training_df.groupby(["author_id", label_col]).size().reset_index(name="count")
+                    )
+                    top_authors = (
+                        author_sent.groupby("author_id")["count"].sum().sort_values(ascending=False).head(15).index
+                    )
+                    shown_auth = author_sent[author_sent["author_id"].isin(top_authors)]
+                    fig_auth = px.bar(
+                        shown_auth,
+                        x="author_id",
+                        y="count",
+                        color=label_col,
+                        title="Top Authors: Sentiment Composition",
+                    )
+                    st.plotly_chart(fig_auth, use_container_width=True)
+
+        with rq_tabs[2]:
+            _rq3_techniques()
+
+            if model_metrics.empty:
+                st.warning("Model summary is not available for RQ3 feature-signal interpretation.")
+            else:
+                fig_perf = px.bar(
+                    model_metrics.sort_values("f1_macro", ascending=False),
+                    x="model",
+                    y=["f1_macro", "precision_macro", "recall_macro"],
+                    barmode="group",
+                    title="Class-Signal Proxy via Model Performance",
+                )
+                st.plotly_chart(fig_perf, use_container_width=True)
+
+            if "text_len_words_traditional_clean" in training_df.columns and _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"]):
+                lbl = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+                bins = pd.cut(training_df["text_len_words_traditional_clean"], bins=[0, 10, 20, 40, 80, 2000], right=False)
+                tmp = pd.DataFrame({"len_bin": bins.astype(str), "label": training_df[lbl].astype(str)})
+                g = tmp.groupby(["len_bin", "label"]).size().reset_index(name="count")
+                fig_len = px.bar(g, x="len_bin", y="count", color="label", barmode="group", title="Sentiment by Text-Length Bin")
+                st.plotly_chart(fig_len, use_container_width=True)
+
+        with rq_tabs[3]:
+            _rq4_techniques()
+
+            scoring = polarity_summary.get("scoring_comparison", {})
+            robust_rows: List[Dict[str, Any]] = []
+
+            raw_share = scoring.get("raw_label_share", {})
+            proc_share = scoring.get("processed_label_share", {})
+            labels_union = sorted(set(raw_share.keys()) | set(proc_share.keys()))
+            for lbl in labels_union:
+                robust_rows.append(
+                    {
+                        "comparison": f"raw_vs_processed_{lbl}",
+                        "raw_share": float(raw_share.get(lbl, 0.0)),
+                        "processed_share": float(proc_share.get(lbl, 0.0)),
+                        "abs_delta": abs(float(proc_share.get(lbl, 0.0)) - float(raw_share.get(lbl, 0.0))),
+                    }
+                )
+
+            if robust_rows:
+                robust_df = pd.DataFrame(robust_rows)
+                st.dataframe(robust_df, use_container_width=True)
+                fig_delta = px.bar(robust_df, x="comparison", y="abs_delta", title="Label Share Shift (Raw vs Processed)")
+                st.plotly_chart(fig_delta, use_container_width=True)
+            else:
+                st.info("Raw/processed label-share comparison not available in current polarity summary.")
+
+            if not model_metrics.empty:
+                stable = model_metrics[["model", "accuracy", "f1_macro", "precision_macro", "recall_macro"]].copy()
+                stable["metric_spread"] = stable[["accuracy", "f1_macro", "precision_macro", "recall_macro"]].max(axis=1) - stable[["accuracy", "f1_macro", "precision_macro", "recall_macro"]].min(axis=1)
+                st.markdown("Robustness Matrix (Across Models)")
+                st.dataframe(stable.sort_values("f1_macro", ascending=False), use_container_width=True)
+
+    with tabs[6]:
         st.subheader("Tableau-Ready Exports")
         st.caption("Use these extracted tables directly in Tableau Desktop/Public.")
 
@@ -626,7 +865,7 @@ def main() -> None:
             mime="text/csv",
         )
 
-    with tabs[6]:
+    with tabs[7]:
         st.subheader("Model Run History")
         st.caption("Historical run log parsed from data/modeling/result.txt")
 

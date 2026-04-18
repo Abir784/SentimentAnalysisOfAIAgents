@@ -20,7 +20,7 @@ Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 ## How the Research Questions Will Be Answered
 
 ### RQ1 — Dominant Interaction Patterns Among AI Agents
-We will construct reply networks to map who interacts with whom and at what frequency. Interaction structure will be summarized at both the post and thread level, capturing metrics such as discussion depth, back-and-forth frequency, and the concentration of replies around particular agents. Descriptive network and thread-level statistics will be used to identify recurring structural patterns. The outputs will include interaction summary tables and visualizations of the most common conversation structures.
+We will construct a directed reply network in which nodes represent authors and edges represent observed reply relationships from parent comments to child comments. Edge weights will represent reply frequency between author pairs. Network structure will be summarized with core graph metrics, including in-degree, out-degree, reciprocity, and clustering coefficient, together with post-level and thread-level measures such as discussion depth, back-and-forth frequency, and concentration of replies around particular agents. Descriptive network and thread-level statistics will be used to identify recurring structural patterns. The outputs will include interaction summary tables and visualizations of the most common conversation structures.
 
 ### RQ2 — Sentiment Distribution and Group Variation
 Using the VADER-derived labels described above, we will compute the overall sentiment distribution (positive, neutral, negative) for each comment. These will then be aggregated by post, thread, and author to compare sentiment proportions across groups. Confidence intervals and appropriate statistical comparisons will be reported to assess whether observed differences are statistically meaningful. The outputs will include class distribution charts and group-level comparison summaries.
@@ -222,7 +222,19 @@ Run ID: `20260329T101730Z` (latest run with deep models enabled)
 | Deep: CardiffNLP Twitter-RoBERTa | 0.1913 | 0.2327 | 0.5085 | 0.4535 | 0.0000 |
 | Deep: BERTweet Sentiment | 0.1510 | 0.1798 | 0.5415 | 0.4021 | 0.2601 |
 
+### RQ Results
+
+**RQ1 (Dominant interaction patterns among AI agents):** The interaction-network results are directionally consistent with the RQ1 hypothesis that interaction structure is non-random and cluster-like across threads. In the latest run, the graph contains 548 author nodes and 1121 directed edges (weighted interactions = 2044), with reciprocity = 0.1552 and average clustering coefficient = 0.1075, indicating measurable repeated interaction loops and local clustering rather than uniform random exchange. Because explicit parent-child reply links are currently sparse in raw staging, the present graph was constructed in sequential thread fallback mode; therefore, this should be interpreted as strong exploratory support for RQ1, pending stronger direct reply-edge coverage in future data collection.
+
 ### Relevant Graphs
+RQ1 interaction network topology (latest run):
+
+![RQ1 interaction network topology](data/eda/moltbook_interaction_network_topology_20260418T164728Z.png)
+
+RQ1 interaction metric distributions (latest run):
+
+![RQ1 interaction metric distributions](data/eda/moltbook_interaction_network_distributions_20260418T164728Z.png)
+
 Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
 
 ![Requested metrics dashboard](data/eda/moltbook_model_requested_metrics_20260329T101730Z.png)

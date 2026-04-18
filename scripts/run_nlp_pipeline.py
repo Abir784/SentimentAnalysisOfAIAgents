@@ -82,6 +82,16 @@ PIPELINE_STAGES: List[PipelineStage] = [
         rationale="Validate score distributions, subgroup contrasts, and examples.",
     ),
     PipelineStage(
+        key="interaction_network",
+        title="Build author reply interaction network",
+        kind="script",
+        target="scripts/run_moltbook_interaction_network.py",
+        rationale=(
+            "Construct a directed author graph and report in-degree/out-degree, "
+            "reciprocity, clustering, and thread-level interaction structure."
+        ),
+    ),
+    PipelineStage(
         key="modeling",
         title="Train lightweight benchmark models",
         kind="script",

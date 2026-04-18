@@ -42,7 +42,7 @@ python scripts/run_nlp_pipeline.py run --from-stage raw_to_staged --to-stage pol
 Run specific stages only:
 
 ```powershell
-python scripts/run_nlp_pipeline.py run --stages collect,raw_to_staged,polarity,modeling
+python scripts/run_nlp_pipeline.py run --stages collect,raw_to_staged,polarity,interaction_network,modeling
 ```
 
 Run one notebook with selected cell numbers:
@@ -66,7 +66,29 @@ Pipeline order is aligned to the research motive (reproducibility, preprocessing
 5. `preprocess_notebook`
 6. `polarity`
 7. `polarity_notebook`
-8. `modeling`
+8. `interaction_network`
+9. `modeling`
+
+## Step 5: Build Interaction Network (RQ1)
+
+Construct a directed author reply graph from staged comments and export network metrics:
+
+```powershell
+python scripts/run_moltbook_interaction_network.py
+```
+
+Edge-construction modes:
+- `--edge-mode auto` (default): use direct parent-child reply edges when available, otherwise fallback to sequential same-thread interaction edges.
+- `--edge-mode direct`: only direct parent-child reply edges.
+- `--edge-mode sequential`: sequential same-thread interaction edges only.
+
+Outputs:
+- `data/eda/moltbook_interaction_network_summary_<run_id>.json`
+- `data/eda/moltbook_interaction_network_nodes_<run_id>.csv`
+- `data/eda/moltbook_interaction_network_edges_<run_id>.csv`
+- `data/eda/moltbook_interaction_network_thread_stats_<run_id>.csv`
+- `data/eda/moltbook_interaction_network_topology_<run_id>.png`
+- `data/eda/moltbook_interaction_network_distributions_<run_id>.png`
 
 ## Step 1: Collect Data
 
@@ -185,6 +207,7 @@ The dashboard automatically reads the latest artifacts from:
 - `data/modeling/moltbook_model_summary_*.json`
 - `data/modeling/moltbook_model_predictions_*.csv`
 - `data/eda/moltbook_eda_summary_*.json`
+
 
 Built-in dashboard views:
 - Overview KPIs and label distribution

@@ -1,0 +1,138 @@
+{
+  "graph_type": "directed_author_reply_graph",
+  "edge_construction_mode": "sequential",
+  "fallback_triggered": true,
+  "node_count": 548,
+  "edge_count": 1121,
+  "weighted_interactions": 2044,
+  "density": 0.00374,
+  "reciprocity": 0.155219,
+  "average_undirected_clustering": 0.10751,
+  "reply_resolution": {
+    "rows_total": 2163,
+    "rows_with_thread_id": 2163,
+    "threads_with_2plus_comments": 55,
+    "sequential_pairs_considered": 2108,
+    "self_reply_rows_skipped": 64,
+    "rows_missing_thread_id": 0,
+    "unique_reply_edges": 1121,
+    "total_reply_interactions": 2044,
+    "edge_mode": "sequential_thread_fallback",
+    "reply_edge_coverage": 0.0
+  },
+  "edge_selection_diagnostics": {
+    "direct_edge_count": 0,
+    "direct_weighted_interactions": 0,
+    "sequential_edge_count": 1121,
+    "sequential_weighted_interactions": 2044,
+    "fallback_triggered": true,
+    "selected_mode": "sequential"
+  },
+  "top_in_degree_authors": [
+    {
+      "author_id": "senti-001",
+      "weighted_in_degree": 158.0,
+      "in_degree": 43
+    },
+    {
+      "author_id": "GanglionMinion",
+      "weighted_in_degree": 69.0,
+      "in_degree": 35
+    },
+    {
+      "author_id": "glados_openclaw",
+      "weighted_in_degree": 62.0,
+      "in_degree": 16
+    },
+    {
+      "author_id": "tatertotterson",
+      "weighted_in_degree": 34.0,
+      "in_degree": 14
+    },
+    {
+      "author_id": "pyclaw001",
+      "weighted_in_degree": 28.0,
+      "in_degree": 12
+    },
+    {
+      "author_id": "tottytotterson",
+      "weighted_in_degree": 26.0,
+      "in_degree": 10
+    },
+    {
+      "author_id": "coinflipcasino",
+      "weighted_in_degree": 24.0,
+      "in_degree": 16
+    },
+    {
+      "author_id": "PerfectlyInnocuous",
+      "weighted_in_degree": 22.0,
+      "in_degree": 8
+    },
+    {
+      "author_id": "JS_BestAgent",
+      "weighted_in_degree": 20.0,
+      "in_degree": 8
+    },
+    {
+      "author_id": "quillagent",
+      "weighted_in_degree": 19.0,
+      "in_degree": 11
+    }
+  ],
+  "top_out_degree_authors": [
+    {
+      "author_id": "senti-001",
+      "weighted_out_degree": 158.0,
+      "out_degree": 42
+    },
+    {
+      "author_id": "GanglionMinion",
+      "weighted_out_degree": 71.0,
+      "out_degree": 38
+    },
+    {
+      "author_id": "glados_openclaw",
+      "weighted_out_degree": 64.0,
+      "out_degree": 15
+    },
+    {
+      "author_id": "tatertotterson",
+      "weighted_out_degree": 33.0,
+      "out_degree": 15
+    },
+    {
+      "author_id": "pyclaw001",
+      "weighted_out_degree": 28.0,
+      "out_degree": 14
+    },
+    {
+      "author_id": "tottytotterson",
+      "weighted_out_degree": 26.0,
+      "out_degree": 8
+    },
+    {
+      "author_id": "coinflipcasino",
+      "weighted_out_degree": 24.0,
+      "out_degree": 16
+    },
+    {
+      "author_id": "PerfectlyInnocuous",
+      "weighted_out_degree": 22.0,
+      "out_degree": 12
+    },
+    {
+      "author_id": "JS_BestAgent",
+      "weighted_out_degree": 20.0,
+      "out_degree": 9
+    },
+    {
+      "author_id": "quillagent",
+      "weighted_out_degree": 19.0,
+      "out_degree": 11
+    }
+  ],
+  "run_id": "20260418T164728Z",
+  "input_file": "data/staged/moltbook_comments_all.jsonl",
+  "rows_input": 2163
+}
