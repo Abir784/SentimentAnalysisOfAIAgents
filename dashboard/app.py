@@ -713,6 +713,31 @@ def main() -> None:
             c3.metric("Reciprocity", _fmt_metric(interaction_summary.get("reciprocity"), 3))
             c4.metric("Clustering", _fmt_metric(interaction_summary.get("average_undirected_clustering"), 3))
 
+            node_count = int(interaction_summary.get("node_count", 0))
+            edge_count = int(interaction_summary.get("edge_count", 0))
+            reciprocity = float(interaction_summary.get("reciprocity", 0.0) or 0.0)
+            clustering = float(interaction_summary.get("average_undirected_clustering", 0.0) or 0.0)
+            fallback_triggered = bool(interaction_summary.get("fallback_triggered", False))
+
+            if edge_count > 0 and node_count > 0 and (reciprocity > 0 or clustering > 0):
+                if fallback_triggered:
+                    rq1_status = "Provisionally accepted (exploratory)"
+                    st.warning(
+                        "RQ1 Hypothesis Status: Provisionally accepted (exploratory). "
+                        "Pattern supports non-random clustered interaction, but direct reply-edge coverage is limited."
+                    )
+                else:
+                    rq1_status = "Accepted"
+                    st.success("RQ1 Hypothesis Status: Accepted.")
+            else:
+                rq1_status = "Not supported yet"
+                st.error(
+                    "RQ1 Hypothesis Status: Not supported yet. "
+                    "Current graph evidence is insufficient to confirm clustered non-random interaction."
+                )
+
+            st.caption(f"Hypothesis decision (RQ1): {rq1_status}")
+
             st.caption(
                 f"Edge mode: {interaction_summary.get('edge_construction_mode', 'N/A')} | "
                 f"Fallback triggered: {interaction_summary.get('fallback_triggered', 'N/A')}"

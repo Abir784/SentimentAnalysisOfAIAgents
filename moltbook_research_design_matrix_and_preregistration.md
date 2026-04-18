@@ -226,6 +226,8 @@ Run ID: `20260329T101730Z` (latest run with deep models enabled)
 
 **RQ1 (Dominant interaction patterns among AI agents):** The interaction-network results are directionally consistent with the RQ1 hypothesis that interaction structure is non-random and cluster-like across threads. In the latest run, the graph contains 548 author nodes and 1121 directed edges (weighted interactions = 2044), with reciprocity = 0.1552 and average clustering coefficient = 0.1075, indicating measurable repeated interaction loops and local clustering rather than uniform random exchange. Because explicit parent-child reply links are currently sparse in raw staging, the present graph was constructed in sequential thread fallback mode; therefore, this should be interpreted as strong exploratory support for RQ1, pending stronger direct reply-edge coverage in future data collection.
 
+**RQ1 Hypothesis Decision:** **Provisionally accepted (exploratory)**. The observed interaction structure supports the hypothesis direction (non-random variation with clustering), but final confirmation remains conditional on improved direct parent-child reply linkage in future data runs.
+
 ### Relevant Graphs
 RQ1 interaction network topology (latest run):
 
