@@ -55,9 +55,39 @@ Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 Note: duplicate rows detected at staging are explicitly handled in preprocessing, and duplicate comments are removed before polarity scoring and model training.
 
 ### 3. Label Construction
-1. Generate sentiment-oriented target labels from processed polarity outputs.
-2. Use the training-ready CSV as the modeling input dataset.
-3. Keep labels in three classes: negative, neutral, positive.
+Target labels are generated automatically from polarity scores using a fixed lexicon-threshold rule.
+
+Labeling logic:
+1. Compute polarity scores for each comment using VADER and extract the compound score $c \in [-1,1]$.
+2. Apply a deterministic three-class mapping:
+   - if $c \geq 0.05$, assign `positive`
+   - if $c \leq -0.05$, assign `negative`
+   - otherwise, assign `neutral`
+3. Generate labels for both raw text and preprocessed text, then use `processed_polarity_label` as the default modeling target in the training-ready CSV.
+4. Keep label space fixed to three classes: `negative`, `neutral`, `positive`.
+
+Formal decision rule:
+
+$$
+y(c)=
+\begin{cases}
+  positive, & c \ge 0.05 \\
+  negative, & c \le -0.05 \\
+  neutral, & -0.05 < c < 0.05
+\end{cases}
+$$
+
+Pseudocode:
+```text
+for each comment i:
+  c_i = VADER_compound(text_traditional_clean_i)
+  if c_i >= 0.05:
+    label_i = positive
+  elif c_i <= -0.05:
+    label_i = negative
+  else:
+    label_i = neutral
+```
 
 ### 4. Feature Engineering and Modeling
 1. Transform text to TF-IDF features (unigram + bigram).
