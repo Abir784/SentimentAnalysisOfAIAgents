@@ -1,0 +1,46 @@
+Dual View Resonance (DVR) - Archived Custom Model Algorithm
+===========================================================
+
+Status: Archived for documentation only.
+Active pipeline: rule-based sentiment analysis (VADER + SentiWordNet + ensemble).
+
+Original DVR Idea
+-----------------
+Learn sentiment from two synchronized text views and combine them with a meta-fusion layer.
+
+Input Views
+-----------
+1) text_traditional_clean -> TF-IDF word n-grams (1,2)
+2) text_basic_clean -> TF-IDF character n-grams (3,5)
+
+Base Learners
+-------------
+1) Word view: SGDClassifier (log_loss, class_weight=balanced)
+2) Char view: LogisticRegression (class_weight=balanced)
+3) Hybrid view: MultinomialNB on concatenated sparse matrix [word || char]
+
+Meta-Fusion
+-----------
+Train a meta Logistic Regression on:
+- base probability outputs from all three learners,
+- cross-view confidence disagreement,
+- absolute polarity-compound delta,
+- cleaned-text word length.
+
+Neutral Guard
+-------------
+If meta confidence is below threshold and cross-view disagreement is low,
+force prediction to neutral.
+
+Fold-Level Procedure (Summary)
+------------------------------
+1) Split using Stratified K-Fold.
+2) Fit base learners on fold train.
+3) Predict probabilities on fold train/test.
+4) Build meta-features.
+5) Fit meta learner on fold train meta-features.
+6) Calibrate neutral threshold from fold-train confidence profile.
+7) Predict fold test and apply neutral guard.
+8) Aggregate out-of-fold predictions and compute evaluation metrics.
+
+This archive is retained for method history and reproducibility notes.

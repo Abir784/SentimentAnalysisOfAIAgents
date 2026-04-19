@@ -2,13 +2,12 @@
 """
 Script to clean up old data files, keeping only the latest version of each.
 
-This script removes older versions of data files from:
-- data/modeling/ (predictions and summaries)
-- data/polarity/ (polarity JSONL and summaries)  
-- data/preprocessed/ (preprocessed JSONL and training CSV)
-- data/eda/ (EDA summaries only)
-
-Modeling graphs are intentionally preserved for every run.
+This script removes older versions of data files from active rule-based folders:
+- data/preprocessed_rule_based/
+- data/eda_rule_based/
+- data/features_rule_based/
+- data/rule_based/
+- data/eda/ (RQ1 interaction artifacts)
 
 Raw and staged folders are NOT cleaned up (per requirements).
 """
@@ -32,13 +31,22 @@ def main() -> None:
     
     # Define cleanup rules: (folder, pattern, keep_count)
     cleanup_rules = [
-        ("modeling", "moltbook_model_predictions_*.csv", 1),
-        ("modeling", "moltbook_model_summary_*.json", 1),
-        ("polarity", "moltbook_comments_polarity_*.jsonl", 1),
-        ("polarity", "moltbook_polarity_summary_*.json", 1),
-        ("preprocessed", "moltbook_comments_preprocessed_*.jsonl", 1),
-        ("preprocessed", "moltbook_training_ready_*.csv", 1),
-        ("eda", "moltbook_eda_summary_*.json", 1),
+        ("preprocessed_rule_based", "moltbook_preprocessed_rule_based_*.csv", 1),
+        ("preprocessed_rule_based", "moltbook_preprocessed_rule_based_*.jsonl", 1),
+        ("preprocessed_rule_based", "moltbook_preprocessed_rule_based_summary_*.json", 1),
+        ("eda_rule_based", "moltbook_eda_rule_based_summary_*.json", 1),
+        ("features_rule_based", "moltbook_features_rule_based_*.csv", 1),
+        ("features_rule_based", "moltbook_features_rule_based_summary_*.json", 1),
+        ("rule_based", "moltbook_rule_based_comments_*.csv", 1),
+        ("rule_based", "moltbook_rule_based_summary_*.json", 1),
+        ("rule_based", "moltbook_rule_based_label_share_*.png", 1),
+        ("rule_based", "moltbook_rule_based_score_distribution_*.png", 1),
+        ("eda", "moltbook_interaction_network_summary_*.json", 1),
+        ("eda", "moltbook_interaction_network_nodes_*.csv", 1),
+        ("eda", "moltbook_interaction_network_edges_*.csv", 1),
+        ("eda", "moltbook_interaction_network_thread_stats_*.csv", 1),
+        ("eda", "moltbook_interaction_network_topology_*.png", 1),
+        ("eda", "moltbook_interaction_network_distributions_*.png", 1),
     ]
     
     print("Cleaning up old data files...")

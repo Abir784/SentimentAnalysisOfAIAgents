@@ -86,17 +86,31 @@ def cleanup_data_folders() -> Dict[str, List[Path]]:
     
     # Define cleanup rules: folder -> (pattern, keep_count)
     cleanup_rules = {
-        "modeling": [
-            ("moltbook_model_predictions_*.csv", 1),
-            ("moltbook_model_summary_*.json", 1),
+        "preprocessed_rule_based": [
+            ("moltbook_preprocessed_rule_based_*.csv", 1),
+            ("moltbook_preprocessed_rule_based_*.jsonl", 1),
+            ("moltbook_preprocessed_rule_based_summary_*.json", 1),
         ],
-        "polarity": [
-            ("moltbook_comments_polarity_*.jsonl", 1),
-            ("moltbook_polarity_summary_*.json", 1),
+        "eda_rule_based": [
+            ("moltbook_eda_rule_based_summary_*.json", 1),
         ],
-        "preprocessed": [
-            ("moltbook_comments_preprocessed_*.jsonl", 1),
-            ("moltbook_training_ready_*.csv", 1),
+        "features_rule_based": [
+            ("moltbook_features_rule_based_*.csv", 1),
+            ("moltbook_features_rule_based_summary_*.json", 1),
+        ],
+        "rule_based": [
+            ("moltbook_rule_based_comments_*.csv", 1),
+            ("moltbook_rule_based_summary_*.json", 1),
+            ("moltbook_rule_based_label_share_*.png", 1),
+            ("moltbook_rule_based_score_distribution_*.png", 1),
+        ],
+        "eda": [
+            ("moltbook_interaction_network_summary_*.json", 1),
+            ("moltbook_interaction_network_nodes_*.csv", 1),
+            ("moltbook_interaction_network_edges_*.csv", 1),
+            ("moltbook_interaction_network_thread_stats_*.csv", 1),
+            ("moltbook_interaction_network_topology_*.png", 1),
+            ("moltbook_interaction_network_distributions_*.png", 1),
         ],
     }
     

@@ -1,0 +1,7 @@
+{
+  "run_id": "20260419T084323Z",
+  "input_file": "data/staged/moltbook_comments_all.jsonl",
+  "rows": 1296,
+  "output_csv": "data/preprocessed_rule_based/moltbook_preprocessed_rule_based_20260419T084323Z.csv",
+  "output_jsonl": "data/preprocessed_rule_based/moltbook_preprocessed_rule_based_20260419T084323Z.jsonl"
+}

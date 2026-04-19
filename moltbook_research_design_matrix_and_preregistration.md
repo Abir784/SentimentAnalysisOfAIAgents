@@ -3,7 +3,7 @@
 Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational Analysis of MoltBook Conversations`
 
 ## Executive Summary (Short Abstract)
-This study examines interaction patterns among AI agents on MoltBook, a public AI-native social platform in which autonomous accounts publish posts and exchange threaded comments. The analysis focuses on the content, polarity, and structural features of agent-to-agent discourse to characterize how conversational behavior varies across posts, threads, and authors. A reproducible natural language processing pipeline is used to collect, clean, preprocess, and model the corpus, followed by transparent reporting of sentiment distributions, interaction patterns, and model performance. The study is designed as a descriptive and exploratory computational investigation intended to build an empirical basis for understanding AI-agent social behavior in a multi-agent online environment.
+This study examines interaction patterns among AI agents on MoltBook, a public AI-native social platform in which autonomous accounts publish posts and exchange threaded comments. The analysis focuses on the content, polarity, and structural features of agent-to-agent discourse to characterize how conversational behavior varies across posts, threads, and authors. A reproducible natural language processing pipeline is used to collect, clean, preprocess, extract features, and apply rule-based sentiment tools, followed by transparent reporting of sentiment distributions and interaction patterns. The study is designed as a descriptive and exploratory computational investigation intended to build an empirical basis for understanding AI-agent social behavior in a multi-agent online environment.
 
 Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 
@@ -14,8 +14,8 @@ Live dashboard: https://sentimentanalysisabir784.streamlit.app/
   - Hypothesis: Positive sentiment will be the most frequent class, while neutral sentiment will remain comparatively underrepresented.
 3. Which observable conversation features are associated with positive, neutral, or negative replies?
   - Hypothesis: Longer and more context-dependent exchanges will show greater sentiment variability than short or low-engagement replies.
-4. Are the observed interaction patterns robust to preprocessing and modeling choices?
-  - Hypothesis: Core descriptive patterns will remain directionally stable across reasonable preprocessing variants, even if class-level performance changes.
+4. Are the observed interaction patterns robust to preprocessing and rule-based method choices?
+  - Hypothesis: Core descriptive patterns will remain directionally stable across reasonable preprocessing variants and rule-based scoring choices.
 
 ## How the Research Questions Will Be Answered
 
@@ -26,10 +26,10 @@ We will construct a directed reply network in which nodes represent authors and 
 Using the VADER-derived labels described above, we will compute the overall sentiment distribution (positive, neutral, negative) for each comment. These will then be aggregated by post, thread, and author to compare sentiment proportions across groups. Confidence intervals and appropriate statistical comparisons will be reported to assess whether observed differences are statistically meaningful. The outputs will include class distribution charts and group-level comparison summaries.
 
 ### RQ3 — Observable Features Associated with Sentiment Classes
-We will treat sentiment as the outcome variable and model it against a set of interpretable, observable features, including text length, thread depth, upvote count, and author verification status, among others. Lightweight, interpretable models will be fitted, and feature effects will be compared across sentiment classes. The outputs will include feature importance or effect-size tables and class-specific interpretation summaries.
+We will treat sentiment as the outcome variable and compare it descriptively against interpretable, observable features, including text length, thread depth, upvote count, and author verification status, among others. Feature-level distributions and subgroup contrasts will be summarized across sentiment classes using non-parametric descriptive statistics and visual comparisons. The outputs will include feature summary tables and class-specific interpretation notes.
 
-### RQ4 — Robustness to Preprocessing and Model Choices
-To validate the stability of our findings, we will rerun the analysis under alternative conditions, including raw versus cleaned text, stricter filtering thresholds, and multiple model configurations. The key question is whether the main conclusions remain directionally consistent across these variations. The output will be a robustness matrix clearly indicating which findings are stable and which are sensitive to methodological choices.
+### RQ4 — Robustness to Preprocessing and Rule-Based Choices
+To validate the stability of our findings, we will rerun the analysis under alternative conditions, including raw versus cleaned text, stricter filtering thresholds, and multiple rule-based scoring views (VADER, SentiWordNet, and ensemble). The key question is whether the main conclusions remain directionally consistent across these variations. The output will be a robustness matrix clearly indicating which findings are stable and which are sensitive to methodological choices.
 
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
@@ -37,25 +37,21 @@ To validate the stability of our findings, we will rerun the analysis under alte
 - Official website: https://www.moltbook.com/
 - Unit of analysis: comment-level text, with post/thread context fields retained for aggregation.
 - Current staged corpus: 2163 comments across 55 posts and 548 authors.
-- Current modeling dataset: 1040 labeled comments after preprocessing and quality filtering.
+- Current preprocessed dataset: comments after preprocessing and quality filtering used for rule-based analysis.
 - Label space: three-class sentiment (`negative`, `neutral`, `positive`).
 - Core fields used: `comment_id`, `post_id`, `thread_id`, `author_id`, `text`, `upvotes`, `is_verified`, `fetched_at`.
-- Data pipeline structure: raw collection -> staged consolidated comments -> preprocessed text -> polarity and training-ready CSV artifacts.
+- Data pipeline structure: raw collection -> staged consolidated comments -> preprocessed text -> EDA -> feature extraction -> rule-based sentiment outputs.
 
 ## Packages and Technologies Used
 - Programming language: Python 3.x
 - Data handling: pandas, numpy
-- NLP preprocessing and sentiment: nltk, langdetect, vaderSentiment
-- ML modeling (lightweight): scikit-learn
-  - TF-IDF features: `TfidfVectorizer`
-  - Models: Logistic Regression, Linear SVM, SGDClassifier, Multinomial Naive Bayes
-  - Custom model: Dual View Resonance (word-view + char-view + hybrid stack with neutral-guard rule)
-  - Validation: StratifiedKFold, CalibratedClassifierCV
+- NLP preprocessing and sentiment: nltk, langdetect, vaderSentiment, SentiWordNet
+- Rule-based sentiment tools: VADER, SentiWordNet, conservative ensemble
 - Visualization: matplotlib, seaborn
 - File formats and storage: JSONL, CSV, JSON
 - Workflow environment: Jupyter notebooks + Python scripts (VS Code workspace)
 
-## Methodology: Data Collection to Model Training
+## Methodology: Data Collection to Rule-Based Analysis
 ### 1. Data Collection and Staging
 1. Collect raw MoltBook conversations into JSONL batches from public pages.
 2. Consolidate raw batches into a staged comments file.
@@ -66,7 +62,7 @@ To validate the stability of our findings, we will rerun the analysis under alte
 2. Normalize text with lowercase conversion, punctuation/special-character cleanup, URL/hashtag/number/emoji removal, abbreviation expansion, tokenization, stopword policy, and lemmatization.
 3. Store processed text and intermediate artifacts for reproducibility and audit.
 
-Note: duplicate rows detected at staging are explicitly handled in preprocessing, and duplicate comments are removed before polarity scoring and model training.
+Note: duplicate rows detected at staging are explicitly handled in preprocessing, and duplicate comments are removed before rule-based scoring.
 
 ### 3. Label Construction
 Target labels are generated automatically from polarity scores using a fixed lexicon-threshold rule.
@@ -77,7 +73,7 @@ Labeling logic:
    - if $c \geq 0.05$, assign `positive`
    - if $c \leq -0.05$, assign `negative`
    - otherwise, assign `neutral`
-3. Generate labels for both raw text and preprocessed text, then use `processed_polarity_label` as the default modeling target in the training-ready CSV.
+3. Generate labels for both VADER and SentiWordNet views, then produce an ensemble label as the primary output.
 4. Keep label space fixed to three classes: `negative`, `neutral`, `positive`.
 
 Formal decision rule:
@@ -103,132 +99,41 @@ for each comment i:
     label_i = neutral
 ```
 
-### 4. Feature Engineering and Modeling
-1. Transform text to TF-IDF features (unigram + bigram).
-2. Train lightweight models suitable for local devices:
-  - Logistic Regression (calibrated)
-  - Linear SVM
-  - SGD linear classifier
-  - Multinomial Naive Bayes
-3. Use stratified 5-fold cross-validation for robust estimates.
-4. Apply minority-threshold tuning for probabilistic models to improve sensitivity on underrepresented classes.
+### 4. Feature Extraction and Rule-Based Scoring
+1. Extract interpretable comment-level features from cleaned text (character count, token count, unique-token ratio, punctuation intensity, uppercase ratio).
+2. Score sentiment with three rule-based tools:
+  - VADER
+  - SentiWordNet
+  - Ensemble decision rule
+3. Compare method-level label shares and agreement rates.
+4. Export feature tables, rule-based summaries, and diagnostic plots.
 
-### 4A. Dual View Resonance Model Specification
-Proposed model: **Dual View Resonance (DVR)**
-
-Core idea:
-1. Learn sentiment from two synchronized text views of the same comment (`text_traditional_clean` and `text_basic_clean`) rather than a single lexical representation.
-2. Use cross-view agreement/disagreement as an ambiguity signal and explicitly route low-confidence, high-ambiguity cases toward neutral-safe predictions.
-
-Architecture:
-1. View A encoder: TF-IDF word n-grams (1,2) over `text_traditional_clean` + SGD (`log_loss`, class-balanced).
-2. View B encoder: TF-IDF character n-grams (3,5) over `text_basic_clean` + Logistic Regression (class-balanced).
-3. Hybrid encoder: concatenated sparse matrix `[word_view || char_view]` + Multinomial Naive Bayes.
-4. Meta-fusion layer: Logistic Regression over stacked probability outputs from the three base encoders plus auxiliary features:
-  - confidence disagreement between word and char views,
-  - `|polarity_compound_delta|`,
-  - `text_len_words_traditional_clean`.
-5. Neutral-guard rule: if meta confidence is below a fold-calibrated threshold and cross-view disagreement is small, prediction is mapped to `neutral`.
-
-Algorithm (fold-level):
-1. Split training data with stratified K-fold.
-2. Fit word-view, char-view, and hybrid encoders on fold-train only.
-3. Obtain train/test class probabilities from each base encoder.
-4. Build meta-feature vectors by concatenating probabilities and auxiliary resonance features.
-5. Fit a class-balanced meta Logistic Regression on fold-train meta-features.
-6. Estimate neutral-guard threshold from fold-train confidence distribution.
-7. Generate fold-test predictions via meta-model and apply neutral-guard post-rule.
-8. Aggregate out-of-fold predictions across all folds and compute final metrics.
-
-Pseudocode:
-```text
-Input:
-  D = {(text_traditional_clean_i, text_basic_clean_i, y_i)} for i=1..N
-  K = number of stratified folds
-
-Initialize OOF predictions P_hat of size N
-
-for each fold f in StratifiedKFold(D, K):
-    Train, Test <- split(D, fold=f)
-
-    # View encoders
-    Xw_train <- TFIDF_word_ngrams(Train.text_traditional_clean)
-    Xw_test  <- transform_word_ngrams(Test.text_traditional_clean)
-
-    Xc_train <- TFIDF_char_ngrams(Train.text_basic_clean)
-    Xc_test  <- transform_char_ngrams(Test.text_basic_clean)
-
-    Xh_train <- concat_sparse(Xw_train, Xc_train)
-    Xh_test  <- concat_sparse(Xw_test, Xc_test)
-
-    M_word   <- fit SGD(log_loss, class_balanced) on (Xw_train, y_train)
-    M_char   <- fit LogisticRegression(class_balanced) on (Xc_train, y_train)
-    M_hybrid <- fit MultinomialNB on (Xh_train, y_train)
-
-    Pw_train, Pw_test <- predict_proba(M_word, Xw_train, Xw_test)
-    Pc_train, Pc_test <- predict_proba(M_char, Xc_train, Xc_test)
-    Ph_train, Ph_test <- predict_proba(M_hybrid, Xh_train, Xh_test)
-
-    R_train <- |max(Pw_train) - max(Pc_train)|
-    R_test  <- |max(Pw_test) - max(Pc_test)|
-
-    Z_train <- concat(Pw_train, Pc_train, Ph_train, R_train,
-                      abs(polarity_compound_delta_train),
-                      text_len_words_traditional_clean_train)
-    Z_test  <- concat(Pw_test, Pc_test, Ph_test, R_test,
-                      abs(polarity_compound_delta_test),
-                      text_len_words_traditional_clean_test)
-
-    M_meta <- fit LogisticRegression(class_balanced) on (Z_train, y_train)
-    Q_test <- predict_proba(M_meta, Z_test)
-
-    tau_neutral <- calibrate_threshold(max_confidence_train(M_meta, Z_train), y_train)
-
-    y_pred <- argmax_labels(Q_test)
-    for each sample j in Test:
-        if max(Q_test[j]) < tau_neutral and R_test[j] < resonance_cutoff:
-            y_pred[j] <- neutral
-
-    write y_pred into OOF slots of fold f
-
-Return OOF predictions P_hat and evaluation metrics
-```
+### 4A. Archived Custom Algorithm
+The previously designed custom Dual View Resonance model has been archived for documentation purposes only and is no longer part of the active pipeline.
+Reference file: `custom_model_algorithm.txt`
 
 ### 5. Evaluation and Reporting
-1. Report five key metrics: Accuracy, F1 Score (macro), Precision (macro), Recall (macro), Sustainability.
-2. Define Sustainability as a runtime-efficiency indicator normalized to [0, 1], where higher means faster and more device-friendly.
-3. Export prediction tables, summary JSON, and visual diagnostics for comparison and interpretation.
+1. Report key descriptive metrics: label shares by method, mean score by method, cross-method agreement, and subgroup sentiment contrasts.
+2. Report RQ1 network metrics: node/edge counts, weighted interactions, reciprocity, clustering, and thread-level distributions.
+3. Export summary JSON, CSV tables, and visual diagnostics for comparison and interpretation.
 
 ## Results (Primary Rule-Based Analysis)
-Data: 2163 staged comments scored with two rule-based sentiment methods (VADER and SentiWordNet) and a conservative ensemble decision rule.
+Data: 1296 staged comments scored with two rule-based sentiment methods (VADER and SentiWordNet) and a conservative ensemble decision rule.
 
-Run ID: `20260419T075547Z` (latest rule-based run)
+Run ID: `20260419T084502Z` (latest rule-based run)
 
-1. VADER mean compound score: 0.3300 (positive-skewed distribution).
-2. SentiWordNet mean score: 0.0233 (near-neutral center with broader neutral mass).
-3. Cross-method agreement rate (VADER vs SentiWordNet labels): 0.4637.
+1. VADER mean compound score: 0.3146 (positive-skewed distribution).
+2. SentiWordNet mean score: 0.0241 (near-neutral center with broader neutral mass).
+3. Cross-method agreement rate (VADER vs SentiWordNet labels): 0.4653.
 4. Ensemble label distribution (primary rule-based output):
-  - Neutral: 0.5682
-  - Positive: 0.3708
-  - Negative: 0.0610
+  - Neutral: 0.5679
+  - Positive: 0.3719
+  - Negative: 0.0602
 5. Rule-based conclusion: compared with single-method VADER, the dual-rule ensemble produces a more conservative neutral-heavy label profile and reduces over-commitment to strong polarity.
-
-### Isolated ML Benchmark (Trained on VADER-Derived Labels)
-ML benchmarking is isolated from the primary rule-based analysis and stored separately under `data/modeling_vader/` and `data/eda/modeling_vader/`.
-
-Latest isolated ML run ID: `20260419T075656Z`
-
-| Model | Accuracy | F1 Score (Macro) | Precision (Macro) | Recall (Macro) | Sustainability |
-|---|---:|---:|---:|---:|---:|
-| Logistic Regression (calibrated) | 0.7750 | 0.4937 | 0.8268 | 0.4644 | 0.8267 |
-| Linear SVM | 0.7654 | 0.5060 | 0.6898 | 0.4775 | 0.9936 |
-| SGD Linear | 0.7577 | 0.5158 | 0.5925 | 0.5008 | 0.9830 |
-| Multinomial Naive Bayes | 0.7365 | 0.3263 | 0.5444 | 0.3565 | 1.0000 |
-| Dual View Resonance (custom) | 0.7452 | 0.5137 | 0.5323 | 0.5134 | 0.0000 |
 
 ### RQ Results
 
-**RQ1 (Dominant interaction patterns among AI agents):** The interaction-network results are directionally consistent with the RQ1 hypothesis that interaction structure is non-random and cluster-like across threads. In the latest run, the graph contains 548 author nodes and 1121 directed edges (weighted interactions = 2044), with reciprocity = 0.1552 and average clustering coefficient = 0.1075, indicating measurable repeated interaction loops and local clustering rather than uniform random exchange. Because explicit parent-child reply links are currently sparse in raw staging, the present graph was constructed in sequential thread fallback mode; therefore, this should be interpreted as strong exploratory support for RQ1, pending stronger direct reply-edge coverage in future data collection.
+**RQ1 (Dominant interaction patterns among AI agents):** The interaction-network results are directionally consistent with the RQ1 hypothesis that interaction structure is non-random and cluster-like across threads. In the latest run, the graph contains 548 author nodes and 1085 directed edges (weighted interactions = 1201), with reciprocity = 0.1493 and average clustering coefficient = 0.0956, indicating measurable repeated interaction loops and local clustering rather than uniform random exchange. Because explicit parent-child reply links are currently sparse in raw staging, the present graph was constructed in sequential thread fallback mode; therefore, this should be interpreted as strong exploratory support for RQ1, pending stronger direct reply-edge coverage in future data collection.
 
 **RQ1 Hypothesis Decision:** **Provisionally accepted (exploratory)**. The observed interaction structure supports the hypothesis direction (non-random variation with clustering), but final confirmation remains conditional on improved direct parent-child reply linkage in future data runs.
 
@@ -243,34 +148,20 @@ RQ1 interaction metric distributions (latest run):
 
 Rule-based label share snapshot (VADER vs SentiWordNet vs Ensemble):
 
-![Rule-based label share](data/rule_based/moltbook_rule_based_label_share_20260419T075547Z.png)
+![Rule-based label share](data/rule_based/moltbook_rule_based_label_share_20260419T084502Z.png)
 
 Rule-based score distribution snapshot:
 
-![Rule-based score distributions](data/rule_based/moltbook_rule_based_score_distribution_20260419T075547Z.png)
+![Rule-based score distributions](data/rule_based/moltbook_rule_based_score_distribution_20260419T084502Z.png)
 
-Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
-
-![Requested metrics dashboard](data/eda/modeling_vader/moltbook_model_requested_metrics_20260419T075656Z.png)
-
-Confusion matrices across models:
-
-![Confusion matrices](data/eda/modeling_vader/moltbook_model_confusion_matrices_20260419T075656Z.png)
-
-Class-wise F1 comparison:
-
-![Class-wise F1](data/eda/modeling_vader/moltbook_model_classwise_f1_20260419T075656Z.png)
-
-Latest rule-based summary artifact: `data/rule_based/moltbook_rule_based_summary_20260419T075547Z.json`
-Latest rule-based comment-level artifact: `data/rule_based/moltbook_rule_based_comments_20260419T075547Z.csv`
-Latest isolated ML summary artifact: `data/modeling_vader/moltbook_model_summary_20260419T075656Z.json`
-Latest isolated ML predictions artifact: `data/modeling_vader/moltbook_model_predictions_20260419T075656Z.csv`
+Latest rule-based summary artifact: `data/rule_based/moltbook_rule_based_summary_20260419T084502Z.json`
+Latest rule-based comment-level artifact: `data/rule_based/moltbook_rule_based_comments_20260419T084502Z.csv`
 
 ## Shortcomings in Current Results
 1. Direct parent-child reply linkage remains sparse in staged data, so RQ1 network findings still rely on sequential-thread fallback for structural inference.
 2. Rule-based methods (VADER vs SentiWordNet) show moderate agreement (0.4637), indicating method sensitivity and the need for careful interpretation of label uncertainty.
 3. Ensemble labeling is intentionally conservative (neutral-heavy), which improves robustness but may suppress weak positive/negative nuance.
-4. Isolated ML benchmarking still trains on VADER-derived targets rather than human-annotated gold labels, so model scores reflect label imitation quality rather than independent sentiment ground truth.
+4. There are no human-annotated gold labels yet, so current polarity outputs remain lexicon-based and should be interpreted as operational sentiment signals rather than ground-truth affect labels.
 5. Resource profiling is still partial: runtime is tracked, but memory and energy consumption are not yet integrated into comparative reporting.
 
 

@@ -1,0 +1,147 @@
+{
+  "row_count": 1296,
+  "unique_posts": 55,
+  "unique_authors": 548,
+  "duplicate_rows_by_platform_post_comment": 0,
+  "missing_rate": {
+    "platform": 0.0,
+    "post_id": 0.0,
+    "thread_id": 0.0,
+    "comment_id": 0.0,
+    "parent_id": 0.0,
+    "level": 0.0,
+    "author_id": 0.0,
+    "relative_time": 0.0,
+    "is_verified": 0.0,
+    "upvotes": 0.044,
+    "text": 0.0,
+    "source_url": 0.0,
+    "fetched_at": 0.0
+  },
+  "level_counts": {
+    "0": 1296
+  },
+  "verified_counts": {
+    "False": 819,
+    "True": 477
+  },
+  "upvotes_stats": {
+    "count": 1239,
+    "mean": 0.3051,
+    "median": 0.0,
+    "p90": 1.0,
+    "max": 7.0
+  },
+  "text_length_chars_stats": {
+    "mean": 660.0123,
+    "median": 499.0,
+    "p90": 1289.0,
+    "max": 5485,
+    "empty_text_rows": 0
+  },
+  "text_length_words_stats": {
+    "mean": 98.473,
+    "median": 75.0,
+    "p90": 195.5,
+    "max": 835
+  },
+  "top_posts_by_comment_count": [
+    [
+      "38a336d5-dfa7-4211-88d6-6368c4b9b840",
+      103
+    ],
+    [
+      "b4b5482a-31db-4470-8bab-990fa169aadd",
+      99
+    ],
+    [
+      "9f2082ba-ccb7-414b-8dbe-5dd9ebbb1b65",
+      73
+    ],
+    [
+      "175817f5-f833-4c12-8a1c-c1bce56c0df0",
+      65
+    ],
+    [
+      "fb9f496a-17de-4fa3-9d8b-c464152258fb",
+      62
+    ],
+    [
+      "c532ced8-5890-4879-b545-bd3cf75a65ee",
+      62
+    ],
+    [
+      "35e3ca66-f1bd-4517-a2a6-a3f2e950eb2c",
+      61
+    ],
+    [
+      "25f6644e-8946-4546-bbf4-028a3e2f5088",
+      61
+    ],
+    [
+      "2d350a21-f313-4f28-816c-9d9a6fea17c5",
+      60
+    ],
+    [
+      "dcb7dcff-8a32-4eed-bca8-0929d5a6d326",
+      59
+    ]
+  ],
+  "top_authors_by_comment_count": [
+    [
+      "senti-001",
+      84
+    ],
+    [
+      "GanglionMinion",
+      50
+    ],
+    [
+      "glados_openclaw",
+      33
+    ],
+    [
+      "tudou_web3",
+      22
+    ],
+    [
+      "quillagent",
+      20
+    ],
+    [
+      "tatertotterson",
+      18
+    ],
+    [
+      "coinflipcasino",
+      16
+    ],
+    [
+      "pyclaw001",
+      15
+    ],
+    [
+      "Ting_Fodder",
+      14
+    ],
+    [
+      "NoxGothGF",
+      13
+    ]
+  ],
+  "artifact_counts": {
+    "contains_continue_reading": 55,
+    "contains_more_from": 55,
+    "contains_http_link": 188,
+    "contains_ui_vote_glyph": 56
+  },
+  "artifact_rates": {
+    "contains_continue_reading": 0.0424,
+    "contains_more_from": 0.0424,
+    "contains_http_link": 0.1451,
+    "contains_ui_vote_glyph": 0.0432
+  },
+  "run_id": "20260419T084440Z",
+  "input_file": "data/staged/moltbook_comments_all.jsonl",
+  "input_rows": 1296
+}

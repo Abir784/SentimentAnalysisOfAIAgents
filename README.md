@@ -1,253 +1,99 @@
 # SentimentAnalysis
 
-## Data Organization
+## Rule-Based Pipeline Overview
 
-The project uses a structured folder hierarchy for different data processing stages:
+This repository now uses a rule-based sentiment pipeline with a separate interaction-network stage for RQ1.
 
-```
+Pipeline stages:
+
+1. `data_acquisition` -> `scripts/process_raw_to_staged.py`
+2. `text_preprocessing` -> `scripts/run_moltbook_text_preprocessing.py`
+3. `eda` -> `scripts/run_moltbook_eda_stage.py`
+4. `feature_extraction` -> `scripts/run_moltbook_feature_extraction.py`
+5. `rule_based_tools` -> `scripts/run_moltbook_rule_based.py`
+6. `interaction_network` (separate RQ1 run) -> `scripts/run_moltbook_interaction_network.py`
+
+There is no ML sentiment training stage in the active pipeline.
+
+## Data Layout
+
+```text
 data/
-├── raw/              # Timestamped raw posts (audit trail, never modified)
-├── staged/           # Consolidated raw comments (moltbook_comments_all.jsonl - appended on each collection)
-├── eda/              # EDA reports and summary statistics
-├── preprocessed/     # English-only cleaned text, ready for analysis
-└── polarity/         # Polarity-scored comments with sentiment labels
+├── raw/                     # Source snapshots (preserved)
+├── staged/                  # Consolidated staged comments
+├── preprocessed_rule_based/ # Stage 2 outputs
+├── eda_rule_based/          # Stage 3 outputs
+├── features_rule_based/     # Stage 4 outputs
+├── rule_based/              # Stage 5 outputs (VADER/SentiWordNet/Ensemble)
+└── eda/                     # RQ1 interaction-network artifacts
 ```
 
-## Unified NLP System (Single Command Interface)
+## Unified Orchestrator
 
-Use one orchestrator to run the full research pipeline, selected stages, or specific notebook cells:
+List stages:
 
 ```powershell
 python scripts/run_nlp_pipeline.py list
 ```
 
-Run the full script-only pipeline (fast default):
+Run full pipeline (script stages):
 
 ```powershell
 python scripts/run_nlp_pipeline.py run --all
 ```
 
-Run the full research pipeline including notebooks:
+Run selected stages:
 
 ```powershell
-python scripts/run_nlp_pipeline.py run --all --include-notebooks
+python scripts/run_nlp_pipeline.py run --stages data_acquisition,text_preprocessing,eda,feature_extraction,rule_based_tools,interaction_network
 ```
 
-Run a stage range in pipeline order:
+Run a contiguous range:
 
 ```powershell
-python scripts/run_nlp_pipeline.py run --from-stage raw_to_staged --to-stage polarity
+python scripts/run_nlp_pipeline.py run --from-stage text_preprocessing --to-stage rule_based_tools
 ```
 
-Run specific stages only:
-
-```powershell
-python scripts/run_nlp_pipeline.py run --stages collect,raw_to_staged,polarity,interaction_network,modeling
-```
-
-Run one notebook with selected cell numbers:
-
-```powershell
-python scripts/run_nlp_pipeline.py run-notebook --notebook notebooks/moltbook_preprocessing_steps.ipynb --cells 1-6,8
-```
-
-Run notebook stages with stage-specific cell selectors:
-
-```powershell
-python scripts/run_nlp_pipeline.py run --stages preprocess_notebook,polarity_notebook --include-notebooks --notebook-cells preprocess_notebook:1-10 polarity_notebook:1-7
-```
-
-Pipeline order is aligned to the research motive (reproducibility, preprocessing robustness, and lightweight model benchmarking):
-
-1. `collect`
-2. `raw_to_staged`
-3. `eda_summary`
-4. `eda_notebook`
-5. `preprocess_notebook`
-6. `polarity`
-7. `polarity_notebook`
-8. `interaction_network`
-9. `modeling`
-
-## Step 5: Build Interaction Network (RQ1)
-
-Construct a directed author reply graph from staged comments and export network metrics:
-
-```powershell
-python scripts/run_moltbook_interaction_network.py
-```
-
-Edge-construction modes:
-- `--edge-mode auto` (default): use direct parent-child reply edges when available, otherwise fallback to sequential same-thread interaction edges.
-- `--edge-mode direct`: only direct parent-child reply edges.
-- `--edge-mode sequential`: sequential same-thread interaction edges only.
-
-Outputs:
-- `data/eda/moltbook_interaction_network_summary_<run_id>.json`
-- `data/eda/moltbook_interaction_network_nodes_<run_id>.csv`
-- `data/eda/moltbook_interaction_network_edges_<run_id>.csv`
-- `data/eda/moltbook_interaction_network_thread_stats_<run_id>.csv`
-- `data/eda/moltbook_interaction_network_topology_<run_id>.png`
-- `data/eda/moltbook_interaction_network_distributions_<run_id>.png`
-
-## Step 1: Collect Data
-
-By default, collection reads URLs from `moltbook_urls.txt` at the repository root.
-
-```powershell
-python scripts/run_moltbook_collection.py --config configs/moltbook_collection.url.json
-```
-
-Outputs:
-- `data/raw/moltbook_raw_<run_id>.jsonl` (timestamped, for audit trail)
-
-Direct URL mode:
-```powershell
-python scripts/run_moltbook_collection.py --url https://www.moltbook.com/post/<id>
-```
-
-Explicit file mode:
-```powershell
-python scripts/run_moltbook_collection.py --urls-file moltbook_urls.txt
-```
-
-## Step 2: Process Raw to Staged
-
-Extract comments from all new/unprocessed raw files and append to the consolidated staged file:
+## Individual Stage Commands
 
 ```powershell
 python scripts/process_raw_to_staged.py
+python scripts/run_moltbook_text_preprocessing.py
+python scripts/run_moltbook_eda_stage.py
+python scripts/run_moltbook_feature_extraction.py
+python scripts/run_moltbook_rule_based.py
+python scripts/run_moltbook_interaction_network.py
 ```
 
-Outputs:
-- `data/staged/moltbook_comments_all.jsonl` (consolidated, appended on each run)
-- `data/staged/.processed_raw_files.json` (tracking file - prevents reprocessing)
+Interaction network edge modes:
 
-This script:
-- Reads all raw JSONL files from `data/raw/`
-- Extracts comments from unprocessed files only
-- Appends them to `data/staged/moltbook_comments_all.jsonl`
-- Tracks processed files to avoid duplication
+- `--edge-mode auto` (default)
+- `--edge-mode direct`
+- `--edge-mode sequential`
 
-## Step 3: Run EDA
+## Dashboard
 
-Analyze the consolidated staged comments:
-
-```powershell
-python scripts/run_moltbook_sentiment.py
-```
-
-Outputs:
-- `data/eda/moltbook_eda_summary_<run_id>.json`
-
-Reads from:
-- `data/staged/moltbook_comments_all.jsonl`
-
-## Step 4: Preprocess & Score Polarity
-
-Run the stricter traditional NLP pipeline for English-only preprocessing, side-by-side polarity scoring, and export artifacts:
-
-```powershell
-python scripts/run_moltbook_polarity.py
-```
-
-Outputs:
-- `data/preprocessed/moltbook_comments_preprocessed_<run_id>.jsonl` (cleaned English-only text)
-- `data/preprocessed/moltbook_training_ready_<run_id>.csv` (lean modeling dataset)
-- `data/polarity/moltbook_comments_polarity_<run_id>.jsonl` (raw vs preprocessed polarity scores)
-- `data/polarity/moltbook_polarity_summary_<run_id>.json` (summary statistics and preprocessing policy)
-
-Use the notebooks for interactive inspection and comparison:
-
-```powershell
-jupyter notebook notebooks/moltbook_polarity_assessment.ipynb
-```
-
-```powershell
-jupyter notebook notebooks/moltbook_raw_vs_preprocessed_polarity.ipynb
-```
-
-Outputs:
-- `data/preprocessed/moltbook_comments_preprocessed_<run_id>.jsonl` (cleaned English-only text)
-- `data/preprocessed/moltbook_training_ready_<run_id>.csv` (training-ready cleaned fields)
-- `data/polarity/moltbook_comments_polarity_<run_id>.jsonl` (with raw and preprocessed polarity scores)
-- `data/polarity/moltbook_polarity_summary_<run_id>.json` (summary statistics)
-
-### Preprocessing Steps
-- HTML entity decoding
-- Unicode normalization (NFKC)
-- Markdown link stripping
-- URL removal
-- UI glyph removal
-- Language detection (English-only filter)
-- Spam marker removal
-- Duplicate filtering
-- POS-aware lemmatization
-- Negation scope prefixing
-- Stopword removal with negation/intensity exceptions
-- Minimum text length validation
-
-## Installation
-
-```powershell
-pip install -r requirements.txt
-```
-
-## Dashboard (Streamlit + Tableau-Ready Exports)
-
-Launch the interactive dashboard:
+Launch Streamlit dashboard:
 
 ```powershell
 streamlit run dashboard/app.py
 ```
 
-The dashboard automatically reads the latest artifacts from:
-- `data/preprocessed/moltbook_training_ready_*.csv`
-- `data/polarity/moltbook_polarity_summary_*.json`
-- `data/modeling/moltbook_model_summary_*.json`
-- `data/modeling/moltbook_model_predictions_*.csv`
-- `data/eda/moltbook_eda_summary_*.json`
+Dashboard tabs:
 
+- Overview
+- Rule-Based Results
+- Feature Extraction
+- RQ1 Analysis (separate interaction network)
 
-Built-in dashboard views:
-- Overview KPIs and label distribution
-- Data quality and preprocessing drop counts
-- Polarity comparison (raw vs processed)
-- Model performance and confusion matrices
-- Predictions explorer with filtering and CSV download
-- Tableau-ready table exports (`model_metrics`, `confusion_matrix_long`, `polarity_label_share`, `dataset_kpis`, `training_label_distribution`)
+## Install
 
-## File Structure
-
-- `src/pipelines/collect_moltbook.py`: Data collection orchestration
-- `src/pipelines/eda_moltbook.py`: EDA summary generation
-- `src/pipelines/normalize_moltbook.py`: Schema normalization
-- `src/collectors/moltbook_scraper.py`: Web scraping logic
-- `configs/moltbook_collection.url.json`: Collection configuration
-- `notebooks/moltbook_polarity_assessment.ipynb`: Interactive preprocessing and polarity scoring
+```powershell
+pip install -r requirements.txt
 ```
 
-Each run prints:
-- this-run totals (`raw_count`, `comments_extracted`, etc.)
-- dedup stats (`requested_urls`, `scraped_urls`, `skipped_existing_urls`)
-- cumulative stored totals (`stored_*_rows_total`, `stored_*_files_total`)
+## Notes
 
-### Outputs
-- Raw payload snapshots: `data/raw/moltbook_raw_<run_id>.jsonl`
-- Normalized records: `data/staged/moltbook_normalized_<run_id>.jsonl`
-- Comments with levels: `data/staged/moltbook_comments_with_levels_<run_id>.jsonl`
-
-### Comment File Schema
-- `platform`, `post_id`, `thread_id`, `comment_id`, `parent_id`
-- `level`, `author_id`, `relative_time`, `is_verified`, `upvotes`
-- `text`, `source_url`, `fetched_at`
-
-### Notes
-- For JS-heavy pages, the scraper uses rendered-text fallback to extract post content and comments.
-- `level` is currently set to `0` because reply nesting is not exposed in the rendered feed format.
-
-### Canonical Normalized Fields
-- `platform`, `post_id`, `thread_id`, `parent_id`
-- `author_id`, `author_type`, `author_model`
-- `topic`, `text`, `timestamp_utc`
-- `upvotes`, `reply_count`, `source_page`, `fetched_at`, `ingested_at`
+- Raw data is the permanent source of truth.
+- Regenerate downstream folders by rerunning the pipeline after cleanup.
+- Custom model algorithm history is archived in `custom_model_algorithm.txt` for record keeping only.

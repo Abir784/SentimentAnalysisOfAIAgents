@@ -158,8 +158,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--input",
-        default="data/staged/moltbook_comments_all.jsonl",
-        help="Input staged comments JSONL.",
+        default="",
+        help="Input file (.csv or .jsonl). Defaults to latest preprocessed_rule_based CSV, else staged JSONL.",
     )
     parser.add_argument(
         "--output-dir",
@@ -180,7 +180,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    input_path = Path(args.input)
+    input_path = Path(args.input) if args.input else Path("")
+    if not args.input:
+        preprocessed_candidates = sorted(
+            Path("data/preprocessed_rule_based").glob("moltbook_preprocessed_rule_based_*.csv")
+        )
+        if preprocessed_candidates:
+            input_path = preprocessed_candidates[-1]
+        else:
+            input_path = Path("data/staged/moltbook_comments_all.jsonl")
+
     if not input_path.exists():
         raise FileNotFoundError(f"Input file not found: {input_path}")
 
@@ -189,15 +198,17 @@ def main() -> None:
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-    rows: List[Dict[str, Any]] = []
-    with input_path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line:
-                continue
-            rows.append(json.loads(line))
-
-    df = pd.DataFrame(rows)
+    if input_path.suffix.lower() == ".csv":
+        df = pd.read_csv(input_path)
+    else:
+        rows: List[Dict[str, Any]] = []
+        with input_path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                rows.append(json.loads(line))
+        df = pd.DataFrame(rows)
     if df.empty:
         raise ValueError("Input file contains no rows.")
 
