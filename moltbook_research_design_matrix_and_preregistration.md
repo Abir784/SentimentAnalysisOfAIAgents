@@ -64,42 +64,7 @@ To validate the stability of our findings, we will rerun the analysis under alte
 
 Note: duplicate rows detected at staging are explicitly handled in preprocessing, and duplicate comments are removed before rule-based scoring.
 
-### 3. Label Construction
-Target labels are generated automatically from polarity scores using a fixed lexicon-threshold rule.
-
-Labeling logic:
-1. Compute polarity scores for each comment using VADER and extract the compound score $c \in [-1,1]$.
-2. Apply a deterministic three-class mapping:
-   - if $c \geq 0.05$, assign `positive`
-   - if $c \leq -0.05$, assign `negative`
-   - otherwise, assign `neutral`
-3. Generate labels for both VADER and SentiWordNet views, then produce an ensemble label as the primary output.
-4. Keep label space fixed to three classes: `negative`, `neutral`, `positive`.
-
-Formal decision rule:
-
-$$
-y(c)=
-\begin{cases}
-  positive, & c \ge 0.05 \\
-  negative, & c \le -0.05 \\
-  neutral, & -0.05 < c < 0.05
-\end{cases}
-$$
-
-Pseudocode:
-```text
-for each comment i:
-  c_i = VADER_compound(text_traditional_clean_i)
-  if c_i >= 0.05:
-    label_i = positive
-  elif c_i <= -0.05:
-    label_i = negative
-  else:
-    label_i = neutral
-```
-
-### 4. Feature Extraction and Rule-Based Scoring
+### 3. Feature Extraction and Rule-Based Scoring
 1. Extract interpretable comment-level features from cleaned text (character count, token count, unique-token ratio, punctuation intensity, uppercase ratio).
 2. Score sentiment with three rule-based tools:
   - VADER
@@ -108,27 +73,27 @@ for each comment i:
 3. Compare method-level label shares and agreement rates.
 4. Export feature tables, rule-based summaries, and diagnostic plots.
 
-### 4A. Archived Custom Algorithm
+### 3A. Archived Custom Algorithm
 The previously designed custom Dual View Resonance model has been archived for documentation purposes only and is no longer part of the active pipeline.
 Reference file: `custom_model_algorithm.txt`
 
-### 5. Evaluation and Reporting
+### 4. Evaluation and Reporting
 1. Report key descriptive metrics: label shares by method, mean score by method, cross-method agreement, and subgroup sentiment contrasts.
 2. Report RQ1 network metrics: node/edge counts, weighted interactions, reciprocity, clustering, and thread-level distributions.
 3. Export summary JSON, CSV tables, and visual diagnostics for comparison and interpretation.
 
 ## Results (Primary Rule-Based Analysis)
-Data: 1296 staged comments scored with two rule-based sentiment methods (VADER and SentiWordNet) and a conservative ensemble decision rule.
+Data: 1219 English-language staged comments scored with two rule-based sentiment methods (VADER and SentiWordNet) and a conservative ensemble decision rule.
 
-Run ID: `20260419T084502Z` (latest rule-based run)
+Run ID: `20260419T092811Z` (latest rule-based run)
 
-1. VADER mean compound score: 0.3146 (positive-skewed distribution).
-2. SentiWordNet mean score: 0.0241 (near-neutral center with broader neutral mass).
-3. Cross-method agreement rate (VADER vs SentiWordNet labels): 0.4653.
+1. VADER mean compound score: 0.3118 (positive-skewed distribution).
+2. SentiWordNet mean score: 0.0240 (near-neutral center with broader neutral mass).
+3. Cross-method agreement rate (VADER vs SentiWordNet labels): 0.4643.
 4. Ensemble label distribution (primary rule-based output):
-  - Neutral: 0.5679
-  - Positive: 0.3719
-  - Negative: 0.0602
+  - Neutral: 0.5685
+  - Positive: 0.3716
+  - Negative: 0.0599
 5. Rule-based conclusion: compared with single-method VADER, the dual-rule ensemble produces a more conservative neutral-heavy label profile and reduces over-commitment to strong polarity.
 
 ### RQ Results
@@ -148,18 +113,26 @@ RQ1 interaction metric distributions (latest run):
 
 Rule-based label share snapshot (VADER vs SentiWordNet vs Ensemble):
 
-![Rule-based label share](data/rule_based/moltbook_rule_based_label_share_20260419T084502Z.png)
+![Rule-based label share](data/rule_based/moltbook_rule_based_label_share_20260419T092811Z.png)
 
 Rule-based score distribution snapshot:
 
-![Rule-based score distributions](data/rule_based/moltbook_rule_based_score_distribution_20260419T084502Z.png)
+![Rule-based score distributions](data/rule_based/moltbook_rule_based_score_distribution_20260419T092811Z.png)
 
-Latest rule-based summary artifact: `data/rule_based/moltbook_rule_based_summary_20260419T084502Z.json`
-Latest rule-based comment-level artifact: `data/rule_based/moltbook_rule_based_comments_20260419T084502Z.csv`
+VADER-only score distribution snapshot:
+
+![VADER score distribution](data/rule_based/moltbook_rule_based_vader_distribution_20260419T092811Z.png)
+
+SentiWordNet-only score distribution snapshot:
+
+![SentiWordNet score distribution](data/rule_based/moltbook_rule_based_swn_distribution_20260419T092811Z.png)
+
+Latest rule-based summary artifact: `data/rule_based/moltbook_rule_based_summary_20260419T092811Z.json`
+Latest rule-based comment-level artifact: `data/rule_based/moltbook_rule_based_comments_20260419T092811Z.csv`
 
 ## Shortcomings in Current Results
 1. Direct parent-child reply linkage remains sparse in staged data, so RQ1 network findings still rely on sequential-thread fallback for structural inference.
-2. Rule-based methods (VADER vs SentiWordNet) show moderate agreement (0.4637), indicating method sensitivity and the need for careful interpretation of label uncertainty.
+2. Rule-based methods (VADER vs SentiWordNet) show moderate agreement (0.4643), indicating method sensitivity and the need for careful interpretation of label uncertainty.
 3. Ensemble labeling is intentionally conservative (neutral-heavy), which improves robustness but may suppress weak positive/negative nuance.
 4. There are no human-annotated gold labels yet, so current polarity outputs remain lexicon-based and should be interpreted as operational sentiment signals rather than ground-truth affect labels.
 5. Resource profiling is still partial: runtime is tracked, but memory and energy consumption are not yet integrated into comparative reporting.

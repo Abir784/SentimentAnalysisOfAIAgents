@@ -45,6 +45,8 @@ def load_dashboard_data() -> Dict[str, Any]:
     rule_comments_latest = _latest_file(rule_dir, "moltbook_rule_based_comments_*.csv")
     rule_label_plot = _latest_file(rule_dir, "moltbook_rule_based_label_share_*.png")
     rule_score_plot = _latest_file(rule_dir, "moltbook_rule_based_score_distribution_*.png")
+    rule_vader_plot = _latest_file(rule_dir, "moltbook_rule_based_vader_distribution_*.png")
+    rule_swn_plot = _latest_file(rule_dir, "moltbook_rule_based_swn_distribution_*.png")
 
     interaction_summary = _latest_file(interaction_dir, "moltbook_interaction_network_summary_*.json")
     interaction_nodes = _latest_file(interaction_dir, "moltbook_interaction_network_nodes_*.csv")
@@ -63,6 +65,8 @@ def load_dashboard_data() -> Dict[str, Any]:
         "rule_df": pd.read_csv(rule_comments_latest) if rule_comments_latest and rule_comments_latest.exists() else pd.DataFrame(),
         "rule_label_plot": rule_label_plot,
         "rule_score_plot": rule_score_plot,
+        "rule_vader_plot": rule_vader_plot,
+        "rule_swn_plot": rule_swn_plot,
         "interaction_summary": _load_json(interaction_summary),
         "interaction_nodes_df": pd.read_csv(interaction_nodes) if interaction_nodes and interaction_nodes.exists() else pd.DataFrame(),
         "interaction_thread_df": pd.read_csv(interaction_threads) if interaction_threads and interaction_threads.exists() else pd.DataFrame(),
@@ -144,10 +148,16 @@ RQ1 Interaction Network is run separately.
 
         label_plot = data.get("rule_label_plot")
         score_plot = data.get("rule_score_plot")
+        vader_plot = data.get("rule_vader_plot")
+        swn_plot = data.get("rule_swn_plot")
         if label_plot and Path(label_plot).exists():
             st.image(str(label_plot), caption="Rule-Based Label Share Snapshot", use_container_width=True)
         if score_plot and Path(score_plot).exists():
             st.image(str(score_plot), caption="Rule-Based Score Distribution Snapshot", use_container_width=True)
+        if vader_plot and Path(vader_plot).exists():
+            st.image(str(vader_plot), caption="VADER Distribution Snapshot", use_container_width=True)
+        if swn_plot and Path(swn_plot).exists():
+            st.image(str(swn_plot), caption="SentiWordNet Distribution Snapshot", use_container_width=True)
 
         if not data["rule_df"].empty:
             st.dataframe(data["rule_df"].head(200), use_container_width=True)

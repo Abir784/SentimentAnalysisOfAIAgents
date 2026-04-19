@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from src.pipelines.polarity_moltbook import preprocess_for_sentiment, traditional_preprocess
+from src.pipelines.polarity_moltbook import detect_language_safe, preprocess_for_sentiment, traditional_preprocess
 from src.utils.file_management import cleanup_old_files
 
 
@@ -57,6 +57,11 @@ def main() -> None:
         raise KeyError("Missing required column: text")
 
     df["text"] = df["text"].fillna("").astype(str)
+    df["language"] = df["text"].map(detect_language_safe)
+    before_filter = int(len(df))
+    df = df[df["language"].eq("en")].copy()
+    after_filter = int(len(df))
+
     df["text_basic_clean"] = df["text"].map(preprocess_for_sentiment)
     df["text_traditional_clean"] = df["text"].map(traditional_preprocess)
     df["text_len_words_basic_clean"] = df["text_basic_clean"].str.split().str.len().fillna(0).astype(int)
@@ -74,6 +79,7 @@ def main() -> None:
             "author_id",
             "is_verified",
             "upvotes",
+            "language",
             "text",
             "text_basic_clean",
             "text_traditional_clean",
@@ -94,6 +100,8 @@ def main() -> None:
     summary = {
         "run_id": run_id,
         "input_file": str(input_path).replace("\\", "/"),
+        "rows_before_language_filter": before_filter,
+        "rows_after_language_filter": after_filter,
         "rows": int(len(out_df)),
         "output_csv": str(csv_path).replace("\\", "/"),
         "output_jsonl": str(jsonl_path).replace("\\", "/"),
@@ -105,6 +113,8 @@ def main() -> None:
     cleanup_old_files(output_dir, "moltbook_preprocessed_rule_based_summary_*.json", keep_latest=1)
 
     print("Text preprocessing complete")
+    print(f"rows_before_language_filter: {before_filter}")
+    print(f"rows_after_language_filter: {after_filter}")
     print(f"rows: {len(out_df)}")
     print(f"output_csv: {csv_path}")
     print(f"output_jsonl: {jsonl_path}")

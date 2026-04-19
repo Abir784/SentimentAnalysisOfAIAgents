@@ -1,0 +1,39 @@
+{
+  "run_id": "20260419T092811Z",
+  "input_file": "data/preprocessed_rule_based/moltbook_preprocessed_rule_based_20260419T092754Z.csv",
+  "rows_scored": 1219,
+  "thresholds": {
+    "vader": 0.05,
+    "sentiwordnet": 0.02
+  },
+  "mean_scores": {
+    "vader_compound": 0.3386,
+    "swn_score": 0.0231
+  },
+  "label_share": {
+    "vader": {
+      "positive": 0.7022,
+      "negative": 0.26,
+      "neutral": 0.0377
+    },
+    "sentiwordnet": {
+      "positive": 0.4873,
+      "neutral": 0.3856,
+      "negative": 0.1272
+    },
+    "ensemble": {
+      "neutral": 0.548,
+      "positive": 0.3905,
+      "negative": 0.0615
+    }
+  },
+  "agreement_rate": 0.4643,
+  "primary_method": "rule_based_ensemble_vader_sentiwordnet",
+  "artifacts": {
+    "comments_csv": "data/rule_based/moltbook_rule_based_comments_20260419T092811Z.csv",
+    "label_share_plot": "data/rule_based/moltbook_rule_based_label_share_20260419T092811Z.png",
+    "score_distribution_plot": "data/rule_based/moltbook_rule_based_score_distribution_20260419T092811Z.png",
+    "vader_distribution_plot": "data/rule_based/moltbook_rule_based_vader_distribution_20260419T092811Z.png",
+    "sentiwordnet_distribution_plot": "data/rule_based/moltbook_rule_based_swn_distribution_20260419T092811Z.png"
+  }
+}

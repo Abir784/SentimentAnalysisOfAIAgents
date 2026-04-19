@@ -152,6 +152,21 @@ def _plot_score_distributions(df: pd.DataFrame, out_path: Path) -> None:
     plt.close()
 
 
+def _plot_single_score_distribution(df: pd.DataFrame, column: str, title: str, out_path: Path) -> None:
+    plt.figure(figsize=(9, 5))
+    if df.empty or column not in df.columns:
+        plt.text(0.5, 0.5, "No scored rows", ha="center", va="center")
+        plt.axis("off")
+    else:
+        plt.hist(df[column], bins=40, alpha=0.8)
+        plt.title(title)
+        plt.xlabel("Score")
+        plt.ylabel("Comments")
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=180)
+    plt.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run rule-based sentiment analysis with VADER and SentiWordNet."
@@ -244,6 +259,8 @@ def main() -> None:
     summary_path = output_dir / f"moltbook_rule_based_summary_{run_id}.json"
     label_plot_path = output_dir / f"moltbook_rule_based_label_share_{run_id}.png"
     score_plot_path = output_dir / f"moltbook_rule_based_score_distribution_{run_id}.png"
+    vader_score_plot_path = output_dir / f"moltbook_rule_based_vader_distribution_{run_id}.png"
+    swn_score_plot_path = output_dir / f"moltbook_rule_based_swn_distribution_{run_id}.png"
 
     keep_cols = [
         "comment_id",
@@ -289,6 +306,8 @@ def main() -> None:
             "comments_csv": str(comments_path).replace("\\", "/"),
             "label_share_plot": str(label_plot_path).replace("\\", "/"),
             "score_distribution_plot": str(score_plot_path).replace("\\", "/"),
+            "vader_distribution_plot": str(vader_score_plot_path).replace("\\", "/"),
+            "sentiwordnet_distribution_plot": str(swn_score_plot_path).replace("\\", "/"),
         },
     }
 
@@ -296,11 +315,15 @@ def main() -> None:
 
     _plot_label_shares(df, label_plot_path)
     _plot_score_distributions(df, score_plot_path)
+    _plot_single_score_distribution(df, "vader_compound", "VADER Compound Distribution", vader_score_plot_path)
+    _plot_single_score_distribution(df, "swn_score", "SentiWordNet Score Distribution", swn_score_plot_path)
 
     cleanup_old_files(output_dir, "moltbook_rule_based_comments_*.csv", keep_latest=1)
     cleanup_old_files(output_dir, "moltbook_rule_based_summary_*.json", keep_latest=1)
     cleanup_old_files(output_dir, "moltbook_rule_based_label_share_*.png", keep_latest=1)
     cleanup_old_files(output_dir, "moltbook_rule_based_score_distribution_*.png", keep_latest=1)
+    cleanup_old_files(output_dir, "moltbook_rule_based_vader_distribution_*.png", keep_latest=1)
+    cleanup_old_files(output_dir, "moltbook_rule_based_swn_distribution_*.png", keep_latest=1)
 
     print("Rule-based sentiment analysis complete")
     print(f"input_file: {input_path}")
@@ -310,6 +333,8 @@ def main() -> None:
     print(f"summary_path: {summary_path}")
     print(f"label_plot_path: {label_plot_path}")
     print(f"score_plot_path: {score_plot_path}")
+    print(f"vader_score_plot_path: {vader_score_plot_path}")
+    print(f"swn_score_plot_path: {swn_score_plot_path}")
 
 
 if __name__ == "__main__":

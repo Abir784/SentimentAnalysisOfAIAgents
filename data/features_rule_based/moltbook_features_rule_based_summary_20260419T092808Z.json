@@ -1,0 +1,14 @@
+{
+  "run_id": "20260419T092808Z",
+  "input_file": "data/preprocessed_rule_based/moltbook_preprocessed_rule_based_20260419T092754Z.csv",
+  "rows": 1219,
+  "feature_columns": [
+    "char_count",
+    "token_count",
+    "unique_token_ratio",
+    "exclamation_count",
+    "question_count",
+    "uppercase_ratio"
+  ],
+  "output_csv": "data/features_rule_based/moltbook_features_rule_based_20260419T092808Z.csv"
+}
