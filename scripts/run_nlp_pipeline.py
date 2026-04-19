@@ -82,6 +82,13 @@ PIPELINE_STAGES: List[PipelineStage] = [
         rationale="Validate score distributions, subgroup contrasts, and examples.",
     ),
     PipelineStage(
+        key="rule_based",
+        title="Run rule-based sentiment (VADER + SentiWordNet)",
+        kind="script",
+        target="scripts/run_moltbook_rule_based.py",
+        rationale="Produce primary rule-based sentiment outputs and visual diagnostics.",
+    ),
+    PipelineStage(
         key="interaction_network",
         title="Build author reply interaction network",
         kind="script",

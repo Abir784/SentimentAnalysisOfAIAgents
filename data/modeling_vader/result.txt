@@ -1,0 +1,24 @@
+================================================================================
+Run ID: 20260419T075656Z
+Saved At (UTC): 2026-04-19T07:57:00Z
+Input CSV: data/preprocessed/moltbook_training_ready_20260329T100311Z.csv
+Rows Used: 1040
+CV Folds: 5
+
+Model Metrics:
+- logistic_lr | accuracy=0.7750 | f1_macro=0.4937 | precision_macro=0.8268 | recall_macro=0.4644 | sustainability=0.8267
+- linear_svm | accuracy=0.7654 | f1_macro=0.5060 | precision_macro=0.6898 | recall_macro=0.4775 | sustainability=0.9936
+- sgd_linear | accuracy=0.7577 | f1_macro=0.5158 | precision_macro=0.5925 | recall_macro=0.5008 | sustainability=0.9830
+- naive_bayes | accuracy=0.7365 | f1_macro=0.3263 | precision_macro=0.5444 | recall_macro=0.3565 | sustainability=1.0000
+- moltbook_dualview_resonance | accuracy=0.7452 | f1_macro=0.5137 | precision_macro=0.5323 | recall_macro=0.5134 | sustainability=0.0000
+
+Best Accuracy: logistic_lr (0.7750)
+Best Macro F1: sgd_linear (0.5158)
+
+Artifacts:
+- Summary JSON: data/modeling_vader/moltbook_model_summary_20260419T075656Z.json
+- Predictions CSV: data/modeling_vader/moltbook_model_predictions_20260419T075656Z.csv
+- Metrics Plot: data/eda/modeling_vader/moltbook_model_metrics_bar_20260419T075656Z.png
+- Requested Metrics Plot: data/eda/modeling_vader/moltbook_model_requested_metrics_20260419T075656Z.png
+- Confusion Matrices Plot: data/eda/modeling_vader/moltbook_model_confusion_matrices_20260419T075656Z.png
+- Class-wise F1 Plot: data/eda/modeling_vader/moltbook_model_classwise_f1_20260419T075656Z.png

@@ -603,8 +603,8 @@ def main() -> None:
     cleanup_old_files(output_dir, "moltbook_interaction_network_nodes_*.csv", keep_latest=1)
     cleanup_old_files(output_dir, "moltbook_interaction_network_edges_*.csv", keep_latest=1)
     cleanup_old_files(output_dir, "moltbook_interaction_network_thread_stats_*.csv", keep_latest=1)
-    cleanup_old_files(output_dir, "moltbook_interaction_network_topology_*.png", keep_latest=1)
-    cleanup_old_files(output_dir, "moltbook_interaction_network_distributions_*.png", keep_latest=1)
+    cleanup_old_files(output_dir, "moltbook_interaction_network_topology_20*.png", keep_latest=1)
+    cleanup_old_files(output_dir, "moltbook_interaction_network_distributions_20*.png", keep_latest=1)
 
     print("Interaction network analysis complete")
     print(f"input_file: {input_path}")

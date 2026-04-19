@@ -602,10 +602,8 @@ def _plot_classwise_f1(metrics_by_model: Dict[str, Dict[str, Any]], out_path: Pa
     plt.close()
 
 
-def _append_result_log(summary: Dict[str, Any], summary_path: Path) -> None:
-    out_dir = Path("data/modeling")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    result_path = out_dir / "result.txt"
+def _append_result_log(summary: Dict[str, Any], summary_path: Path, result_path: Path) -> None:
+    result_path.parent.mkdir(parents=True, exist_ok=True)
 
     models = summary.get("models", {})
     if not models:
@@ -713,6 +711,16 @@ def main() -> None:
         ],
         help="Hugging Face model IDs for deep-model benchmarking.",
     )
+    parser.add_argument(
+        "--modeling-dir",
+        default="data/modeling_vader",
+        help="Output directory for modeling summaries and predictions.",
+    )
+    parser.add_argument(
+        "--plot-dir",
+        default="data/eda/modeling_vader",
+        help="Output directory for modeling plots.",
+    )
     args = parser.parse_args()
 
     if not args.models and not args.run_deep_models:
@@ -794,9 +802,9 @@ def main() -> None:
         metrics_by_model[model_name]["sustainability"] = float(sustainability)
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    modeling_dir = Path("data/modeling")
+    modeling_dir = Path(args.modeling_dir)
     modeling_dir.mkdir(parents=True, exist_ok=True)
-    eda_dir = Path("data/eda")
+    eda_dir = Path(args.plot_dir)
     eda_dir.mkdir(parents=True, exist_ok=True)
 
     pred_df = pd.DataFrame({"comment_id": ids_all.values, "y_true": y_all.values, "text": x_all.values})
@@ -838,7 +846,7 @@ def main() -> None:
     }
     summary_path = modeling_dir / f"moltbook_model_summary_{run_id}.json"
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=True), encoding="utf-8")
-    _append_result_log(summary, summary_path)
+    _append_result_log(summary, summary_path, modeling_dir / "result.txt")
 
     print("Modeling complete")
     print(f"input_file: {input_path}")

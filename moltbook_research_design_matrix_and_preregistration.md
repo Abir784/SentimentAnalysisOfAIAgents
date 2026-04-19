@@ -199,28 +199,32 @@ Return OOF predictions P_hat and evaluation metrics
 2. Define Sustainability as a runtime-efficiency indicator normalized to [0, 1], where higher means faster and more device-friendly.
 3. Export prediction tables, summary JSON, and visual diagnostics for comparison and interpretation.
 
-## Results (Latest Deep-Enabled Run)
-Data: 1040 labeled comments, 5-fold stratified cross-validation for lightweight models, plus full-dataset pretrained inference for deep models.
+## Results (Primary Rule-Based Analysis)
+Data: 2163 staged comments scored with two rule-based sentiment methods (VADER and SentiWordNet) and a conservative ensemble decision rule.
 
-Run ID: `20260329T101730Z` (latest run with deep models enabled)
+Run ID: `20260419T075547Z` (latest rule-based run)
 
-1. Best Accuracy: Logistic Regression (0.7750)
-2. Best Macro F1: SGD Linear (0.5158)
-3. Best Sustainability: Multinomial Naive Bayes (1.0000)
-4. Custom model (Dual View Resonance) reached macro F1 = 0.5137 with explicit neutral-guard behavior, accuracy = 0.7452, and moderate runtime cost.
-5. Deep transformer baselines still underperformed on this dataset under current label mapping (accuracy: 0.1913 and 0.1510), indicating domain adaptation and label calibration are still needed before deployment.
+1. VADER mean compound score: 0.3300 (positive-skewed distribution).
+2. SentiWordNet mean score: 0.0233 (near-neutral center with broader neutral mass).
+3. Cross-method agreement rate (VADER vs SentiWordNet labels): 0.4637.
+4. Ensemble label distribution (primary rule-based output):
+  - Neutral: 0.5682
+  - Positive: 0.3708
+  - Negative: 0.0610
+5. Rule-based conclusion: compared with single-method VADER, the dual-rule ensemble produces a more conservative neutral-heavy label profile and reduces over-commitment to strong polarity.
 
-### Model Results Table
+### Isolated ML Benchmark (Trained on VADER-Derived Labels)
+ML benchmarking is isolated from the primary rule-based analysis and stored separately under `data/modeling_vader/` and `data/eda/modeling_vader/`.
+
+Latest isolated ML run ID: `20260419T075656Z`
 
 | Model | Accuracy | F1 Score (Macro) | Precision (Macro) | Recall (Macro) | Sustainability |
 |---|---:|---:|---:|---:|---:|
-| Logistic Regression (calibrated) | 0.7750 | 0.4937 | 0.8268 | 0.4644 | 0.9993 |
-| Linear SVM | 0.7654 | 0.5060 | 0.6898 | 0.4775 | 1.0000 |
-| SGD Linear | 0.7577 | 0.5158 | 0.5925 | 0.5008 | 1.0000 |
+| Logistic Regression (calibrated) | 0.7750 | 0.4937 | 0.8268 | 0.4644 | 0.8267 |
+| Linear SVM | 0.7654 | 0.5060 | 0.6898 | 0.4775 | 0.9936 |
+| SGD Linear | 0.7577 | 0.5158 | 0.5925 | 0.5008 | 0.9830 |
 | Multinomial Naive Bayes | 0.7365 | 0.3263 | 0.5444 | 0.3565 | 1.0000 |
-| Dual View Resonance (custom) | 0.7452 | 0.5137 | 0.5323 | 0.5134 | 0.9971 |
-| Deep: CardiffNLP Twitter-RoBERTa | 0.1913 | 0.2327 | 0.5085 | 0.4535 | 0.0000 |
-| Deep: BERTweet Sentiment | 0.1510 | 0.1798 | 0.5415 | 0.4021 | 0.2601 |
+| Dual View Resonance (custom) | 0.7452 | 0.5137 | 0.5323 | 0.5134 | 0.0000 |
 
 ### RQ Results
 
@@ -231,33 +235,43 @@ Run ID: `20260329T101730Z` (latest run with deep models enabled)
 ### Relevant Graphs
 RQ1 interaction network topology (latest run):
 
-![RQ1 interaction network topology](data/eda/moltbook_interaction_network_topology_20260418T164728Z.png)
+![RQ1 interaction network topology](data/eda/moltbook_interaction_network_topology_latest.png)
 
 RQ1 interaction metric distributions (latest run):
 
-![RQ1 interaction metric distributions](data/eda/moltbook_interaction_network_distributions_20260418T164728Z.png)
+![RQ1 interaction metric distributions](data/eda/moltbook_interaction_network_distributions_latest.png)
+
+Rule-based label share snapshot (VADER vs SentiWordNet vs Ensemble):
+
+![Rule-based label share](data/rule_based/moltbook_rule_based_label_share_20260419T075547Z.png)
+
+Rule-based score distribution snapshot:
+
+![Rule-based score distributions](data/rule_based/moltbook_rule_based_score_distribution_20260419T075547Z.png)
 
 Requested metrics dashboard (Accuracy, F1, Precision, Recall, Sustainability):
 
-![Requested metrics dashboard](data/eda/moltbook_model_requested_metrics_20260329T101730Z.png)
+![Requested metrics dashboard](data/eda/modeling_vader/moltbook_model_requested_metrics_20260419T075656Z.png)
 
 Confusion matrices across models:
 
-![Confusion matrices](data/eda/moltbook_model_confusion_matrices_20260329T101730Z.png)
+![Confusion matrices](data/eda/modeling_vader/moltbook_model_confusion_matrices_20260419T075656Z.png)
 
 Class-wise F1 comparison:
 
-![Class-wise F1](data/eda/moltbook_model_classwise_f1_20260329T101730Z.png)
+![Class-wise F1](data/eda/modeling_vader/moltbook_model_classwise_f1_20260419T075656Z.png)
 
-Latest summary artifact: `data/modeling/moltbook_model_summary_20260329T101730Z.json`
-Latest predictions artifact: `data/modeling/moltbook_model_predictions_20260329T101730Z.csv`
+Latest rule-based summary artifact: `data/rule_based/moltbook_rule_based_summary_20260419T075547Z.json`
+Latest rule-based comment-level artifact: `data/rule_based/moltbook_rule_based_comments_20260419T075547Z.csv`
+Latest isolated ML summary artifact: `data/modeling_vader/moltbook_model_summary_20260419T075656Z.json`
+Latest isolated ML predictions artifact: `data/modeling_vader/moltbook_model_predictions_20260419T075656Z.csv`
 
 ## Shortcomings in Current Results
-1. Neutral class performance is still weak because class support is low relative to positive samples (neutral support remains very limited).
-2. Accuracy is acceptable, but macro-level metrics still show imbalance sensitivity and limited minority recall.
-3. Latest crawl expansion increased staged duplicates (552 duplicate rows detected before strict preprocessing), requiring stronger dedup controls earlier in the pipeline.
-4. The custom dual-view model improves interpretability of ambiguity handling (neutral-guard), but still trades off runtime efficiency.
-5. Sustainability is runtime-based only; it does not yet include memory footprint and energy measurements.
+1. Direct parent-child reply linkage remains sparse in staged data, so RQ1 network findings still rely on sequential-thread fallback for structural inference.
+2. Rule-based methods (VADER vs SentiWordNet) show moderate agreement (0.4637), indicating method sensitivity and the need for careful interpretation of label uncertainty.
+3. Ensemble labeling is intentionally conservative (neutral-heavy), which improves robustness but may suppress weak positive/negative nuance.
+4. Isolated ML benchmarking still trains on VADER-derived targets rather than human-annotated gold labels, so model scores reflect label imitation quality rather than independent sentiment ground truth.
+5. Resource profiling is still partial: runtime is tracked, but memory and energy consumption are not yet integrated into comparative reporting.
 
 
 <!-- ## Immediate Improvement Plan

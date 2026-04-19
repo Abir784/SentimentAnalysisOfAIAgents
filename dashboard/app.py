@@ -12,7 +12,8 @@ import streamlit as st
 
 
 DATA_ROOT = Path("data")
-MODELING_RESULT_LOG = DATA_ROOT / "modeling" / "result.txt"
+MODELING_RESULT_LOG = DATA_ROOT / "modeling_vader" / "result.txt"
+LEGACY_MODELING_RESULT_LOG = DATA_ROOT / "modeling" / "result.txt"
 
 
 def _latest_file(folder: Path, pattern: str) -> Path | None:
@@ -32,14 +33,21 @@ def _load_json(path: Path | None) -> Dict[str, Any]:
 def load_dashboard_data() -> Dict[str, Any]:
     preprocessed_dir = DATA_ROOT / "preprocessed"
     polarity_dir = DATA_ROOT / "polarity"
-    modeling_dir = DATA_ROOT / "modeling"
+    modeling_dir = DATA_ROOT / "modeling_vader"
+    if not modeling_dir.exists():
+        modeling_dir = DATA_ROOT / "modeling"
     eda_dir = DATA_ROOT / "eda"
+    rule_based_dir = DATA_ROOT / "rule_based"
 
     training_csv = _latest_file(preprocessed_dir, "moltbook_training_ready_*.csv")
     polarity_summary_json = _latest_file(polarity_dir, "moltbook_polarity_summary_*.json")
     modeling_summary_json = _latest_file(modeling_dir, "moltbook_model_summary_*.json")
     predictions_csv = _latest_file(modeling_dir, "moltbook_model_predictions_*.csv")
     eda_summary_json = _latest_file(eda_dir, "moltbook_eda_summary_*.json")
+    rule_based_summary_json = _latest_file(rule_based_dir, "moltbook_rule_based_summary_*.json")
+    rule_based_comments_csv = _latest_file(rule_based_dir, "moltbook_rule_based_comments_*.csv")
+    rule_based_label_plot = _latest_file(rule_based_dir, "moltbook_rule_based_label_share_*.png")
+    rule_based_score_plot = _latest_file(rule_based_dir, "moltbook_rule_based_score_distribution_*.png")
     interaction_summary_json = _latest_file(eda_dir, "moltbook_interaction_network_summary_*.json")
     interaction_nodes_csv = _latest_file(eda_dir, "moltbook_interaction_network_nodes_*.csv")
     interaction_edges_csv = _latest_file(eda_dir, "moltbook_interaction_network_edges_*.csv")
@@ -56,6 +64,11 @@ def load_dashboard_data() -> Dict[str, Any]:
 
     training_df = pd.read_csv(training_csv) if training_csv and training_csv.exists() else pd.DataFrame()
     predictions_df = pd.read_csv(predictions_csv) if predictions_csv and predictions_csv.exists() else pd.DataFrame()
+    rule_based_df = (
+        pd.read_csv(rule_based_comments_csv)
+        if rule_based_comments_csv and rule_based_comments_csv.exists()
+        else pd.DataFrame()
+    )
     interaction_nodes_df = (
         pd.read_csv(interaction_nodes_csv)
         if interaction_nodes_csv and interaction_nodes_csv.exists()
@@ -83,6 +96,12 @@ def load_dashboard_data() -> Dict[str, Any]:
         "predictions_df": predictions_df,
         "eda_summary_json": eda_summary_json,
         "eda_summary": _load_json(eda_summary_json),
+        "rule_based_summary_json": rule_based_summary_json,
+        "rule_based_summary": _load_json(rule_based_summary_json),
+        "rule_based_comments_csv": rule_based_comments_csv,
+        "rule_based_df": rule_based_df,
+        "rule_based_label_plot": rule_based_label_plot,
+        "rule_based_score_plot": rule_based_score_plot,
         "interaction_summary_json": interaction_summary_json,
         "interaction_summary": _load_json(interaction_summary_json),
         "interaction_nodes_csv": interaction_nodes_csv,
@@ -371,7 +390,7 @@ def _rq2_techniques() -> None:
     st.markdown(
         """
 **Techniques Used (RQ2)**
-- VADER-derived three-class labels (`negative`, `neutral`, `positive`).
+- Rule-based labels from VADER + SentiWordNet (ensemble) in three classes (`negative`, `neutral`, `positive`).
 - Group aggregation by post, thread, and author.
 - Comparative descriptive statistics with share distributions.
 """
@@ -415,12 +434,15 @@ def main() -> None:
     with st.sidebar:
         st.header("Data Sources")
         st.write(f"Training CSV: {data['training_csv']}")
+        st.write(f"Rule-Based Summary: {data['rule_based_summary_json']}")
+        st.write(f"Rule-Based Comments: {data['rule_based_comments_csv']}")
         st.write(f"Polarity Summary: {data['polarity_summary_json']}")
         st.write(f"Model Summary: {data['modeling_summary_json']}")
         st.write(f"Predictions CSV: {data['predictions_csv']}")
         st.write(f"EDA Summary: {data['eda_summary_json']}")
         st.divider()
         st.subheader("Loaded Run IDs")
+        st.write(f"Rule-Based Run: {data['rule_based_summary'].get('run_id', 'N/A')}")
         st.write(f"Polarity Run: {data['polarity_summary'].get('run_id', 'N/A')}")
         st.write(f"Modeling Run: {data['modeling_summary'].get('run_id', 'N/A')}")
         st.write(f"EDA Run: {data['eda_summary'].get('run_id', 'N/A')}")
@@ -434,6 +456,8 @@ def main() -> None:
     modeling_summary = data["modeling_summary"]
     predictions_df = data["predictions_df"]
     eda_summary = data["eda_summary"]
+    rule_based_summary = data["rule_based_summary"]
+    rule_based_df = data["rule_based_df"]
 
     if training_df.empty:
         st.error("No training data found under data/preprocessed. Run polarity pipeline first.")
@@ -453,18 +477,26 @@ def main() -> None:
     k3.metric("Rows After Preprocess", f"{int(rows_after_preprocess):,}")
 
     model_metrics = _model_metrics_frame(modeling_summary)
-    best_model = "N/A"
-    best_acc = 0.0
-    if not model_metrics.empty:
-        idx = model_metrics["accuracy"].idxmax()
-        best_model = str(model_metrics.loc[idx, "model"])
-        best_acc = float(model_metrics.loc[idx, "accuracy"])
-    k4.metric("Best Model", best_model, f"acc={best_acc:.4f}")
+    if rule_based_summary:
+        k4.metric(
+            "Primary Sentiment Method",
+            str(rule_based_summary.get("primary_method", "rule_based")),
+            f"agreement={_fmt_metric(rule_based_summary.get('agreement_rate'), 4)}",
+        )
+    else:
+        best_model = "N/A"
+        best_acc = 0.0
+        if not model_metrics.empty:
+            idx = model_metrics["accuracy"].idxmax()
+            best_model = str(model_metrics.loc[idx, "model"])
+            best_acc = float(model_metrics.loc[idx, "accuracy"])
+        k4.metric("Best Model", best_model, f"acc={best_acc:.4f}")
 
     tabs = st.tabs([
         "Overview",
         "Data Quality",
         "Polarity",
+        "Rule-Based",
         "Modeling",
         "Predictions",
         "RQ Analysis",
@@ -482,10 +514,17 @@ def main() -> None:
         )
         c1, c2 = st.columns(2)
 
-        label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+        label_col = None
+        overview_df = training_df
+        if not rule_based_df.empty and "ensemble_label" in rule_based_df.columns:
+            label_col = "ensemble_label"
+            overview_df = rule_based_df
+        else:
+            label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+
         if label_col:
             label_dist = (
-                training_df[label_col]
+                overview_df[label_col]
                 .value_counts()
                 .rename_axis("label")
                 .reset_index(name="count")
@@ -628,6 +667,56 @@ def main() -> None:
             st.info("No polarity share data available in current summary artifact.")
 
     with tabs[3]:
+        st.subheader("Rule-Based Sentiment (Primary)")
+        st.caption("Methods: VADER + SentiWordNet + conservative neutral-on-disagreement ensemble")
+
+        if not rule_based_summary:
+            st.warning("No rule-based summary found. Run scripts/run_moltbook_rule_based.py.")
+        else:
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Rows Scored", f"{int(rule_based_summary.get('rows_scored', 0)):,}")
+            c2.metric("Agreement Rate", _fmt_metric(rule_based_summary.get("agreement_rate"), 4))
+            c3.metric("Primary Method", str(rule_based_summary.get("primary_method", "N/A")))
+
+            mean_scores = rule_based_summary.get("mean_scores", {})
+            c4, c5 = st.columns(2)
+            c4.metric("Mean VADER Compound", _fmt_metric(mean_scores.get("vader_compound"), 4))
+            c5.metric("Mean SentiWordNet Score", _fmt_metric(mean_scores.get("swn_score"), 4))
+
+            label_share = rule_based_summary.get("label_share", {})
+            share_rows: List[Dict[str, Any]] = []
+            for method_key, share_map in label_share.items():
+                for label, share in (share_map or {}).items():
+                    share_rows.append(
+                        {
+                            "method": str(method_key),
+                            "label": str(label),
+                            "share": float(share),
+                        }
+                    )
+            if share_rows:
+                share_df = pd.DataFrame(share_rows)
+                fig_share = px.bar(
+                    share_df,
+                    x="label",
+                    y="share",
+                    color="method",
+                    barmode="group",
+                    title="Rule-Based Label Share by Method",
+                )
+                st.plotly_chart(fig_share, use_container_width=True)
+
+            label_plot = data.get("rule_based_label_plot")
+            score_plot = data.get("rule_based_score_plot")
+            if label_plot and Path(label_plot).exists():
+                st.image(str(label_plot), caption="Rule-Based Label Share Snapshot", use_container_width=True)
+            if score_plot and Path(score_plot).exists():
+                st.image(str(score_plot), caption="Rule-Based Score Distribution Snapshot", use_container_width=True)
+
+            if not rule_based_df.empty:
+                st.dataframe(rule_based_df.head(200), use_container_width=True)
+
+    with tabs[4]:
         st.subheader("Model Performance")
         if model_metrics.empty:
             st.warning("No modeling summary found. Run scripts/run_moltbook_modeling.py.")
@@ -670,7 +759,7 @@ def main() -> None:
                 fig_cm.update_layout(title=f"Confusion Matrix: {model_choice}", xaxis_title="Predicted", yaxis_title="True")
                 st.plotly_chart(fig_cm, use_container_width=True)
 
-    with tabs[4]:
+    with tabs[5]:
         st.subheader("Predictions Explorer")
         if predictions_df.empty:
             st.warning("No predictions CSV found.")
@@ -695,7 +784,7 @@ def main() -> None:
             else:
                 st.dataframe(predictions_df.head(500), use_container_width=True)
 
-    with tabs[5]:
+    with tabs[6]:
         st.subheader("Research Questions (RQ1-RQ4)")
         rq_tabs = st.tabs(["RQ1 Interaction Network", "RQ2 Sentiment Variation", "RQ3 Feature Signals", "RQ4 Robustness"])
 
@@ -769,19 +858,26 @@ def main() -> None:
         with rq_tabs[1]:
             _rq2_techniques()
 
-            label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+            rq2_df = training_df
+            label_col = None
+            if not rule_based_df.empty and "ensemble_label" in rule_based_df.columns:
+                rq2_df = rule_based_df
+                label_col = "ensemble_label"
+            else:
+                label_col = _first_existing(training_df, ["processed_polarity_label", "raw_polarity_label"])
+
             if not label_col:
                 st.warning("No polarity label column available for RQ2 analysis.")
             else:
                 overall = (
-                    training_df[label_col].value_counts(normalize=True).rename_axis("label").reset_index(name="share")
+                    rq2_df[label_col].value_counts(normalize=True).rename_axis("label").reset_index(name="share")
                 )
                 fig_overall = px.bar(overall, x="label", y="share", title="Overall Sentiment Share")
                 st.plotly_chart(fig_overall, use_container_width=True)
 
                 post_top = (
-                    training_df.groupby(["post_id", label_col]).size().reset_index(name="count")
-                    if "post_id" in training_df.columns
+                    rq2_df.groupby(["post_id", label_col]).size().reset_index(name="count")
+                    if "post_id" in rq2_df.columns
                     else pd.DataFrame()
                 )
                 if not post_top.empty:
@@ -802,9 +898,9 @@ def main() -> None:
                     )
                     st.plotly_chart(fig_post, use_container_width=True)
 
-                if "author_id" in training_df.columns:
+                if "author_id" in rq2_df.columns:
                     author_sent = (
-                        training_df.groupby(["author_id", label_col]).size().reset_index(name="count")
+                        rq2_df.groupby(["author_id", label_col]).size().reset_index(name="count")
                     )
                     top_authors = (
                         author_sent.groupby("author_id")["count"].sum().sort_values(ascending=False).head(15).index
@@ -875,7 +971,7 @@ def main() -> None:
                 st.markdown("Robustness Matrix (Across Models)")
                 st.dataframe(stable.sort_values("f1_macro", ascending=False), use_container_width=True)
 
-    with tabs[6]:
+    with tabs[7]:
         st.subheader("Tableau-Ready Exports")
         st.caption("Use these extracted tables directly in Tableau Desktop/Public.")
 
@@ -890,11 +986,12 @@ def main() -> None:
             mime="text/csv",
         )
 
-    with tabs[7]:
+    with tabs[8]:
         st.subheader("Model Run History")
         st.caption("Historical run log parsed from data/modeling/result.txt")
 
-        runs_df, run_metrics_df, run_log_raw = _parse_result_log(MODELING_RESULT_LOG)
+        result_log_path = MODELING_RESULT_LOG if MODELING_RESULT_LOG.exists() else LEGACY_MODELING_RESULT_LOG
+        runs_df, run_metrics_df, run_log_raw = _parse_result_log(result_log_path)
 
         if runs_df.empty:
             st.warning("No run history found in data/modeling/result.txt")

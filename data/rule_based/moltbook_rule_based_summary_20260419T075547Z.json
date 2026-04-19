@@ -1,0 +1,37 @@
+{
+  "run_id": "20260419T075547Z",
+  "input_file": "data/staged/moltbook_comments_all.jsonl",
+  "rows_scored": 2163,
+  "thresholds": {
+    "vader": 0.05,
+    "sentiwordnet": 0.02
+  },
+  "mean_scores": {
+    "vader_compound": 0.33,
+    "swn_score": 0.0233
+  },
+  "label_share": {
+    "vader": {
+      "positive": 0.681,
+      "negative": 0.2506,
+      "neutral": 0.0684
+    },
+    "sentiwordnet": {
+      "positive": 0.4771,
+      "neutral": 0.3953,
+      "negative": 0.1276
+    },
+    "ensemble": {
+      "neutral": 0.5682,
+      "positive": 0.3708,
+      "negative": 0.061
+    }
+  },
+  "agreement_rate": 0.4637,
+  "primary_method": "rule_based_ensemble_vader_sentiwordnet",
+  "artifacts": {
+    "comments_csv": "data/rule_based/moltbook_rule_based_comments_20260419T075547Z.csv",
+    "label_share_plot": "data/rule_based/moltbook_rule_based_label_share_20260419T075547Z.png",
+    "score_distribution_plot": "data/rule_based/moltbook_rule_based_score_distribution_20260419T075547Z.png"
+  }
+}
