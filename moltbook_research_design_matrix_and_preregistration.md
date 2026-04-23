@@ -436,6 +436,48 @@ Project: `Sentiment Dynamics in AI-to-AI Social Networks (MoltBook)`
 - Appendix:
   - Annotation guidelines, ablations, diagnostics, and Phase 2 roadmap. -->
 
+## RQ-wise Graph Showcase (Answer-Oriented)
+
+This section groups the most important visual outputs by research question so each RQ answer can be presented directly from figures.
+
+### RQ1 — Dominant interaction patterns
+Answer focus: interaction structure is clustered and non-random.
+
+- `data/figures/rq1_network_sample_20260419T092832Z.png` (network topology snapshot)
+- `data/figures/rq1_degree_distribution_20260419T092832Z.png` (heavy-tail interaction concentration)
+- `data/figures/rq1_thread_depth_histogram_20260419T092832Z.png` (discussion depth profile)
+- `data/figures/rq1_reply_concentration_20260419T092832Z.png` (reply concentration by actor/thread)
+- `data/figures/rq1_community_size_distribution_20260419T092832Z.png` (community-size structure)
+
+### RQ2 — Sentiment distribution and group variation
+Answer focus: neutral is dominant overall, with significant variation by post/thread/author.
+
+- `data/figures/rq2_corpus_distribution_20260419T092811Z.png` (overall class distribution)
+- `data/figures/rq2_by_post_20260419T092811Z.png` (variation across posts)
+- `data/figures/rq2_top_authors_20260419T092811Z.png` (author-level sentiment concentration)
+- `data/figures/rq2_by_author_entropy_20260419T092811Z.png` (author-level diversity/entropy)
+- `data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png` (VADER vs SWN agreement/disagreement)
+
+### RQ3 — Feature association with sentiment
+Answer focus: feature effects are mixed; length-related variability is stronger than depth.
+
+- `data/figures/rq3_feature_boxplots_20260419T092811Z.png` (feature distributions by sentiment class)
+- `data/figures/rq3_variability_scatter_20260419T092811Z.png` (thread variability association view)
+- `data/figures/rq3_verified_vs_unverified_20260419T092811Z.png` (verification subgroup comparison)
+
+### RQ4 — Robustness under methodological variants
+Answer focus: findings are stable for preprocessing variants but sensitive to scorer choice.
+
+- `data/figures/rq4_robustness_heatmap_20260419T092811Z.png` (variant-by-metric stability map)
+- `data/figures/rq4_robustness_matrix_20260419T092811Z.csv` (supporting matrix for the heatmap)
+
+### Optional single-slide summary mapping
+
+- RQ1 supported: clustered interaction topology.
+- RQ2 not supported: neutral dominates, not positive.
+- RQ3 partially supported: variability tracks length more than depth.
+- RQ4 partially supported: preprocessing robust, scorer-sensitive.
+
 
 
 
