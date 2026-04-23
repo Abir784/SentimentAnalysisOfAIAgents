@@ -1,0 +1,91 @@
+{
+  "run_id": "20260419T092811Z",
+  "input_file": "data/rule_based/moltbook_rule_based_comments_20260419T092811Z.csv",
+  "rows": 1219,
+  "seed": 42,
+  "n_bootstrap": 4000,
+  "rq2_outputs": {
+    "label_share_bootstrap_ci95": {
+      "vader": {
+        "negative": {
+          "point": 0.260049,
+          "ci95_low": 0.236239,
+          "ci95_high": 0.283839
+        },
+        "neutral": {
+          "point": 0.037736,
+          "ci95_low": 0.027892,
+          "ci95_high": 0.049221
+        },
+        "positive": {
+          "point": 0.702215,
+          "ci95_low": 0.675964,
+          "ci95_high": 0.727646
+        }
+      },
+      "swn": {
+        "negative": {
+          "point": 0.127153,
+          "ci95_low": 0.108285,
+          "ci95_high": 0.146021
+        },
+        "neutral": {
+          "point": 0.385562,
+          "ci95_low": 0.358491,
+          "ci95_high": 0.411813
+        },
+        "positive": {
+          "point": 0.487285,
+          "ci95_low": 0.458573,
+          "ci95_high": 0.515176
+        }
+      },
+      "ensemble": {
+        "negative": {
+          "point": 0.061526,
+          "ci95_low": 0.0484,
+          "ci95_high": 0.075472
+        },
+        "neutral": {
+          "point": 0.54799,
+          "ci95_low": 0.520098,
+          "ci95_high": 0.575902
+        },
+        "positive": {
+          "point": 0.390484,
+          "ci95_low": 0.362592,
+          "ci95_high": 0.417555
+        }
+      }
+    },
+    "mean_score_bootstrap_ci95": {
+      "vader_compound": {
+        "point": 0.338595,
+        "ci95_low": 0.305613,
+        "ci95_high": 0.371826
+      },
+      "swn_score": {
+        "point": 0.023077,
+        "ci95_low": 0.020446,
+        "ci95_high": 0.025739
+      }
+    },
+    "paired_significance_positive_detection": {
+      "comparison": "vader_positive_vs_swn_positive",
+      "mcnemar": {
+        "n00": 245,
+        "n01": 118,
+        "n10": 380,
+        "n11": 476,
+        "chi2_cc": 136.789156626506,
+        "p_value_chi2_cc": 1.3409339570631217e-31,
+        "p_value_exact_binomial": 3.9069879665161266e-33
+      },
+      "paired_rate_difference_bootstrap_ci95": {
+        "point": 0.21493,
+        "ci95_low": 0.181296,
+        "ci95_high": 0.248564
+      }
+    }
+  }
+}

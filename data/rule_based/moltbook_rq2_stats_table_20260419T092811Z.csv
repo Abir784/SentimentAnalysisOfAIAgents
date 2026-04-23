@@ -1,0 +1,14 @@
+metric_type,method,label,point,ci95_low,ci95_high
+label_share,vader,negative,0.260049,0.236239,0.283839
+label_share,vader,neutral,0.037736,0.027892,0.049221
+label_share,vader,positive,0.702215,0.675964,0.727646
+label_share,swn,negative,0.127153,0.108285,0.146021
+label_share,swn,neutral,0.385562,0.358491,0.411813
+label_share,swn,positive,0.487285,0.458573,0.515176
+label_share,ensemble,negative,0.061526,0.0484,0.075472
+label_share,ensemble,neutral,0.54799,0.520098,0.575902
+label_share,ensemble,positive,0.390484,0.362592,0.417555
+mean_score,vader_compound,,0.338595,0.305613,0.371826
+mean_score,swn_score,,0.023077,0.020446,0.025739
+paired_rate_difference,vader_positive_minus_swn_positive,,0.21493,0.181296,0.248564
+mcnemar_exact_p,vader_positive_vs_swn_positive,,3.9069879665161266e-33,,

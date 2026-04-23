@@ -63,6 +63,9 @@ python scripts/run_moltbook_eda_stage.py
 python scripts/run_moltbook_feature_extraction.py
 python scripts/run_moltbook_rule_based.py
 python scripts/run_moltbook_interaction_network.py
+python scripts/run_moltbook_rq2_stats.py --bootstrap 4000 --seed 42
+python scripts/build_moltbook_goldset_sample.py --target-size 400 --seed 42
+python scripts/evaluate_moltbook_goldset.py --input data/gold/moltbook_goldset_sample_20260419T092811Z.csv
 ```
 
 Interaction network edge modes:
@@ -91,6 +94,23 @@ Dashboard tabs:
 ```powershell
 pip install -r requirements.txt
 ```
+
+## Latest Run Snapshot
+
+- Staged comments: 1296
+- Preprocessed English comments: 1219
+- Unique posts: 55
+- Unique authors: 548
+- Rule-based run ID: `20260419T092811Z`
+- VADER mean compound: 0.3386
+- SentiWordNet mean score: 0.0231
+- VADER vs SentiWordNet agreement: 0.4643
+- Ensemble label shares: neutral 0.5480, positive 0.3905, negative 0.0615
+- Interaction network run ID: `20260419T092832Z`
+- Interaction graph (sequential fallback): 548 nodes, 1085 edges, reciprocity 0.1493, clustering 0.0956
+- RQ2 inferential stats artifact: `data/rule_based/moltbook_rq2_stats_20260419T092811Z.json`
+- Gold-set sample artifact: `data/gold/moltbook_goldset_sample_20260419T092811Z.csv`
+- Run manifests: `data/manifests/rq2_stats_manifest_20260419T092811Z.json`, `data/manifests/goldset_sample_manifest_20260419T092811Z.json`
 
 ## Notes
 

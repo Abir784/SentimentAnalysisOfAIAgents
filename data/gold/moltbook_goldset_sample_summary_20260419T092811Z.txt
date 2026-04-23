@@ -1,0 +1,7 @@
+run_id: 20260419T092811Z
+input_file: data/rule_based/moltbook_rule_based_comments_20260419T092811Z.csv
+target_size: 400
+sample_size: 400
+seed: 42
+sample_csv: data/gold/moltbook_goldset_sample_20260419T092811Z.csv
+strata_csv: data/gold/moltbook_goldset_sample_strata_20260419T092811Z.csv
