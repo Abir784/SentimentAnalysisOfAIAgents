@@ -1,0 +1,10 @@
+{
+  "run_id": "20260419T092811Z",
+  "top_disagreement_pattern": {
+    "vader": "positive",
+    "swn": "neutral",
+    "count": 305
+  },
+  "mcnemar_note": "No human labels available; reported descriptive disagreement pattern only.",
+  "mcnemar": {}
+}

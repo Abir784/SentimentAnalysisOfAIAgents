@@ -1,0 +1,10 @@
+vader_label,swn_label,count,row_prop
+negative,negative,75,0.23659305993690852
+negative,neutral,150,0.47318611987381703
+negative,positive,92,0.2902208201892745
+neutral,negative,5,0.10869565217391304
+neutral,neutral,15,0.32608695652173914
+neutral,positive,26,0.5652173913043478
+positive,negative,75,0.08761682242990654
+positive,neutral,305,0.35630841121495327
+positive,positive,476,0.5560747663551402

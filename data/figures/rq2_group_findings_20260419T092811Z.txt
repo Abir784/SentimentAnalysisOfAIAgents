@@ -1,0 +1,4 @@
+Kruskal-Wallis post-level positive proportion: H=110.8733, p=2.81029e-07
+Kruskal-Wallis thread-level positive proportion: H=110.8733, p=2.81029e-07
+Kruskal-Wallis author-level positive proportion: H=308.7110, p=3.01737e-10
+Pairwise Mann-Whitney U tests were run with Bonferroni correction on sufficiently sized groups.

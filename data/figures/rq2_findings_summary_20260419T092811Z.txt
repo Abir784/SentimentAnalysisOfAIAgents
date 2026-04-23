@@ -1,0 +1,6 @@
+RQ2 corpus distribution: negative=0.0615, neutral=0.5480, positive=0.3905; chi2=450.6267, p=1.4049e-98.
+HYPOTHESIS VERDICT: NOT SUPPORTED
+- Neutral is the dominant class (54.8%) not positive (39.1%).
+- Neutral is overrepresented relative to uniform baseline.
+- Positive is the second-most frequent class.
+- This suggests predominantly non-polar informational exchanges.

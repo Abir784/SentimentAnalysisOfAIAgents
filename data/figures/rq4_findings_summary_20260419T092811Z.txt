@@ -1,0 +1,6 @@
+HYPOTHESIS VERDICT
+PARTIALLY SUPPORTED
+cv_pos=0.288208
+max_abs_delta_pos=0.311731
+dominant_class_all_variants_neutral=False
+sensitive_variants=['v3_vader_only', 'v4_swn_only']

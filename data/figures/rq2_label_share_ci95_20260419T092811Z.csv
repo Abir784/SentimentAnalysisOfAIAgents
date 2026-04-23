@@ -1,0 +1,10 @@
+method,label,point,ci95_low,ci95_high
+vader,negative,0.260049,0.236239,0.283839
+vader,neutral,0.037736,0.027892,0.049221
+vader,positive,0.702215,0.675964,0.727646
+swn,negative,0.127153,0.108285,0.146021
+swn,neutral,0.385562,0.358491,0.411813
+swn,positive,0.487285,0.458573,0.515176
+ensemble,negative,0.061526,0.0484,0.075472
+ensemble,neutral,0.54799,0.520098,0.575902
+ensemble,positive,0.390484,0.362592,0.417555

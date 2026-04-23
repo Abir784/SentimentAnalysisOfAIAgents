@@ -1,0 +1,6 @@
+variant_id,description,n_comments,prop_neg,prop_neu,prop_pos,dominant_class,delta_pos_from_baseline,stable?
+v1_baseline,"Standard pipeline - traditional clean text, VADER ensemble",1219,0.06152584085315833,0.5479901558654635,0.39048400328137817,neutral,0.0,True
+v2_basic_clean,"Basic cleaning only - no stopword removal, no lemmatization",1219,0.06152584085315833,0.5479901558654635,0.39048400328137817,neutral,0.0,True
+v3_vader_only,VADER labels only - no SentiWordNet in ensemble,1219,0.26004922067268255,0.03773584905660377,0.7022149302707137,positive,0.3117309269893355,False
+v4_swn_only,SentiWordNet labels only,1219,0.12715340442986053,0.3855619360131255,0.48728465955701394,positive,0.09680065627563578,False
+v5_strict_filter,Stricter quality filter - min 5 words per comment,1185,0.06329113924050633,0.550210970464135,0.38649789029535864,neutral,-0.00398611298601953,True

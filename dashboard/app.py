@@ -47,6 +47,8 @@ def load_dashboard_data() -> Dict[str, Any]:
     rule_score_plot = _latest_file(rule_dir, "moltbook_rule_based_score_distribution_*.png")
     rule_vader_plot = _latest_file(rule_dir, "moltbook_rule_based_vader_distribution_*.png")
     rule_swn_plot = _latest_file(rule_dir, "moltbook_rule_based_swn_distribution_*.png")
+    rq2_stats_latest = _latest_file(rule_dir, "moltbook_rq2_stats_*.json")
+    rq2_table_latest = _latest_file(rule_dir, "moltbook_rq2_stats_table_*.csv")
 
     interaction_summary = _latest_file(interaction_dir, "moltbook_interaction_network_summary_*.json")
     interaction_nodes = _latest_file(interaction_dir, "moltbook_interaction_network_nodes_*.csv")
@@ -67,6 +69,8 @@ def load_dashboard_data() -> Dict[str, Any]:
         "rule_score_plot": rule_score_plot,
         "rule_vader_plot": rule_vader_plot,
         "rule_swn_plot": rule_swn_plot,
+        "rq2_stats": _load_json(rq2_stats_latest),
+        "rq2_table": pd.read_csv(rq2_table_latest) if rq2_table_latest and rq2_table_latest.exists() else pd.DataFrame(),
         "interaction_summary": _load_json(interaction_summary),
         "interaction_nodes_df": pd.read_csv(interaction_nodes) if interaction_nodes and interaction_nodes.exists() else pd.DataFrame(),
         "interaction_thread_df": pd.read_csv(interaction_threads) if interaction_threads and interaction_threads.exists() else pd.DataFrame(),
@@ -95,7 +99,7 @@ def _fmt(value: Any, dec: int = 4) -> str:
 def main() -> None:
     st.set_page_config(page_title="MoltBook Rule-Based Dashboard", page_icon="📊", layout="wide")
     st.title("MoltBook Sentiment Analysis Dashboard")
-    st.caption("Rule-based pipeline dashboard (VADER + SentiWordNet + Ensemble) with separate RQ1 analysis")
+    st.caption("Rule-based sentiment pipeline (VADER + SentiWordNet + Ensemble) with RQ1 interaction network and RQ2 inferential statistics")
 
     data = load_dashboard_data()
 
@@ -116,7 +120,7 @@ def main() -> None:
     c3.metric("RQ1 Nodes", f"{int(interaction_summary.get('node_count', 0)):,}")
     c4.metric("RQ1 Edges", f"{int(interaction_summary.get('edge_count', 0)):,}")
 
-    tabs = st.tabs(["Overview", "Rule-Based Results", "Feature Extraction", "RQ1 Analysis"])
+    tabs = st.tabs(["Overview", "Rule-Based Results", "RQ2 Inferential Stats", "Feature Extraction", "RQ1 Analysis"])
 
     with tabs[0]:
         st.subheader("Pipeline Overview")

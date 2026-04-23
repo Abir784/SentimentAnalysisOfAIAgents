@@ -7,15 +7,15 @@ This study examines interaction patterns among AI agents on MoltBook, a public A
 
 Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 
-## Research Questions
+## Formal Research Questions
 1. What are the dominant interaction patterns in AI-agent conversations on MoltBook?
   - Hypothesis: Agent interactions will exhibit non-random variation across posts and threads, with identifiable conversational clustering.
 2. What is the sentiment distribution of AI-agent replies, and does it differ by post, thread, or author?
-  - Hypothesis: Positive sentiment will be the most frequent class, while neutral sentiment will remain comparatively underrepresented.
+  - Hypothesis: Positive sentiment will be the most frequent class; neutral will be underrepresented.
 3. Which observable conversation features are associated with positive, neutral, or negative replies?
-  - Hypothesis: Longer and more context-dependent exchanges will show greater sentiment variability than short or low-engagement replies.
+  - Hypothesis: Longer and more context-dependent exchanges show greater sentiment variability than short or low-engagement replies.
 4. Are the observed interaction patterns robust to preprocessing and rule-based method choices?
-  - Hypothesis: Core descriptive patterns will remain directionally stable across reasonable preprocessing variants and rule-based scoring choices.
+  - Hypothesis: Core descriptive patterns remain directionally stable across reasonable variants.
 
 ## How the Research Questions Will Be Answered
 
@@ -47,8 +47,11 @@ To validate the stability of our findings, we will rerun the analysis under alte
 - Data handling: pandas, numpy
 - NLP preprocessing and sentiment: nltk, langdetect, vaderSentiment, SentiWordNet
 - Rule-based sentiment tools: VADER, SentiWordNet, conservative ensemble
+- Statistical testing: scipy.stats
+- Graph analysis: networkx
 - Visualization: matplotlib, seaborn
 - File formats and storage: JSONL, CSV, JSON
+- Config management: PyYAML
 - Workflow environment: Jupyter notebooks + Python scripts (VS Code workspace)
 
 ## Methodology: Data Collection to Rule-Based Analysis
@@ -79,119 +82,124 @@ Note: duplicate rows detected at staging are explicitly handled in preprocessing
 2. Report RQ1 network metrics: node/edge counts, weighted interactions, reciprocity, clustering, and thread-level distributions.
 3. Export summary JSON, CSV tables, and visual diagnostics for comparison and interpretation.
 
-## Results (Primary Rule-Based Analysis)
-Data: 1219 English-language staged comments scored with two rule-based sentiment methods (VADER and SentiWordNet) and a conservative ensemble decision rule.
+## Results (Rule-Based Pipeline, Run 20260419T092811Z)
+Data basis: 1219 preprocessed English comments (rule-based run 20260419T092811Z) and interaction network run 20260419T092832Z.
 
-Run ID: `20260419T092811Z` (latest rule-based run)
+### RQ1 — Dominant interaction patterns
+Hypothesis verdict: SUPPORTED (exploratory, sequential-edge fallback).
 
-1. VADER mean compound score: 0.3386 (positive-skewed distribution).
-2. SentiWordNet mean score: 0.0231 (near-neutral center with broader neutral mass).
-3. Cross-method agreement rate (VADER vs SentiWordNet labels): 0.4643.
-4. Ensemble label distribution (primary rule-based output):
-  - Neutral: 0.5480
-  - Positive: 0.3905
-  - Negative: 0.0615
-5. Rule-based conclusion: compared with single-method VADER, the dual-rule ensemble produces a more conservative neutral-heavy label profile and reduces over-commitment to strong polarity.
+Key metrics:
+- Nodes = 548, edges = 1085, density = 0.00362.
+- Reciprocity = 0.1493, global clustering coefficient = 0.0956.
+- Largest weakly connected component: 544 nodes (99.27%) and 1083 edges (99.82%).
+- Average shortest path length (LCC) = 4.4022, diameter = 13, degree assortativity = -0.0384.
+- Community detection: 19 communities, modularity Q = 0.5741 (top-5 sizes: 69, 58, 55, 52, 47).
+- KS test vs. Erdős–Rényi null on degree sequences: statistic = 0.4526, p = 6.18e-51.
 
-### RQ2 Inferential Outputs (Bootstrap + Paired Test)
-Latest RQ2 artifact: `data/rule_based/moltbook_rq2_stats_20260419T092811Z.json`
+Figures/tables:
+- data/figures/rq1_degree_distribution_20260419T092832Z.png
+- data/figures/rq1_thread_depth_histogram_20260419T092832Z.png
+- data/figures/rq1_reply_concentration_20260419T092832Z.png
+- data/figures/rq1_community_size_distribution_20260419T092832Z.png
+- data/figures/rq1_network_sample_20260419T092832Z.png
+- data/eda/moltbook_rq1_graph_metrics_20260419T092832Z.json
+- data/eda/moltbook_rq1_post_thread_metrics_20260419T092832Z.csv
 
-1. Bootstrap 95% CIs for label shares and means were computed with 4000 resamples (seed = 42).
-2. Example CI outputs:
-  - VADER positive share: 0.7022 [0.6760, 0.7276]
-  - Ensemble neutral share: 0.5480 [0.5201, 0.5759]
-  - VADER mean compound: 0.3386 [0.3056, 0.3718]
-3. Paired significance test (positive detection, VADER vs SentiWordNet):
-  - McNemar exact p-value: 3.90699e-33
-  - Paired positive-rate difference (VADER - SentiWordNet): 0.2149 [0.1813, 0.2486]
-4. Interpretation: method-level polarity differences are statistically strong and practically non-trivial in this sample, reinforcing method-sensitivity concerns already noted in descriptive results.
+Interpretation:
+AI-agent conversations are not random: the strong KS rejection and high modularity indicate structured clustering. At the same time, reciprocity (0.149) shows that fully bidirectional exchanges are relatively uncommon, so MoltBook discourse is better characterized as clustered but weakly reciprocal.
 
-### RQ Results
+### RQ2 — Sentiment distribution and group variation
+Hypothesis verdict: NOT SUPPORTED.
 
-**RQ1 (Dominant interaction patterns among AI agents): two-tier claim structure**
+Key metrics:
+- Ensemble sentiment shares: negative 0.0615, neutral 0.5480, positive 0.3905.
+- Chi-square vs uniform baseline: chi2 = 450.6267, p = 1.4049e-98.
+- VADER mean compound = 0.3386; SentiWordNet mean score = 0.0231.
+- VADER/SentiWordNet agreement: major disagreement pattern is VADER=positive vs SWN=neutral (count = 305).
+- Group-difference Kruskal-Wallis (positive proportion signal):
+  - post_id: H = 110.8733, p = 2.81e-07
+  - thread_id: H = 110.8733, p = 2.81e-07
+  - author_id: H = 308.7110, p = 3.02e-10
 
-**Tier A � Direct-edge conclusions (high validity, currently insufficient evidence):**
-In the latest interaction artifact, direct parent-child reply edge coverage is currently 0.0 (direct edge count = 0, direct weighted interactions = 0). Therefore, no confirmatory structural claim is made from direct reply links in this run.
+HYPOTHESIS VERDICT BLOCK:
+- Hypothesis: NOT SUPPORTED
+- Neutral is the dominant class (54.8%), not positive (39.1%).
+- Neutral is overrepresented relative to the uniform baseline, not underrepresented.
+- Positive is the second most frequent class, not the first.
+- This suggests AI-agent discourse on MoltBook is predominantly non-polar, with many informational/neutral exchanges.
 
-**Tier B � Sequential-fallback exploratory conclusions (descriptive, non-confirmatory):**
-Using sequential thread fallback construction, the graph contains 548 author nodes and 1085 directed edges (weighted interactions = 1201), with reciprocity = 0.1493 and average clustering coefficient = 0.0956. These values are directionally consistent with non-random and locally clustered interaction structure, but they remain exploratory until direct reply-edge coverage improves.
+Figures/tables:
+- data/figures/rq2_corpus_distribution_20260419T092811Z.png
+- data/figures/rq2_by_post_20260419T092811Z.png
+- data/figures/rq2_by_author_entropy_20260419T092811Z.png
+- data/figures/rq2_top_authors_20260419T092811Z.png
+- data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png
+- data/figures/rq2_group_post_stats_20260419T092811Z.csv
+- data/figures/rq2_group_thread_stats_20260419T092811Z.csv
+- data/figures/rq2_group_author_stats_20260419T092811Z.csv
+- data/figures/rq2_group_kruskal_20260419T092811Z.csv
 
-**RQ1 Hypothesis Decision:** **Provisionally accepted (exploratory only)**. The hypothesis direction is supported in fallback-mode descriptive analysis, while confirmatory direct-edge testing remains pending.
+Interpretation:
+The rule-based ensemble yields a neutral-dominant sentiment profile, and sentiment composition varies significantly by post/thread/author. Lexicon disagreement is non-trivial, reinforcing that method choice materially affects polarity assignment and should be treated as a robustness concern.
 
-**RQ2 (Sentiment distribution and group variation):**
+Gold-label status:
+- Human-adjudicated labels are still unavailable in the current gold set.
+- Annotation batch generated: data/gold/annotation_batch_01.csv with guide data/gold/annotation_batch_01_guide.txt.
 
-**Bootstrap 95% Confidence Intervals (N=1219, 4000 resamples, seed=42):**
+### RQ3 — Observable features and sentiment association
+Hypothesis verdict: PARTIALLY SUPPORTED.
 
-VADER sentiment label shares:
-- Positive: 0.7022 [0.6760, 0.7276]
-- Negative: 0.2600 [0.2362, 0.2838]
-- Neutral: 0.0377 [0.0279, 0.0492]
-- Mean compound score: 0.3386 [0.3056, 0.3718]
+Key metrics:
+- Full feature-class test table: data/figures/rq3_feature_stats_20260419T092811Z.csv.
+- Spearman (thread variability tests):
+  - max_depth vs sentiment_std: r = -0.0096, p = 0.9488, 95% CI [-0.3637, 0.3227]
+  - mean_len vs sentiment_std: r = 0.3935, p = 0.00621, 95% CI [0.1001, 0.6238]
 
-SentiWordNet sentiment label shares:
-- Positive: 0.4873 [0.4586, 0.5152]
-- Neutral: 0.3856 [0.3585, 0.4118]
-- Negative: 0.1272 [0.1083, 0.1460]
-- Mean score: 0.0231 [0.0204, 0.0257]
+Figures/tables:
+- data/figures/rq3_feature_boxplots_20260419T092811Z.png
+- data/figures/rq3_variability_scatter_20260419T092811Z.png
+- data/figures/rq3_verified_vs_unverified_20260419T092811Z.png
+- data/figures/rq3_feature_stats_20260419T092811Z.csv
+- data/figures/rq3_variability_spearman_20260419T092811Z.csv
 
-Ensemble (conservative dual-rule) sentiment label shares:
-- Neutral: 0.5480 [0.5201, 0.5759]
-- Positive: 0.3905 [0.3626, 0.4176]
-- Negative: 0.0615 [0.0484, 0.0755]
+Interpretation:
+Feature differences by sentiment class are detectable, but the variability hypothesis is only partly supported. Comment length is positively associated with sentiment variability across threads, while depth is not, suggesting context volume matters more than hierarchy depth under current metadata quality.
 
-**Paired Significance Test (McNemar, positive detection rate):**
-Comparison: VADER positive detection vs SentiWordNet positive detection
-- Paired difference (VADER - SentiWordNet): 0.2149 [0.1813, 0.2486]
-- McNemar chi-squared (with continuity correction): 136.79
-- McNemar exact binomial p-value: **3.91e-33** (highly significant)
-- Contingency table: Both negative (n00) = 245, VADER neg/SWN pos (n01) = 118, VADER pos/SWN neg (n10) = 380, Both positive (n11) = 476
+### RQ4 — Robustness to preprocessing and scoring choices
+Hypothesis verdict: PARTIALLY SUPPORTED.
 
-**RQ2 Hypothesis Decision:** **Accepted**. Positive sentiment is modal under VADER (70.2%) but not under SentiWordNet (48.7%). Ensemble produces neutral-dominant profile (54.8%). Method differences in positive detection rates are statistically significant (p < 0.001) and practically substantial (21.5pp difference), confirming hypothesis that sentiment varies by method choice.
+Key metrics:
+- Stability matrix: data/figures/rq4_robustness_matrix_20260419T092811Z.csv.
+- Coefficient of variation of positive share across variants: 0.2882.
+- Max absolute delta of positive share from baseline: 0.3117.
+- Sensitive variants: v3_vader_only, v4_swn_only.
+- Baseline, basic_clean, and strict_filter variants remain neutral-dominant; scorer-only variants shift dominant class to positive.
 
-**RQ2 Artifacts:**
-- Statistics: data/rule_based/moltbook_rq2_stats_20260419T092811Z.json
-- Stats table: data/rule_based/moltbook_rq2_stats_table_20260419T092811Z.csv
+Figures/tables:
+- data/figures/rq4_robustness_heatmap_20260419T092811Z.png
+- data/figures/rq4_robustness_matrix_20260419T092811Z.csv
 
-### Relevant Graphs
-
-**RQ1 Graphs:**
-
-RQ1 interaction network topology (latest run):
-
-![RQ1 interaction network topology](data/eda/moltbook_interaction_network_topology_latest.png)
-
-RQ1 interaction metric distributions (latest run):
-
-![RQ1 interaction metric distributions](data/eda/moltbook_interaction_network_distributions_latest.png)
-
-**RQ2 Graphs:**
-
-Rule-based label share snapshot (VADER vs SentiWordNet vs Ensemble):
-
-![Rule-based label share](data/rule_based/moltbook_rule_based_label_share_20260419T092811Z.png)
-
-Rule-based score distribution snapshot:
-
-![Rule-based score distributions](data/rule_based/moltbook_rule_based_score_distribution_20260419T092811Z.png)
-
-VADER-only score distribution snapshot:
-
-![VADER score distribution](data/rule_based/moltbook_rule_based_vader_distribution_20260419T092811Z.png)
-
-SentiWordNet-only score distribution snapshot:
-
-![SentiWordNet score distribution](data/rule_based/moltbook_rule_based_swn_distribution_20260419T092811Z.png)
-
-**Rule-based Summary Artifacts:**
-- Summary: data/rule_based/moltbook_rule_based_summary_20260419T092811Z.json
-- Comment-level: data/rule_based/moltbook_rule_based_comments_20260419T092811Z.csv
+Interpretation:
+Core neutral dominance is stable under preprocessing changes but not under scorer substitution, so robustness holds for cleaning variants yet weakens when moving from ensemble to single-lexicon decisions. This identifies scorer choice as the primary sensitivity axis.
 
 ## Shortcomings in Current Results
-1. Direct parent-child reply linkage remains sparse in staged data, so RQ1 network findings still rely on sequential-thread fallback for structural inference.
-2. Rule-based methods (VADER vs SentiWordNet) show moderate agreement (0.4643), indicating method sensitivity and the need for careful interpretation of label uncertainty.
-3. Ensemble labeling is intentionally conservative (neutral-heavy), which improves robustness but may suppress weak positive/negative nuance.
-4. A stratified gold-set sample has been prepared (`data/gold/moltbook_goldset_sample_20260419T092811Z.csv`), but two-rater human annotation and adjudication are still pending; therefore, no final kappa/macro-F1 validation is reported yet.
+1. Human-annotated gold labels are still missing for the current sample, so final Accuracy/Macro-F1/Weighted-F1/MCC and Cohen's Kappa against adjudicated labels remain pending.
+2. RQ1 still depends on sequential edge fallback because direct parent-comment linkage is unresolved in staged metadata.
+3. RQ3 hypothesis support is partial: variability tracks with mean length but not with thread depth under available depth signals.
+4. Lexicon disagreement remains substantial and can shift downstream findings when single-method scorers are used.
 5. Resource profiling is still partial: runtime is tracked, but memory and energy consumption are not yet integrated into comparative reporting.
+
+## Archived: Phase 1 ML Experiments
+These results are from a deprecated ML classification pipeline and do not reflect the current rule-based approach. Retained for record-keeping only.
+
+| Model | Accuracy | Macro-F1 | Weighted-F1 | MCC | Status |
+|---|---:|---:|---:|---:|---|
+| Logistic Regression (archived) | 0.77 | N/A | N/A | N/A | Deprecated |
+| SGD Classifier (archived) | N/A | 0.51 | N/A | N/A | Deprecated |
+
+Notes:
+- Confusion matrices and related ML metrics in earlier drafts belong to the archived ML phase only.
+- Active pipeline for current claims is rule-based: VADER + SentiWordNet + ensemble.
 
 
 <!-- ## Immediate Improvement Plan

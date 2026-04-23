@@ -1,0 +1,35 @@
+variants:
+  - id: "v1_baseline"
+    description: "Standard pipeline - traditional clean text, VADER ensemble"
+    text_field: "text_traditional_clean"
+    scorer: "ensemble"
+    min_word_count: 1
+    remove_stopwords: true
+
+  - id: "v2_basic_clean"
+    description: "Basic cleaning only - no stopword removal, no lemmatization"
+    text_field: "text_basic_clean"
+    scorer: "ensemble"
+    min_word_count: 1
+    remove_stopwords: false
+
+  - id: "v3_vader_only"
+    description: "VADER labels only - no SentiWordNet in ensemble"
+    text_field: "text_traditional_clean"
+    scorer: "vader"
+    min_word_count: 1
+    remove_stopwords: true
+
+  - id: "v4_swn_only"
+    description: "SentiWordNet labels only"
+    text_field: "text_traditional_clean"
+    scorer: "sentiwordnet"
+    min_word_count: 1
+    remove_stopwords: true
+
+  - id: "v5_strict_filter"
+    description: "Stricter quality filter - min 5 words per comment"
+    text_field: "text_traditional_clean"
+    scorer: "ensemble"
+    min_word_count: 5
+    remove_stopwords: true

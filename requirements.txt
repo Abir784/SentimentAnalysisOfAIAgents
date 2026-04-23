@@ -9,3 +9,5 @@ vaderSentiment==3.3.2
 streamlit==1.56.0
 plotly==6.7.0
 networkx==3.6.1
+scipy==1.15.2
+PyYAML==6.0.2

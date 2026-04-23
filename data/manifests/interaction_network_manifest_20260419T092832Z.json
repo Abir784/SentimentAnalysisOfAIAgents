@@ -1,0 +1,21 @@
+{
+  "experiment": "rq1_interaction_network",
+  "run_id": "20260419T092832Z",
+  "created_at_utc": "2026-04-23T14:06:16Z",
+  "input_file": "data/staged/moltbook_comments_all.jsonl",
+  "output_files": [
+    "data/eda/moltbook_interaction_network_summary_20260419T092832Z.json",
+    "data/eda/moltbook_interaction_network_nodes_20260419T092832Z.csv",
+    "data/eda/moltbook_interaction_network_edges_20260419T092832Z.csv",
+    "data/eda/moltbook_interaction_network_thread_stats_20260419T092832Z.csv",
+    "data/eda/moltbook_interaction_network_topology_20260419T092832Z.png",
+    "data/eda/moltbook_interaction_network_distributions_20260419T092832Z.png",
+    "data/eda/moltbook_interaction_network_topology_latest.png",
+    "data/eda/moltbook_interaction_network_distributions_latest.png"
+  ],
+  "parameters": {
+    "seed": 42,
+    "edge_mode": "sequential"
+  },
+  "edge_mode_reason": "sequential fallback selected because direct parent-child linkage did not resolve to in-corpus comment edges"
+}

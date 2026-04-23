@@ -27,6 +27,28 @@ except ImportError as exc:
     ) from exc
 
 
+EDGE_MODE_JUSTIFICATION = """Edge construction modes for MoltBook interaction graphs:
+
+1) direct mode
+     - Requires explicit parent-comment linkage where each comment's parent_id matches
+         another comment_id in the same staged corpus.
+     - On this dataset, direct mode failed to produce usable reply edges because parent_id
+         values frequently do not resolve to in-corpus comment_id records at analysis time.
+
+2) sequential mode
+     - Constructs reply edges from consecutive comments in the same thread, preserving
+         observed thread order as a proxy reply chain: author(i-1) -> author(i).
+     - Assumes adjacency is a reasonable interaction signal when explicit reply metadata
+         is missing or unresolved.
+
+3) why sequential fallback is acceptable here
+     - MoltBook staged data consistently preserves post/thread grouping and comment order.
+     - Sequential fallback keeps all thread interaction signal available for descriptive
+         structure analysis while clearly labeling results as fallback-derived.
+     - This supports exploratory network analysis without overstating direct-reply certainty.
+"""
+
+
 def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     with path.open("r", encoding="utf-8") as handle:
@@ -511,6 +533,35 @@ def _plot_metric_distributions(node_df: pd.DataFrame, thread_df: pd.DataFrame, o
     plt.close()
 
 
+def _write_manifest(
+    run_id: str,
+    input_file: Path,
+    output_files: List[Path],
+    edge_mode: str,
+    edge_mode_reason: str,
+    seed: int,
+) -> Path:
+    manifest_dir = REPO_ROOT / "data" / "manifests"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest = {
+        "experiment": "rq1_interaction_network",
+        "run_id": run_id,
+        "created_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "input_file": input_file.as_posix(),
+        "output_files": [p.as_posix() for p in output_files],
+        "parameters": {
+            "seed": int(seed),
+            "edge_mode": edge_mode,
+        },
+        "edge_mode_reason": edge_mode_reason,
+    }
+
+    out_path = manifest_dir / f"interaction_network_manifest_{run_id}.json"
+    out_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=True), encoding="utf-8")
+    return out_path
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build directed author reply network and export RQ1 interaction metrics."
@@ -534,7 +585,27 @@ def main() -> None:
             "direct (parent->child comment links only), or sequential (adjacent comments within thread)."
         ),
     )
+    parser.add_argument(
+        "--edge-mode-justification",
+        action="store_true",
+        help="Print a human-readable explanation of direct/sequential edge logic and exit.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for reproducibility.",
+    )
+    parser.add_argument(
+        "--run-id",
+        default="",
+        help="Optional run ID (UTC format YYYYMMDDTHHMMSSZ). Defaults to current UTC time.",
+    )
     args = parser.parse_args()
+
+    if args.edge_mode_justification:
+        print(EDGE_MODE_JUSTIFICATION.strip())
+        return
 
     input_path = Path(args.input)
     if not input_path.exists():
@@ -543,7 +614,7 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    run_id = args.run_id.strip() or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
     rows = _read_jsonl(input_path)
     df = pd.DataFrame(rows)
@@ -578,6 +649,7 @@ def main() -> None:
             "run_id": run_id,
             "input_file": str(input_path).replace("\\", "/"),
             "rows_input": int(len(df)),
+            "edge_mode_justification": EDGE_MODE_JUSTIFICATION.strip(),
         }
     )
 
@@ -598,6 +670,30 @@ def main() -> None:
     _plot_metric_distributions(node_df, thread_df, distribution_plot_path)
     shutil.copyfile(network_plot_path, latest_network_plot_path)
     shutil.copyfile(distribution_plot_path, latest_distribution_plot_path)
+
+    selected = str(selection_diagnostics.get("selected_mode", "unknown"))
+    reason = (
+        "auto mode selected direct edges because parent-child links were resolvable"
+        if selected == "direct"
+        else "sequential fallback selected because direct parent-child linkage did not resolve to in-corpus comment edges"
+    )
+    manifest_path = _write_manifest(
+        run_id=run_id,
+        input_file=input_path,
+        output_files=[
+            summary_path,
+            nodes_path,
+            edges_path,
+            thread_path,
+            network_plot_path,
+            distribution_plot_path,
+            latest_network_plot_path,
+            latest_distribution_plot_path,
+        ],
+        edge_mode=selected,
+        edge_mode_reason=reason,
+        seed=args.seed,
+    )
 
     cleanup_old_files(output_dir, "moltbook_interaction_network_summary_*.json", keep_latest=1)
     cleanup_old_files(output_dir, "moltbook_interaction_network_nodes_*.csv", keep_latest=1)
@@ -625,6 +721,7 @@ def main() -> None:
     print(f"distribution_plot_path: {distribution_plot_path}")
     print(f"network_plot_latest_path: {latest_network_plot_path}")
     print(f"distribution_plot_latest_path: {latest_distribution_plot_path}")
+    print(f"manifest_path: {manifest_path}")
 
 
 if __name__ == "__main__":

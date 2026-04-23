@@ -134,5 +134,6 @@
   ],
   "run_id": "20260419T092832Z",
   "input_file": "data/staged/moltbook_comments_all.jsonl",
-  "rows_input": 1296
+  "rows_input": 1296,
+  "edge_mode_justification": "Edge construction modes for MoltBook interaction graphs:\n\n1) direct mode\n     - Requires explicit parent-comment linkage where each comment's parent_id matches\n         another comment_id in the same staged corpus.\n     - On this dataset, direct mode failed to produce usable reply edges because parent_id\n         values frequently do not resolve to in-corpus comment_id records at analysis time.\n\n2) sequential mode\n     - Constructs reply edges from consecutive comments in the same thread, preserving\n         observed thread order as a proxy reply chain: author(i-1) -> author(i).\n     - Assumes adjacency is a reasonable interaction signal when explicit reply metadata\n         is missing or unresolved.\n\n3) why sequential fallback is acceptable here\n     - MoltBook staged data consistently preserves post/thread grouping and comment order.\n     - Sequential fallback keeps all thread interaction signal available for descriptive\n         structure analysis while clearly labeling results as fallback-derived.\n     - This supports exploratory network analysis without overstating direct-reply certainty."
 }

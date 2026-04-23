@@ -1,0 +1,13 @@
+ANNOTATION GUIDE (3-class sentiment)
+
+Classes:
+- negative: clear negative judgment, criticism, frustration, harm, or rejection.
+- neutral: informational, descriptive, procedural, or mixed/unclear affect with no dominant polarity.
+- positive: clear approval, praise, support, optimism, or favorable evaluation.
+
+Rules:
+1) Label the dominant sentiment of the full comment, not isolated words.
+2) If strong positive and negative cues are balanced or ambiguous, choose neutral.
+3) Ignore model label when assigning human_label.
+4) If sarcasm/irony cannot be resolved confidently, choose neutral.
+5) Keep labels lowercase: negative/neutral/positive.

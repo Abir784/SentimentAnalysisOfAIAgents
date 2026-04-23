@@ -1,0 +1,16 @@
+# Python environment and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local/editor artifacts
+.DS_Store
+Thumbs.db

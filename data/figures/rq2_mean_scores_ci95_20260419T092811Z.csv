@@ -1,0 +1,3 @@
+metric,point,ci95_low,ci95_high
+vader_compound,0.338595,0.305613,0.371826
+swn_score,0.023077,0.020446,0.025739
