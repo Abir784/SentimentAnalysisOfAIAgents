@@ -184,10 +184,9 @@ Core neutral dominance is stable under preprocessing changes but not under score
 
 ## Shortcomings in Current Results
 1. Human-annotated gold labels are still missing for the current sample, so final Accuracy/Macro-F1/Weighted-F1/MCC and Cohen's Kappa against adjudicated labels remain pending.
-2. RQ1 still depends on sequential edge fallback because direct parent-comment linkage is unresolved in staged metadata.
-3. RQ3 hypothesis support is partial: variability tracks with mean length but not with thread depth under available depth signals.
-4. Lexicon disagreement remains substantial and can shift downstream findings when single-method scorers are used.
-5. Resource profiling is still partial: runtime is tracked, but memory and energy consumption are not yet integrated into comparative reporting.
+2. RQ3 hypothesis support is partial: variability tracks with mean length but not with thread depth under available depth signals.
+3. Lexicon disagreement remains substantial and can shift downstream findings when single-method scorers are used.
+4. Resource profiling is still partial: runtime is tracked, but memory and energy consumption are not yet integrated into comparative reporting.
 
 ## Archived: Phase 1 ML Experiments
 These results are from a deprecated ML classification pipeline and do not reflect the current rule-based approach. Retained for record-keeping only.
@@ -443,42 +442,42 @@ This section groups the most important visual outputs by research question so ea
 ### RQ1 — Dominant interaction patterns
 Answer focus: interaction structure is clustered and non-random.
 
-![RQ1 Network Topology Snapshot](data/figures/rq1_network_sample_20260419T092832Z.png)
+<img src="./data/figures/rq1_network_sample_20260419T092832Z.png" alt="RQ1 Network Topology Snapshot" width="900" />
 
-![RQ1 Degree Distribution](data/figures/rq1_degree_distribution_20260419T092832Z.png)
+<img src="./data/figures/rq1_degree_distribution_20260419T092832Z.png" alt="RQ1 Degree Distribution" width="900" />
 
-![RQ1 Thread Depth Histogram](data/figures/rq1_thread_depth_histogram_20260419T092832Z.png)
+<img src="./data/figures/rq1_thread_depth_histogram_20260419T092832Z.png" alt="RQ1 Thread Depth Histogram" width="900" />
 
-![RQ1 Reply Concentration](data/figures/rq1_reply_concentration_20260419T092832Z.png)
+<img src="./data/figures/rq1_reply_concentration_20260419T092832Z.png" alt="RQ1 Reply Concentration" width="900" />
 
-![RQ1 Community Size Distribution](data/figures/rq1_community_size_distribution_20260419T092832Z.png)
+<img src="./data/figures/rq1_community_size_distribution_20260419T092832Z.png" alt="RQ1 Community Size Distribution" width="900" />
 
 ### RQ2 — Sentiment distribution and group variation
 Answer focus: neutral is dominant overall, with significant variation by post/thread/author.
 
-![RQ2 Corpus Distribution](data/figures/rq2_corpus_distribution_20260419T092811Z.png)
+<img src="./data/figures/rq2_corpus_distribution_20260419T092811Z.png" alt="RQ2 Corpus Distribution" width="900" />
 
-![RQ2 Variation by Post](data/figures/rq2_by_post_20260419T092811Z.png)
+<img src="./data/figures/rq2_by_post_20260419T092811Z.png" alt="RQ2 Variation by Post" width="900" />
 
-![RQ2 Top Authors by Sentiment Profile](data/figures/rq2_top_authors_20260419T092811Z.png)
+<img src="./data/figures/rq2_top_authors_20260419T092811Z.png" alt="RQ2 Top Authors by Sentiment Profile" width="900" />
 
-![RQ2 Author Entropy](data/figures/rq2_by_author_entropy_20260419T092811Z.png)
+<img src="./data/figures/rq2_by_author_entropy_20260419T092811Z.png" alt="RQ2 Author Entropy" width="900" />
 
-![RQ2 Lexicon Agreement Heatmap](data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png)
+<img src="./data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png" alt="RQ2 Lexicon Agreement Heatmap" width="900" />
 
 ### RQ3 — Feature association with sentiment
 Answer focus: feature effects are mixed; length-related variability is stronger than depth.
 
-![RQ3 Feature Distributions by Sentiment Class](data/figures/rq3_feature_boxplots_20260419T092811Z.png)
+<img src="./data/figures/rq3_feature_boxplots_20260419T092811Z.png" alt="RQ3 Feature Distributions by Sentiment Class" width="900" />
 
-![RQ3 Thread Variability Association](data/figures/rq3_variability_scatter_20260419T092811Z.png)
+<img src="./data/figures/rq3_variability_scatter_20260419T092811Z.png" alt="RQ3 Thread Variability Association" width="900" />
 
-![RQ3 Verified vs Unverified Comparison](data/figures/rq3_verified_vs_unverified_20260419T092811Z.png)
+<img src="./data/figures/rq3_verified_vs_unverified_20260419T092811Z.png" alt="RQ3 Verified vs Unverified Comparison" width="900" />
 
 ### RQ4 — Robustness under methodological variants
 Answer focus: findings are stable for preprocessing variants but sensitive to scorer choice.
 
-![RQ4 Robustness Heatmap](data/figures/rq4_robustness_heatmap_20260419T092811Z.png)
+<img src="./data/figures/rq4_robustness_heatmap_20260419T092811Z.png" alt="RQ4 Robustness Heatmap" width="900" />
 
 Supporting matrix (table data): data/figures/rq4_robustness_matrix_20260419T092811Z.csv
 
