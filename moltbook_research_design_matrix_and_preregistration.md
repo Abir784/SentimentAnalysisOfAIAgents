@@ -443,33 +443,44 @@ This section groups the most important visual outputs by research question so ea
 ### RQ1 — Dominant interaction patterns
 Answer focus: interaction structure is clustered and non-random.
 
-- `data/figures/rq1_network_sample_20260419T092832Z.png` (network topology snapshot)
-- `data/figures/rq1_degree_distribution_20260419T092832Z.png` (heavy-tail interaction concentration)
-- `data/figures/rq1_thread_depth_histogram_20260419T092832Z.png` (discussion depth profile)
-- `data/figures/rq1_reply_concentration_20260419T092832Z.png` (reply concentration by actor/thread)
-- `data/figures/rq1_community_size_distribution_20260419T092832Z.png` (community-size structure)
+![RQ1 Network Topology Snapshot](data/figures/rq1_network_sample_20260419T092832Z.png)
+
+![RQ1 Degree Distribution](data/figures/rq1_degree_distribution_20260419T092832Z.png)
+
+![RQ1 Thread Depth Histogram](data/figures/rq1_thread_depth_histogram_20260419T092832Z.png)
+
+![RQ1 Reply Concentration](data/figures/rq1_reply_concentration_20260419T092832Z.png)
+
+![RQ1 Community Size Distribution](data/figures/rq1_community_size_distribution_20260419T092832Z.png)
 
 ### RQ2 — Sentiment distribution and group variation
 Answer focus: neutral is dominant overall, with significant variation by post/thread/author.
 
-- `data/figures/rq2_corpus_distribution_20260419T092811Z.png` (overall class distribution)
-- `data/figures/rq2_by_post_20260419T092811Z.png` (variation across posts)
-- `data/figures/rq2_top_authors_20260419T092811Z.png` (author-level sentiment concentration)
-- `data/figures/rq2_by_author_entropy_20260419T092811Z.png` (author-level diversity/entropy)
-- `data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png` (VADER vs SWN agreement/disagreement)
+![RQ2 Corpus Distribution](data/figures/rq2_corpus_distribution_20260419T092811Z.png)
+
+![RQ2 Variation by Post](data/figures/rq2_by_post_20260419T092811Z.png)
+
+![RQ2 Top Authors by Sentiment Profile](data/figures/rq2_top_authors_20260419T092811Z.png)
+
+![RQ2 Author Entropy](data/figures/rq2_by_author_entropy_20260419T092811Z.png)
+
+![RQ2 Lexicon Agreement Heatmap](data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png)
 
 ### RQ3 — Feature association with sentiment
 Answer focus: feature effects are mixed; length-related variability is stronger than depth.
 
-- `data/figures/rq3_feature_boxplots_20260419T092811Z.png` (feature distributions by sentiment class)
-- `data/figures/rq3_variability_scatter_20260419T092811Z.png` (thread variability association view)
-- `data/figures/rq3_verified_vs_unverified_20260419T092811Z.png` (verification subgroup comparison)
+![RQ3 Feature Distributions by Sentiment Class](data/figures/rq3_feature_boxplots_20260419T092811Z.png)
+
+![RQ3 Thread Variability Association](data/figures/rq3_variability_scatter_20260419T092811Z.png)
+
+![RQ3 Verified vs Unverified Comparison](data/figures/rq3_verified_vs_unverified_20260419T092811Z.png)
 
 ### RQ4 — Robustness under methodological variants
 Answer focus: findings are stable for preprocessing variants but sensitive to scorer choice.
 
-- `data/figures/rq4_robustness_heatmap_20260419T092811Z.png` (variant-by-metric stability map)
-- `data/figures/rq4_robustness_matrix_20260419T092811Z.csv` (supporting matrix for the heatmap)
+![RQ4 Robustness Heatmap](data/figures/rq4_robustness_heatmap_20260419T092811Z.png)
+
+Supporting matrix (table data): data/figures/rq4_robustness_matrix_20260419T092811Z.csv
 
 ### Optional single-slide summary mapping
 
