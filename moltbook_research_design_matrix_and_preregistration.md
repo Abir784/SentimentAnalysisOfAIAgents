@@ -207,7 +207,7 @@ This section groups the most important visual outputs by research question so ea
 ### RQ1 — Dominant interaction patterns
 Answer focus: interaction structure is clustered and non-random.
 
-<img src="./data/figures/rq1_representative_subgraph_20260424T111521Z.png" alt="RQ1 Representative Subgraph" width="900" />
+<img src="./data/figures/rq1_representative_subgraph_20260424T112944Z.png" alt="RQ1 Representative Subgraph" width="900" />
 
 <img src="./data/figures/rq1_degree_distribution_20260424T111521Z.png" alt="RQ1 Degree Distribution" width="900" />
 

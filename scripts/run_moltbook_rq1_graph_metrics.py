@@ -270,7 +270,12 @@ def _generate_node_abbreviation(full_name: str) -> str:
     return full_name[:2] + full_name[-1]
 
 
-def _plot_representative_subgraph(g: nx.DiGraph, pagerank: Dict[str, float], out_path: Path, seed: int) -> None:
+def _plot_representative_subgraph(
+    g: nx.DiGraph,
+    pagerank: Dict[str, float],
+    out_path: Path,
+    seed: int,
+) -> pd.DataFrame:
     degrees = dict(g.degree())
     keep_nodes = [n for n, d in degrees.items() if d >= 3]
     sub = g.subgraph(keep_nodes).copy()
@@ -282,7 +287,7 @@ def _plot_representative_subgraph(g: nx.DiGraph, pagerank: Dict[str, float], out
         fig.tight_layout()
         fig.savefig(out_path, dpi=150)
         plt.close(fig)
-        return
+        return pd.DataFrame(columns=["author_id", "abbreviation", "pagerank", "in_degree", "out_degree", "degree"])
 
     pos = nx.spring_layout(sub, seed=seed, k=0.55)
     in_deg = dict(sub.in_degree())
@@ -302,27 +307,26 @@ def _plot_representative_subgraph(g: nx.DiGraph, pagerank: Dict[str, float], out
     labels = {n: abbrev_map[n] for n in sub.nodes()}
     nx.draw_networkx_labels(sub, pos, labels=labels, font_size=8, font_color="#111111", ax=ax, font_weight="bold")
 
-    # Create legend with full names mapped to abbreviations
-    # Sort by PageRank to show top agents
-    top_nodes = sorted(sub.nodes(), key=lambda n: pagerank.get(n, 0), reverse=True)[:15]
-    legend_text = "Agent Abbreviations (top 15 by PageRank):\n"
-    for i, node in enumerate(top_nodes):
-        legend_text += f"{abbrev_map[node]} = {node}\n"
+    # Full map for every labeled node in the representative subgraph.
+    label_map_rows = [
+        {
+            "author_id": str(node),
+            "abbreviation": abbrev_map[node],
+            "pagerank": float(pagerank.get(node, 0.0)),
+            "in_degree": int(sub.in_degree(node)),
+            "out_degree": int(sub.out_degree(node)),
+            "degree": int(sub.degree(node)),
+        }
+        for node in sub.nodes()
+    ]
+    label_map_df = pd.DataFrame(label_map_rows).sort_values(["pagerank", "degree"], ascending=False).reset_index(drop=True)
 
-    ax.text(
-        0.02, 0.98, legend_text,
-        transform=ax.transAxes,
-        fontsize=8,
-        verticalalignment="top",
-        bbox=dict(boxstyle="round", facecolor="#f0f0f0", alpha=0.9, pad=0.8),
-        family="monospace"
-    )
-
-    ax.set_title("RQ1 Representative Subgraph (degree >= 3)\nAll nodes labeled with abbreviations", fontsize=12, fontweight="bold")
+    ax.set_title("RQ1 Representative Subgraph (degree >= 3)", fontsize=12, fontweight="bold")
     ax.axis("off")
     fig.tight_layout()
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
+    return label_map_df
 
 
 def _write_manifest(run_id: str, params: Dict[str, Any], outputs: List[Path]) -> Path:
@@ -496,11 +500,13 @@ def main() -> None:
 
     network_png = fig_dir / f"rq1_representative_subgraph_{run_id}.png"
     network_csv = fig_dir / f"rq1_representative_subgraph_{run_id}.csv"
-    _plot_representative_subgraph(g, pr, network_png, args.seed)
+    label_map_json = fig_dir / f"rq1_representative_subgraph_label_map_{run_id}.json"
+    label_map_df = _plot_representative_subgraph(g, pr, network_png, args.seed)
     if node_metrics.empty:
         pd.DataFrame(columns=["author_id", "in_degree", "pagerank"]).to_csv(network_csv, index=False)
     else:
         node_metrics.sort_values("pagerank", ascending=False).head(5)[["author_id", "in_degree", "pagerank"]].to_csv(network_csv, index=False)
+    label_map_json.write_text(label_map_df.to_json(orient="records", indent=2), encoding="utf-8")
 
     findings_path = Path("data") / "rq1_findings_summary.md"
     hypothesis_verdict = (
@@ -539,6 +545,7 @@ The graph uses sequential fallback edges because direct parent-child links are u
         comm_csv,
         network_png,
         network_csv,
+        label_map_json,
         findings_path,
     ]
     manifest_path = _write_manifest(
