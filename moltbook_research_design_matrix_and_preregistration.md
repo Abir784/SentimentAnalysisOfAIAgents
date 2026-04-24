@@ -87,9 +87,9 @@ Note: duplicate rows detected at staging are explicitly handled in preprocessing
 # Findings in Detail
 
 ## RQ1: Dominant Interaction Patterns in AI-Agent Conversations
-
-Analysis of the MoltBook reply network reveals a pronounced core-periphery structure in which a small number of highly connected agents occupy a central hub position, while the majority of agents remain at the network periphery with low degree. The degree distribution approximates a power-law decay on a log-log scale, consistent with preferential attachment dynamics observed in human social networks, wherein a disproportionate share of interactions concentrates among a few dominant agents — including glados_openclaw, senti-001, quillagent, GanglionMinion, and coinflipcasino. Community detection identified nineteen distinct conversational clusters ranging in size from 2 to 69 members, with a smooth rank-size decline indicative of meaningful, non-random community formation. The largest community accounts for substantially more members than subsequent clusters, suggesting one dominant conversational grouping within the platform.
-
+ 
+Analysis of the MoltBook reply network reveals a pronounced core-periphery structure in which a small number of highly connected agents occupy a central hub position, while the majority of agents remain at the network periphery with low degree. The degree distribution approximates a power-law decay on a log-log scale, consistent with preferential attachment dynamics observed in human social networks. PageRank analysis identifies a clear hierarchy of influence among the top five agents: senti-001 (PageRank = 0.038, in-degree = 43), GanglionMinion (PageRank = 0.027, in-degree = 33), coinflipcasino (PageRank = 0.013, in-degree = 16), glados_openclaw (PageRank = 0.012, in-degree = 14), and quillagent (PageRank = 0.010, in-degree = 11). These five agents collectively concentrate a disproportionate share of incoming interaction traffic, with senti-001 occupying a structurally dominant position considerably above all others. Community detection identified nineteen distinct conversational clusters ranging in size from 2 to 69 members, with a smooth rank-size decline indicative of meaningful, non-random community formation. The largest community accounts for substantially more members than subsequent clusters, suggesting one dominant conversational grouping within the platform.
+ 
 At the post level, reply concentration measured via the Gini coefficient varies considerably across threads. Approximately 22 of the 55 sampled posts exhibit non-zero Gini scores, with values reaching as high as 0.58 in the most concentrated posts, while the corpus-wide mean remains low at 0.091. This pattern indicates that engagement is selectively concentrated in a subset of posts, while the majority attract broadly distributed or negligible reply activity. Collectively, these structural properties — the scale-free degree distribution, the multi-community topology, and the heterogeneous reply concentration — confirm that AI-agent interactions on MoltBook are organised according to non-random, socially structured patterns consistent with broader findings from computational social network analysis.
 
 ---
@@ -121,20 +121,26 @@ The VADER-only variant (v3) diverges substantially, producing a distribution of 
 ---
 
 ## RQ1 — Interaction Patterns in AI-Agent Conversations
-
-The reply network exhibits a clear **core-periphery structure** with power-law degree distribution, characteristic of preferential attachment. Five hub agents dominate interaction traffic. Community detection yields **19 distinct clusters** (size range: 2–69 members), confirming non-random conversational organisation.
-
+ 
+The reply network exhibits a clear **core-periphery structure** with power-law degree distribution, characteristic of preferential attachment. PageRank analysis reveals a strict influence hierarchy among hub agents. Community detection yields **19 distinct clusters** (size range: 2–69 members), confirming non-random conversational organisation.
+ 
+| Rank | Agent | In-Degree | PageRank |
+|---|---|---|---|
+| 1 | senti-001 | 43 | 0.038 |
+| 2 | GanglionMinion | 33 | 0.027 |
+| 3 | coinflipcasino | 16 | 0.013 |
+| 4 | glados_openclaw | 14 | 0.012 |
+| 5 | quillagent | 11 | 0.010 |
+ 
 | Metric | Value |
 |---|---|
 | Communities detected | 19 |
 | Largest community size | 69 agents |
-| Max agent degree (in/out) | 33 / 38 |
 | Mean Gini (reply concentration) | 0.091 |
 | Peak Gini (single post) | 0.58 |
-
-> **Key point:** A small elite of agents drives the majority of interactions; most agents engage minimally. Community structure is real and meaningful, not random.
-
----
+ 
+> **Key point:** senti-001 is the structurally dominant agent by a clear margin. A small elite of five agents concentrates the majority of interaction traffic; the rest of the network engages minimally.
+ 
 
 ## RQ2 — Sentiment Distribution of AI-Agent Replies
 
@@ -201,15 +207,15 @@ This section groups the most important visual outputs by research question so ea
 ### RQ1 — Dominant interaction patterns
 Answer focus: interaction structure is clustered and non-random.
 
-<img src="./data/figures/rq1_network_sample_20260419T092832Z.png" alt="RQ1 Network Topology Snapshot" width="900" />
+<img src="./data/figures/rq1_representative_subgraph_20260424T111521Z.png" alt="RQ1 Representative Subgraph" width="900" />
 
-<img src="./data/figures/rq1_degree_distribution_20260419T092832Z.png" alt="RQ1 Degree Distribution" width="900" />
+<img src="./data/figures/rq1_degree_distribution_20260424T111521Z.png" alt="RQ1 Degree Distribution" width="900" />
 
-<img src="./data/figures/rq1_thread_depth_histogram_20260419T092832Z.png" alt="RQ1 Thread Depth Histogram" width="900" />
+<img src="./data/figures/rq1_thread_depth_histogram_20260424T111521Z.png" alt="RQ1 Thread Depth Histogram" width="900" />
 
-<img src="./data/figures/rq1_reply_concentration_20260419T092832Z.png" alt="RQ1 Reply Concentration" width="900" />
+<img src="./data/figures/rq1_reply_concentration_20260424T111521Z.png" alt="RQ1 Reply Concentration" width="900" />
 
-<img src="./data/figures/rq1_community_size_distribution_20260419T092832Z.png" alt="RQ1 Community Size Distribution" width="900" />
+<img src="./data/figures/rq1_community_size_distribution_20260424T111521Z.png" alt="RQ1 Community Size Distribution" width="900" />
 
 ### RQ2 — Sentiment distribution and group variation
 Answer focus: neutral is dominant overall, with significant variation by post/thread/author.

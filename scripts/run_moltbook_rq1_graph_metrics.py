@@ -250,12 +250,32 @@ def _plot_community_sizes(sizes: List[int], out_path: Path) -> None:
     plt.close(fig)
 
 
-def _plot_network_sample(g: nx.DiGraph, pagerank: Dict[str, float], out_path: Path, seed: int) -> None:
+def _generate_node_abbreviation(full_name: str) -> str:
+    """Generate short abbreviation for agent/author name."""
+    if len(full_name) <= 3:
+        return full_name
+    # Handle common patterns: remove common prefixes/suffixes
+    clean = full_name.replace("_", "").replace("-", "")
+    if len(clean) <= 4:
+        return clean[:4]
+    # Use first letters of camelCase or underscore-separated words
+    if "_" in full_name:
+        parts = full_name.split("_")
+        return "".join(p[0].upper() for p in parts if p)
+    # CamelCase: take capital letters
+    capitals = "".join(c for c in full_name if c.isupper())
+    if len(capitals) >= 2:
+        return capitals[:3]
+    # Default: first 3 chars + last char
+    return full_name[:2] + full_name[-1]
+
+
+def _plot_representative_subgraph(g: nx.DiGraph, pagerank: Dict[str, float], out_path: Path, seed: int) -> None:
     degrees = dict(g.degree())
     keep_nodes = [n for n, d in degrees.items() if d >= 3]
     sub = g.subgraph(keep_nodes).copy()
 
-    fig, ax = plt.subplots(figsize=(10, 8), dpi=150)
+    fig, ax = plt.subplots(figsize=(14, 10), dpi=150)
     if sub.number_of_nodes() == 0:
         ax.text(0.5, 0.5, "No nodes with degree >= 3", ha="center", va="center")
         ax.axis("off")
@@ -268,6 +288,9 @@ def _plot_network_sample(g: nx.DiGraph, pagerank: Dict[str, float], out_path: Pa
     in_deg = dict(sub.in_degree())
     node_sizes = [150 + 80 * in_deg.get(n, 0) for n in sub.nodes()]
 
+    # Generate abbreviations for all nodes
+    abbrev_map = {n: _generate_node_abbreviation(str(n)) for n in sub.nodes()}
+
     max_weight = max((d.get("weight", 1) for _, _, d in sub.edges(data=True)), default=1)
     nx.draw_networkx_nodes(sub, pos, node_size=node_sizes, node_color="#219ebc", alpha=0.85, ax=ax)
 
@@ -275,11 +298,27 @@ def _plot_network_sample(g: nx.DiGraph, pagerank: Dict[str, float], out_path: Pa
         alpha = min(0.9, 0.2 + (data.get("weight", 1) / max_weight) * 0.7)
         nx.draw_networkx_edges(sub, pos, edgelist=[(u, v)], alpha=alpha, width=1.2, edge_color="#023047", ax=ax)
 
-    top5 = [n for n, _ in sorted(pagerank.items(), key=lambda x: x[1], reverse=True)[:5] if n in sub.nodes()]
-    labels = {n: str(n) for n in top5}
-    nx.draw_networkx_labels(sub, pos, labels=labels, font_size=9, font_color="#111111", ax=ax)
+    # Label ALL nodes with abbreviations
+    labels = {n: abbrev_map[n] for n in sub.nodes()}
+    nx.draw_networkx_labels(sub, pos, labels=labels, font_size=8, font_color="#111111", ax=ax, font_weight="bold")
 
-    ax.set_title("RQ1 Network Sample (degree >= 3)")
+    # Create legend with full names mapped to abbreviations
+    # Sort by PageRank to show top agents
+    top_nodes = sorted(sub.nodes(), key=lambda n: pagerank.get(n, 0), reverse=True)[:15]
+    legend_text = "Agent Abbreviations (top 15 by PageRank):\n"
+    for i, node in enumerate(top_nodes):
+        legend_text += f"{abbrev_map[node]} = {node}\n"
+
+    ax.text(
+        0.02, 0.98, legend_text,
+        transform=ax.transAxes,
+        fontsize=8,
+        verticalalignment="top",
+        bbox=dict(boxstyle="round", facecolor="#f0f0f0", alpha=0.9, pad=0.8),
+        family="monospace"
+    )
+
+    ax.set_title("RQ1 Representative Subgraph (degree >= 3)\nAll nodes labeled with abbreviations", fontsize=12, fontweight="bold")
     ax.axis("off")
     fig.tight_layout()
     fig.savefig(out_path, dpi=150)
@@ -455,9 +494,9 @@ def main() -> None:
     _plot_community_sizes(comm_sizes, comm_png)
     pd.DataFrame({"community_size": sorted(comm_sizes, reverse=True)}).to_csv(comm_csv, index=False)
 
-    network_png = fig_dir / f"rq1_network_sample_{run_id}.png"
-    network_csv = fig_dir / f"rq1_network_sample_{run_id}.csv"
-    _plot_network_sample(g, pr, network_png, args.seed)
+    network_png = fig_dir / f"rq1_representative_subgraph_{run_id}.png"
+    network_csv = fig_dir / f"rq1_representative_subgraph_{run_id}.csv"
+    _plot_representative_subgraph(g, pr, network_png, args.seed)
     if node_metrics.empty:
         pd.DataFrame(columns=["author_id", "in_degree", "pagerank"]).to_csv(network_csv, index=False)
     else:
