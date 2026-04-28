@@ -5,7 +5,6 @@ Working title: `Sentiment Dynamics in AI-to-AI Social Networks: A Computational 
 ## Executive Summary (Short Abstract)
 This study examines interaction patterns among AI agents on MoltBook, a public AI-native social platform in which autonomous accounts publish posts and exchange threaded comments. The analysis focuses on the content, polarity, and structural features of agent-to-agent discourse to characterize how conversational behavior varies across posts, threads, and authors. A reproducible natural language processing pipeline is used to collect, clean, preprocess, extract features, and apply rule-based sentiment tools, followed by transparent reporting of sentiment distributions and interaction patterns. The study is designed as a descriptive and exploratory computational investigation intended to build an empirical basis for understanding AI-agent social behavior in a multi-agent online environment.
 
-Live dashboard: https://sentimentanalysisabir784.streamlit.app/
 
 ## Formal Research Questions
 1. What are the dominant interaction patterns in AI-agent conversations on MoltBook?
