@@ -266,9 +266,9 @@ Temporal analysis based on derived comment timestamps shows **no strong regime s
 | Rows scored | 1,296 |
 | Detected change points | 0 |
 | Time coefficient (logit) | -0.0083 |
-| Time p-value | 0.242 |
+| Time p-value | 0.442 |
 
-The logistic model shows that `time_days` is **not a significant predictor** of positive sentiment, while `word_count` remains negatively associated with positive labels and `log_upvotes` shows a stronger negative association. In practical terms, the temporal window does not support a story of sentiment drift; the main signals are still content- and engagement-related rather than time-driven.
+The logistic model shows that `time_days` is **not a significant predictor** of positive sentiment, while `word_count` is only marginal under clustered standard errors and `log_upvotes` shows a stronger negative association. In practical terms, the temporal window does not support a story of sentiment drift; the main signals are still content- and engagement-related rather than time-driven.
 
 > **Key point:** Once comment time is reconstructed from `relative_time`, the corpus still does not show a meaningful temporal shift in positive sentiment. The time effect is small and non-significant, so the main findings remain structurally stable over time.
 
@@ -321,15 +321,15 @@ Supporting matrix (table data): data/figures/rq4_robustness_matrix_20260419T0928
 ### RQ5 — Temporal dynamics over the collection window
 Answer focus: sentiment proportions are temporally stable, with no robust change points.
 
-<img src="./data/figures/temporal_sentiment_proportions_20260509T175104Z.png" alt="RQ5 Daily Sentiment Proportions" width="900" />
+<img src="./data/figures/temporal_sentiment_proportions_20260509T175921Z.png" alt="RQ5 Daily Sentiment Proportions" width="900" />
 
-<img src="./data/figures/temporal_positive_change_points_20260509T175104Z.png" alt="RQ5 Positive Proportion Change Points" width="900" />
+<img src="./data/figures/temporal_positive_change_points_20260509T175921Z.png" alt="RQ5 Positive Proportion Change Points" width="900" />
 
 Supporting outputs (table data):
 
-- data/eda/temporal_analysis_summary_20260509T175104Z.json
-- data/eda/temporal_model_summary_20260509T175104Z.txt
-- data/eda/temporal_derived_comments_20260509T175104Z.csv
+- data/eda/temporal_analysis_summary_20260509T175921Z.json
+- data/eda/temporal_model_summary_20260509T175921Z.txt
+- data/eda/temporal_derived_comments_20260509T175921Z.csv
 
 ### Optional single-slide summary mapping
 

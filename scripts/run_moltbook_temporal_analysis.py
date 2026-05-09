@@ -186,14 +186,14 @@ def main() -> None:
     change_points = [daily.index[idx - 1] for idx in breakpoints if 0 < idx < len(daily)]
 
     model = smf.logit("is_positive ~ time_days + word_count + log_upvotes", data=df)
-    result = model.fit(disp=False)
-
-    robust_result = result
     if "author_id" in df.columns and df["author_id"].notna().any():
-        try:
-            robust_result = result.get_robustcov_results(cov_type="cluster", groups=df["author_id"])
-        except Exception:
-            robust_result = result
+        robust_result = model.fit(
+            disp=False,
+            cov_type="cluster",
+            cov_kwds={"groups": df["author_id"]},
+        )
+    else:
+        robust_result = model.fit(disp=False)
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     daily_plot = figure_dir / f"temporal_sentiment_proportions_{run_id}.png"

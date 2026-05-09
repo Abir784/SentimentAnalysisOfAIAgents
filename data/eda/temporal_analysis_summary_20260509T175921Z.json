@@ -1,0 +1,28 @@
+{
+  "rule_based_csv": "data/rule_based/moltbook_rule_based_comments_20260509T173800Z.csv",
+  "staged_jsonl": "data/staged/moltbook_comments_all.jsonl",
+  "n_rows": 1296,
+  "date_range": [
+    "2026-03-07",
+    "2026-03-28"
+  ],
+  "change_points": [],
+  "model_params": {
+    "Intercept": -0.10658119873356707,
+    "time_days": -0.008326462828545008,
+    "word_count": -0.0019709867284119355,
+    "log_upvotes": -0.7223746517397218
+  },
+  "model_pvalues": {
+    "Intercept": 0.6524187184095305,
+    "time_days": 0.4419849999270995,
+    "word_count": 0.08280489534572966,
+    "log_upvotes": 0.0011913787376552065
+  },
+  "artifacts": {
+    "daily_plot": "data/figures/temporal_sentiment_proportions_20260509T175921Z.png",
+    "change_point_plot": "data/figures/temporal_positive_change_points_20260509T175921Z.png",
+    "model_summary": "data/eda/temporal_model_summary_20260509T175921Z.txt",
+    "derived_comments": "data/eda/temporal_derived_comments_20260509T175921Z.csv"
+  }
+}
