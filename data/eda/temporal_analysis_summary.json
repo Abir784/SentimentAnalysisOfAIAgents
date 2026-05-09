@@ -1,0 +1,21 @@
+{
+  "rule_based_csv": "data\\rule_based\\moltbook_rule_based_comments_20260509T173800Z.csv",
+  "n_rows": 1296,
+  "date_range": [
+    "2026-03-08",
+    "2026-03-28"
+  ],
+  "change_points": [],
+  "model_params": {
+    "Intercept": -0.05510114822143342,
+    "time_days": -0.008639848572250178,
+    "word_count": -0.002165807031110324,
+    "log_upvotes": -0.7493163837609571
+  },
+  "model_pvalues": {
+    "Intercept": 0.6907961790540622,
+    "time_days": 0.21209890679759869,
+    "word_count": 0.0034229653353759124,
+    "log_upvotes": 3.247404537799547e-05
+  }
+}
