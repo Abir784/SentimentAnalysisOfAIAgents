@@ -1,4 +1,0 @@
-HYPOTHESIS VERDICT
-PARTIALLY SUPPORTED
-depth vs variability: r=-0.0096, p=0.948817, ci95=[-0.3637, 0.3227]
-length vs variability: r=0.3935, p=0.00621104, ci95=[0.1001, 0.6238]

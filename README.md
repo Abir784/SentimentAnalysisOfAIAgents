@@ -63,7 +63,10 @@ python scripts/run_moltbook_eda_stage.py
 python scripts/run_moltbook_feature_extraction.py
 python scripts/run_moltbook_rule_based.py
 python scripts/run_moltbook_interaction_network.py
+python scripts/run_moltbook_rq1_graph_metrics.py
 python scripts/run_moltbook_rq2_stats.py --bootstrap 4000 --seed 42
+python scripts/run_moltbook_rq3_sentiment_dynamics.py
+python scripts/run_moltbook_rq4_robustness.py
 python scripts/build_moltbook_goldset_sample.py --target-size 400 --seed 42
 python scripts/evaluate_moltbook_goldset.py --input data/gold/moltbook_goldset_sample_20260419T092811Z.csv
 ```

@@ -1,0 +1,3 @@
+metric,value,total_pairs,p_value
+exact_match_rate,0.48106365834004833,1241.0,
+chi2_statistic,5.003896107275509,,0.2868979638116859
