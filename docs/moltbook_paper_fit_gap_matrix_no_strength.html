@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MoltBook Paper Fit and Gap Matrix</title>
+  <style>
+    @page {
+      size: Letter landscape;
+      margin: 0.5in;
+    }
+
+    :root {
+      --ink: #152033;
+      --muted: #5b6577;
+      --blue: #1f4e79;
+      --line: #d7dde7;
+      --head: #f2f5f9;
+      --high-bg: #e7f5ee;
+      --high: #1f6f54;
+      --medium-bg: #fff4da;
+      --medium: #835d00;
+      --low-bg: #f8e9e9;
+      --low: #9b2c2c;
+    }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      font-size: 9.4pt;
+      line-height: 1.34;
+      margin: 0;
+      background: #fff;
+    }
+
+    h1 {
+      margin: 0 0 0.04in 0;
+      color: var(--blue);
+      font-size: 20pt;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 9.5pt;
+      margin: 0 0 0.14in 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.065in 0.075in;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      background: var(--head);
+      color: #23344f;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    a {
+      color: #1f5f99;
+      text-decoration: none;
+      font-weight: 650;
+    }
+
+    .paper { width: 28%; }
+    .fit { width: 12%; }
+    .match { width: 30%; }
+    .gap { width: 30%; }
+
+    .tag {
+      display: inline-block;
+      padding: 0.018in 0.055in;
+      border-radius: 0.04in;
+      font-size: 7.8pt;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .high { background: var(--high-bg); color: var(--high); }
+    .medium { background: var(--medium-bg); color: var(--medium); }
+    .low { background: var(--low-bg); color: var(--low); }
+
+    .id {
+      display: block;
+      color: var(--muted);
+      font-size: 8pt;
+      margin-top: 0.025in;
+    }
+  </style>
+</head>
+<body>
+  <h1>Paper-by-Paper Fit and Gap Matrix</h1>
+  <p class="subtitle">Comparison against the MoltBook project focus: thread-level sentiment homeostasis, parent-child sentiment alignment, author sentiment consistency, interaction structure, and sentiment-method robustness.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="paper">Paper Link</th>
+        <th class="fit">Fit</th>
+        <th class="match">What Matches Our Research</th>
+        <th class="gap">Gap Our Project Can Fill</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2602.12634">The Rise of AI Agent Communities</a><span class="id">arXiv:2602.12634</span></td>
+        <td><span class="tag high">Very high</span></td>
+        <td>Same platform; discourse, topics, broad sentiment tone, neutral writing, positivity in community contexts, sparse interaction network, hubs, low reciprocity.</td>
+        <td>Does not deeply model parent-child sentiment alignment, thread-phase trajectories, neutral attractor behavior, negative de-escalation, author sentiment consistency, or scorer robustness.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2602.20044">Let There Be Claws</a><span class="id">arXiv:2602.20044</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Strong match for RQ1: directed comment graphs, reciprocity, community structure, centrality, attention inequality, hub-authority roles, memory and identity topics.</td>
+        <td>Mostly structural. It does not explain how sentiment behaves inside reply chains or whether hub agents stabilize discourse tonally.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2602.10127">"Humans welcome to observe"</a><span class="id">arXiv:2602.10127</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Same platform; large-scale empirical analysis; topic taxonomy; toxicity and risk; temporal development; centralization and platform-level safeguards.</td>
+        <td>Risk and toxicity framing dominates. It does not focus on ordinary sentiment distribution, parent-child alignment, or rule-based sentiment robustness.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2602.13284">Agents in the Wild</a><span class="id">arXiv:2602.13284</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Same platform; safety and society framing; low reciprocity; shallow interaction; pro-human vs anti-human sentiment; critique of sociality claims.</td>
+        <td>Main object is safety and structural hollowness, not sentiment homeostasis or thread-level affective regulation.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2602.14299">Does Socialization Emerge in AI Agent Society?</a><span class="id">arXiv:2602.14299</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Same platform; semantic stabilization, individual inertia, weak mutual influence, lack of shared social memory. Very relevant to author-level sentiment consistency.</td>
+        <td>Studies semantic and socialization dynamics rather than sentiment-class transitions or reply-level affective alignment.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2603.03555">Benchmarking Emergent Coordination in Large-Scale LLM Populations</a><span class="id">arXiv:2603.03555</span></td>
+        <td><span class="tag medium">Medium</span></td>
+        <td>MoltBook archive; role specialization, information diffusion, core-periphery structure, coordination overhead.</td>
+        <td>Coordination-focused rather than sentiment-focused. It does not test ordinary sentiment transitions or method robustness.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2601.01090">Harm in AI-Driven Societies</a><span class="id">arXiv:2601.01090</span></td>
+        <td><span class="tag high">High method fit</span></td>
+        <td>Strong methodological parallel: models posts as stimuli and comments as responses; studies whether harmful exposure predicts harmful replies.</td>
+        <td>Different platform and toxicity-only outcome. It does not study MoltBook or general positive/neutral/negative sentiment dynamics.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2602.03775">Collective Behaviors and Social Dynamics in LLM Agents</a><span class="id">arXiv:2602.03775 / EACL 2026</span></td>
+        <td><span class="tag medium">Medium-high</span></td>
+        <td>AI-agent social network; homophily, social influence, toxicity, ideological leaning, polarization, longitudinal dynamics.</td>
+        <td>Chirper.ai rather than MoltBook. Broader social dynamics, not thread-level sentiment homeostasis.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2504.10286">Characterizing LLM-driven Social Network: The Chirper.ai Case</a><span class="id">arXiv:2504.10286</span></td>
+        <td><span class="tag medium">Medium</span></td>
+        <td>AI-agent social network compared with human social network; posting behavior, abusive content, and social structure.</td>
+        <td>Different platform. It does not address MoltBook-specific comment threads, neutral attractor behavior, or scorer sensitivity.</td>
+      </tr>
+      <tr>
+        <td><a href="https://www.sciencedirect.com/science/article/pii/S2543925125000154">Unveiling Collective Behaviors of LLM-based Autonomous Agents</a><span class="id">Data and Information Management, 2026</span></td>
+        <td><span class="tag medium">Medium</span></td>
+        <td>Chirper-based social network analysis; centralized interaction, power-law degree patterns, homophily, machine behavior framing.</td>
+        <td>Does not address MoltBook, sentiment alignment, or scorer robustness.</td>
+      </tr>
+      <tr>
+        <td><a href="https://arxiv.org/abs/2304.03442">Generative Agents</a><span class="id">arXiv:2304.03442</span></td>
+        <td><span class="tag low">Background</span></td>
+        <td>Foundational agent society architecture; memory, reflection, planning, emergent social behavior.</td>
+        <td>Simulation rather than observed platform data. It does not compete with your empirical MoltBook analysis.</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

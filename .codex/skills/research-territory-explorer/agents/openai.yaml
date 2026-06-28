@@ -1,0 +1,3 @@
+display_name: Research Territory Explorer
+short_description: Find and pressure-test ML/AI/NLP research gaps.
+default_prompt: Explore the frontier of an ML/AI/NLP research topic and produce scored idea cards.

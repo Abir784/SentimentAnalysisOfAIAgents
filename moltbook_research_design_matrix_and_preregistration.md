@@ -82,70 +82,6 @@ Note: duplicate rows detected at staging are explicitly handled in preprocessing
 3. Export feature tables, rule-based summaries, and diagnostic plots.
 
 
-## Temporal Dimension — Agent Behavior Over Time
-
-Motivation: evaluate how agent sentiment, engagement, and structural roles evolve during the collection window and whether temporal patterns (trends, bursts, or regime shifts) meaningfully alter the descriptive conclusions above.
-
-Data fields used: `fetched_at`, `post_id`, `thread_id`, `author_id`, sentiment labels, and extracted features (length, upvotes, thread depth).
-
-Measures:
-- Corpus-level time series of sentiment proportions (daily / weekly): `P(positive)`, `P(neutral)`, `P(negative)` with 95% CIs (bootstrap).
-- Per-author temporal trajectories: rolling-window proportions (7-day, 14-day) and per-agent activity rates.
-- Thread-level temporal dynamics: time-to-first-reply, reply-rate decay, and age-based sentiment change.
-- Burst and event detection: identify activity spikes (volume) and co-located sentiment shifts.
-
-Analysis plan:
-- Resample to daily and weekly series; compute proportions and bootstrap CIs.
-- Decompose series (trend / seasonal / residual) and inspect ACF/PACF.
-- Apply change-point detection (e.g., `ruptures` or Bayesian CP) to find structural shifts in sentiment proportions.
-- Fit mixed-effects logistic regression for sentiment (binary/ordinal as appropriate) with fixed effects for time (continuous or piecewise), thread features, and random intercepts for `author_id` to capture within-agent correlation.
-- Test for monotonic trends with the Mann–Kendall test and estimate segmented regressions for detected breakpoints.
-- If forecasting or autoregressive structure is required, fit parsimonious ARIMA / state-space models and report residual diagnostics.
-
-Hypotheses:
-- H1 (null): Sentiment proportions are stationary across the collection window. Alternative: statistically significant trend or regime shifts exist.
-- H2: Periods of heightened activity (bursts) are associated with transient increases in positive sentiment driven by a small set of hub agents.
-- H3: Thread age is positively associated with increased positive replies (longer-lived threads become more positive over time).
-
-Visualizations and outputs:
-- Time-series plots of sentiment proportions with rolling means and change-point annotations.
-- Heatmap / raster of `author_id` × time sentiment intensity to highlight actor-led shifts.
-- Animated or faceted thread timelines showing reply timestamps and sentiment labels.
-- Event-annotated dashboards highlighting detected breakpoints and top contributing authors.
-
-Robustness and sensitivity checks:
-- Repeat temporal analyses across preprocessing variants and scorers (VADER, SentiWordNet, ensemble).
-- Subsample by author cohorts, post age, and burst windows to confirm that trends are not driven by a few extreme agents or outlier posts.
-- Document resampling choices, smoothing windows, and seeds; provide reproducible code snippets and pinned package versions.
-
-
-## Temporal Analysis — Methods and Results
-
-**Methodology (summary):** We used the rule-based ensemble-scored corpus produced by the pipeline (`data/rule_based/moltbook_rule_based_comments_20260509T173800Z.csv`) and merged it with staged metadata to recover both `fetched_at` and `relative_time`. For each comment, the actual comment timestamp was derived as `actual_timestamp = fetched_at - relative_time_delta`, where `relative_time_delta` was parsed from strings such as `1d ago`, `27m ago`, and `2h ago`. Daily and weekly resamples of the `ensemble_label` were computed from this derived timestamp to produce time series of `P(positive)`, `P(neutral)`, and `P(negative)` with Wilson (95%) confidence intervals. Change-point detection was applied to the positive-proportion series using a PELT algorithm (package `ruptures`). A logistic regression (logit) model predicting `is_positive` (ensemble label) was fit with predictors `time_days` (days since first derived observation), `word_count`, and `log1p(upvotes)`; clustered robust standard errors were requested by `author_id` to account for within-author correlation. All artifacts and summaries are saved under `data/figures` and `data/eda` for reproducibility.
-
-**Key temporal outputs (artifacts):**
-- Daily sentiment proportions plot: [data/figures/temporal_sentiment_proportions_20260509T175104Z.png](data/figures/temporal_sentiment_proportions_20260509T175104Z.png#L1)
-- Positive-proportion change-point plot: [data/figures/temporal_positive_change_points_20260509T175104Z.png](data/figures/temporal_positive_change_points_20260509T175104Z.png#L1)
-- Model summary (logit, clustered SEs): [data/eda/temporal_model_summary_20260509T175104Z.txt](data/eda/temporal_model_summary_20260509T175104Z.txt#L1)
-- JSON summary: [data/eda/temporal_analysis_summary_20260509T175104Z.json](data/eda/temporal_analysis_summary_20260509T175104Z.json#L1)
-- Derived-comment table: [data/eda/temporal_derived_comments_20260509T175104Z.csv](data/eda/temporal_derived_comments_20260509T175104Z.csv#L1)
-
-**Results (concise):**
-- Date range analysed: 2026-03-07 → 2026-03-28 (n = 1,296 scored rows).
-- Change-point detection returned no robust breakpoints in the positive-proportion series across the sampled window (no regime shifts detected).
-- Logistic model coefficients (log-odds): intercept = -0.107, `time_days` = -0.0083 (p = 0.24), `word_count` = -0.0020 (p = 0.0043), `log_upvotes` = -0.7224 (p < 0.0001). Full parameter table and diagnostics: [data/eda/temporal_model_summary_20260509T175104Z.txt](data/eda/temporal_model_summary_20260509T175104Z.txt#L1).
-
-**Interpretation:** Within the sampled collection window we find no evidence of a sustained temporal trend or abrupt regime shift in positive sentiment proportions. The fitted logit suggests that longer replies are slightly less likely to be labelled `positive` by the ensemble (small but statistically significant negative association), and comments with higher upvotes show a substantially lower probability of receiving a `positive` label (negative coefficient on `log_upvotes`). The time coefficient is small and not statistically significant, consistent with the absence of a detectable trend once timestamps are derived from `relative_time` rather than relying on `fetched_at` alone. These results are reported with the caveat that labels derive from a rule-based ensemble and that alternative scorers or additional months of collection could reveal different dynamics; robustness checks across scorers and smoothing windows are recommended.
-
-**Figures:**
-
-![Daily sentiment proportions](data/figures/temporal_sentiment_proportions_20260509T175104Z.png)
-
-![Detected change points (positive proportion)](data/figures/temporal_positive_change_points_20260509T175104Z.png)
-
-
-
-
 # Findings in Detail
 
 ## RQ1: Dominant Interaction Patterns in AI-Agent Conversations
@@ -302,22 +238,6 @@ The neutral-dominant finding holds across preprocessing and filtering variants b
 > **Key point:** Three of five variants converge on the same neutral-dominant pattern. VADER alone would invert the finding entirely — justifying the ensemble approach as a methodological necessity, not a convenience.
 
 
-## RQ5 — Temporal Dynamics in AI-Agent Conversations
-
-Temporal analysis based on derived comment timestamps shows **no strong regime shift** in sentiment composition over the collection window. Using `actual_timestamp = fetched_at - relative_time_delta`, the series spans **2026-03-07 to 2026-03-28** across **1,296 scored comments**. A PELT change-point model found **no robust breakpoints** in the positive-sentiment proportion series, suggesting temporal stability rather than abrupt sentiment reorganization.
-
-| Metric | Value |
-|---|---|
-| Date range analysed | 2026-03-07 → 2026-03-28 |
-| Rows scored | 1,296 |
-| Detected change points | 0 |
-| Time coefficient (logit) | -0.0083 |
-| Time p-value | 0.442 |
-
-The logistic model shows that `time_days` is **not a significant predictor** of positive sentiment, while `word_count` is only marginal under clustered standard errors and `log_upvotes` shows a stronger negative association. In practical terms, the temporal window does not support a story of sentiment drift; the main signals are still content- and engagement-related rather than time-driven.
-
-> **Key point:** Once comment time is reconstructed from `relative_time`, the corpus still does not show a meaningful temporal shift in positive sentiment. The time effect is small and non-significant, so the main findings remain structurally stable over time.
-
 ## RQ-wise Graph Showcase 
 
 This section groups the most important visual outputs by research question so each RQ answer can be presented directly from figures.
@@ -364,26 +284,12 @@ Answer focus: findings are stable for preprocessing variants but sensitive to sc
 
 Supporting matrix (table data): data/figures/rq4_robustness_matrix_20260419T092811Z.csv
 
-### RQ5 — Temporal dynamics over the collection window
-Answer focus: sentiment proportions are temporally stable, with no robust change points.
-
-<img src="./data/figures/temporal_sentiment_proportions_20260509T175921Z.png" alt="RQ5 Daily Sentiment Proportions" width="900" />
-
-<img src="./data/figures/temporal_positive_change_points_20260509T175921Z.png" alt="RQ5 Positive Proportion Change Points" width="900" />
-
-Supporting outputs (table data):
-
-- data/eda/temporal_analysis_summary_20260509T175921Z.json
-- data/eda/temporal_model_summary_20260509T175921Z.txt
-- data/eda/temporal_derived_comments_20260509T175921Z.csv
-
 ### Optional single-slide summary mapping
 
 - RQ1 supported: clustered interaction topology.
 - RQ2 not supported: neutral dominates, not positive.
 - RQ3 supported: sentiment homeostasis observed; neutral is conversational attractor; positive accumulates with thread depth.
 - RQ4 partially supported: preprocessing robust, scorer-sensitive.
-- RQ5 partially supported: no temporal drift, stable across the window.
 
 
 

@@ -1,0 +1,125 @@
+{
+  "records": 6000,
+  "malformed_rows": 0,
+  "models": [
+    {
+      "model": "phi",
+      "records": 1500,
+      "avg_compound": 0.0433,
+      "median_compound": 0.0,
+      "avg_positive": 0.1281,
+      "avg_negative": 0.1106,
+      "avg_neutral": 0.7613,
+      "avg_message_length": 177.0573
+    },
+    {
+      "model": "mistral",
+      "records": 1500,
+      "avg_compound": -0.1017,
+      "median_compound": 0.0,
+      "avg_positive": 0.1191,
+      "avg_negative": 0.1478,
+      "avg_neutral": 0.7331,
+      "avg_message_length": 199.3987
+    },
+    {
+      "model": "neural-chat",
+      "records": 1000,
+      "avg_compound": -0.1323,
+      "median_compound": 0.0,
+      "avg_positive": 0.1149,
+      "avg_negative": 0.1592,
+      "avg_neutral": 0.7259,
+      "avg_message_length": 199.264
+    },
+    {
+      "model": "llama2",
+      "records": 2000,
+      "avg_compound": -0.1692,
+      "median_compound": -0.077,
+      "avg_positive": 0.106,
+      "avg_negative": 0.155,
+      "avg_neutral": 0.739,
+      "avg_message_length": 199.825
+    }
+  ],
+  "labels": [
+    {
+      "model": "llama2",
+      "sentiment_label": "negative",
+      "count": 1016,
+      "share": 0.508
+    },
+    {
+      "model": "llama2",
+      "sentiment_label": "neutral",
+      "count": 289,
+      "share": 0.1445
+    },
+    {
+      "model": "llama2",
+      "sentiment_label": "positive",
+      "count": 695,
+      "share": 0.3475
+    },
+    {
+      "model": "mistral",
+      "sentiment_label": "negative",
+      "count": 686,
+      "share": 0.4573
+    },
+    {
+      "model": "mistral",
+      "sentiment_label": "neutral",
+      "count": 224,
+      "share": 0.1493
+    },
+    {
+      "model": "mistral",
+      "sentiment_label": "positive",
+      "count": 590,
+      "share": 0.3933
+    },
+    {
+      "model": "neural-chat",
+      "sentiment_label": "negative",
+      "count": 462,
+      "share": 0.462
+    },
+    {
+      "model": "neural-chat",
+      "sentiment_label": "neutral",
+      "count": 158,
+      "share": 0.158
+    },
+    {
+      "model": "neural-chat",
+      "sentiment_label": "positive",
+      "count": 380,
+      "share": 0.38
+    },
+    {
+      "model": "phi",
+      "sentiment_label": "negative",
+      "count": 521,
+      "share": 0.3473
+    },
+    {
+      "model": "phi",
+      "sentiment_label": "neutral",
+      "count": 269,
+      "share": 0.1793
+    },
+    {
+      "model": "phi",
+      "sentiment_label": "positive",
+      "count": 710,
+      "share": 0.4733
+    }
+  ],
+  "overall_labels": {
+    "negative": 2685,
+    "positive": 2375,
+    "neutral": 940
+  }
+}

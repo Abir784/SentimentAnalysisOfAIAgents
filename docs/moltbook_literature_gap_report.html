@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MoltBook Literature Gap and Positioning Report</title>
+  <style>
+    @page {
+      size: Letter;
+      margin: 0.78in 0.82in 0.78in 0.82in;
+    }
+
+    :root {
+      --ink: #172033;
+      --muted: #596275;
+      --blue: #1f4e79;
+      --line: #d8dee9;
+      --soft: #f5f7fa;
+      --soft-blue: #edf4fb;
+      --green: #1f6f54;
+      --amber: #8a6400;
+      --red: #9b2c2c;
+    }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      font-size: 10.6pt;
+      line-height: 1.42;
+      margin: 0;
+      background: white;
+    }
+
+    h1, h2, h3 {
+      color: var(--blue);
+      page-break-after: avoid;
+      break-after: avoid;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 24pt;
+      line-height: 1.12;
+      margin-top: 0.08in;
+      margin-bottom: 0.08in;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 15.4pt;
+      margin-top: 0.28in;
+      margin-bottom: 0.08in;
+      padding-bottom: 0.04in;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h3 {
+      font-size: 12.2pt;
+      margin-top: 0.18in;
+      margin-bottom: 0.05in;
+      color: #25415f;
+    }
+
+    p {
+      margin: 0 0 0.095in 0;
+    }
+
+    ul, ol {
+      margin-top: 0.04in;
+      margin-bottom: 0.11in;
+      padding-left: 0.26in;
+    }
+
+    li {
+      margin-bottom: 0.045in;
+    }
+
+    a {
+      color: #1f5f99;
+      text-decoration: none;
+    }
+
+    .subtitle {
+      font-size: 12pt;
+      color: var(--muted);
+      margin-bottom: 0.18in;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: 1.35in 1fr;
+      gap: 0.03in 0.12in;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 0.12in 0;
+      margin: 0.08in 0 0.2in 0;
+      font-size: 9.7pt;
+    }
+
+    .meta b {
+      color: #25334a;
+    }
+
+    .callout {
+      background: var(--soft-blue);
+      border-left: 4px solid var(--blue);
+      padding: 0.12in 0.14in;
+      margin: 0.12in 0 0.18in 0;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .callout strong {
+      color: #153858;
+    }
+
+    .small {
+      font-size: 9.2pt;
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.02in 0.065in;
+      border-radius: 0.04in;
+      font-size: 8.2pt;
+      font-weight: 650;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .high { background: #e7f5ee; color: var(--green); }
+    .medium { background: #fff4da; color: var(--amber); }
+    .low { background: #f8e9e9; color: var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin: 0.1in 0 0.16in 0;
+      page-break-inside: auto;
+      font-size: 9.25pt;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.065in 0.075in;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      background: var(--soft);
+      color: #24344d;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .w-paper { width: 28%; }
+    .w-match { width: 13%; }
+    .w-covers { width: 29%; }
+    .w-gap { width: 30%; }
+
+    .score-table .score { text-align: center; font-weight: 700; }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 9.6pt;
+      margin-top: -0.02in;
+    }
+
+    .source-list li {
+      margin-bottom: 0.075in;
+      overflow-wrap: anywhere;
+    }
+
+    .footer-space {
+      height: 0.15in;
+    }
+  </style>
+</head>
+<body>
+  <h1>Literature Gap and Positioning Report</h1>
+  <p class="subtitle">For the project: <strong>Sentiment Dynamics in AI-to-AI Social Networks: A Computational Analysis of MoltBook Conversations</strong></p>
+
+  <div class="meta">
+    <b>Date</b><span>June 1, 2026</span>
+    <b>Research object</b><span>MoltBook comments and reply threads produced by AI agents</span>
+    <b>Core methods</b><span>Rule-based sentiment analysis, parent-child sentiment alignment, thread-phase dynamics, author consistency, network analysis, and robustness checks</span>
+    <b>Primary claim</b><span>MoltBook discourse shows sentiment homeostasis: neutral sentiment acts as a stabilizing attractor, negative sentiment is often de-escalated, and author-level sentiment style is more stable than simple contagion would predict.</span>
+  </div>
+
+  <div class="callout">
+    <p><strong>Bottom line.</strong> Your work should not be framed as the first MoltBook sentiment paper. That claim is too vulnerable because several 2026 papers already study MoltBook discourse, topics, sentiment tone, toxicity, and network structure. The stronger and more defensible framing is: <strong>the first focused thread-level study of sentiment homeostasis, parent-child sentiment alignment, author sentiment consistency, and scorer robustness in AI-to-AI MoltBook conversations.</strong></p>
+  </div>
+
+  <h2>1. What Our Research Actually Is</h2>
+  <p>Your project is a computational social science and NLP study of AI-agent communication on MoltBook. It collects public MoltBook comments, stages and preprocesses them, scores sentiment with VADER, SentiWordNet, and an ensemble decision rule, then analyzes interaction structure and sentiment dynamics across posts, threads, authors, and methodological variants.</p>
+
+  <p>The current project has four main research questions:</p>
+  <ol>
+    <li><strong>RQ1 - Interaction structure:</strong> What are the dominant interaction patterns in AI-agent conversations on MoltBook?</li>
+    <li><strong>RQ2 - Sentiment distribution:</strong> What is the distribution of sentiment in AI-agent replies, and does it vary by post, thread, or author?</li>
+    <li><strong>RQ3 - Thread-level dynamics:</strong> Do replies tend to match, oppose, neutralize, or de-escalate the sentiment of parent comments?</li>
+    <li><strong>RQ4 - Robustness:</strong> Are the observed patterns stable across preprocessing decisions and rule-based sentiment tools?</li>
+  </ol>
+
+  <p>The most important distinction is that your strongest contribution is not simply that MoltBook comments are neutral or positive. Existing work already touches broad sentiment. Your stronger contribution is that you model sentiment as a <strong>dynamic relational process</strong> inside reply chains. This lets you ask whether sentiment spreads, stabilizes, reverses, or gets neutralized across parent-child comment pairs.</p>
+
+  <h2>2. Broad Literature Landscape</h2>
+  <p>The related literature can be divided into six clusters. Each cluster overlaps with your work in a different way.</p>
+
+  <h3>Cluster A: Large-scale MoltBook discourse and community analysis</h3>
+  <p>These papers are the closest competitors because they study the same platform. They usually operate at large scale and ask broad questions: what agents discuss, how posts are distributed, what risks appear, and what the interaction network looks like. The strongest match here is <em>The Rise of AI Agent Communities</em>, which already reports neutral writing patterns and sparse, hub-dominated interaction structures.</p>
+
+  <p><strong>How this helps you:</strong> These papers give you context and justification. They prove MoltBook is a legitimate empirical site for studying agent-to-agent communication. They also give you baseline claims to refine.</p>
+  <p><strong>Where your gap remains:</strong> They do not deeply test sentiment transitions inside reply trees. They do not center neutral sentiment as an attractor state, negative de-escalation, thread-phase trajectories, or scorer sensitivity.</p>
+
+  <h3>Cluster B: MoltBook network structure and coordination</h3>
+  <p>These papers analyze graph structure, centralization, reciprocity, role specialization, and information diffusion. They are most relevant to your RQ1. Your own network results - core-periphery structure, hubs, community clusters, reply concentration, low reciprocity - match this cluster strongly.</p>
+
+  <p><strong>How this helps you:</strong> It supports your claim that MoltBook is not random text generation. Even if interaction is shallow, it still has measurable social structure.</p>
+  <p><strong>Where your gap remains:</strong> Network structure alone does not explain sentiment behavior. Your work can connect structure to affective or tonal dynamics.</p>
+
+  <h3>Cluster C: MoltBook safety, toxicity, and risk</h3>
+  <p>Several papers focus on safety risks: toxicity, anti-human ideology, prompt injection, social engineering, platform manipulation, and governance narratives. These papers are adjacent but not identical. They usually focus on harmful or risky content, not everyday affective dynamics.</p>
+
+  <p><strong>How this helps you:</strong> It provides contrast. If prior work asks whether agents produce risky discourse, your work asks how ordinary sentiment is stabilized, softened, or maintained in regular comment exchanges.</p>
+  <p><strong>Where your gap remains:</strong> Toxicity is not the same as sentiment. A platform can have low toxicity but still show meaningful positive, neutral, or negative alignment patterns.</p>
+
+  <h3>Cluster D: AI-agent socialization and semantic convergence</h3>
+  <p>This literature asks whether AI agents form stable societies, whether they adapt to one another, and whether shared memory or consensus emerges. <em>Does Socialization Emerge in AI Agent Society?</em> is especially relevant because it reports strong individual inertia and weak mutual influence in MoltBook.</p>
+
+  <p><strong>How this helps you:</strong> It gives a theoretical frame for your author-level consistency results. If agents have high inertia, then sentiment may be more speaker-driven than conversation-driven.</p>
+  <p><strong>Where your gap remains:</strong> Socialization papers usually analyze semantic or lexical convergence. Your analysis is more specific: sentiment class transitions and thread-level affective regulation.</p>
+
+  <h3>Cluster E: Chirper.ai and other LLM-agent social networks</h3>
+  <p>Chirper.ai papers are not about MoltBook, but they are very useful comparators. They examine AI-only social networks over longer time windows and at large scale, including homophily, toxicity adoption, ideology, polarization, and human-vs-agent differences.</p>
+
+  <p><strong>How this helps you:</strong> Chirper papers establish that AI-agent social platforms are becoming a research object across multiple settings. They also provide methods you can adapt, especially stimulus-response modeling from toxicity adoption studies.</p>
+  <p><strong>Where your gap remains:</strong> Chirper findings may not transfer directly to MoltBook because platform affordances differ. Your contribution is platform-specific and comment-thread specific.</p>
+
+  <h3>Cluster F: LLM-agent simulation and generative agent societies</h3>
+  <p>Simulation papers such as <em>Generative Agents</em>, SALM, LLM-AIDSim, and prosocial contagion simulations study artificial agent environments rather than observed MoltBook traces. They are background literature, not direct competitors.</p>
+
+  <p><strong>How this helps you:</strong> They justify why multi-agent behavior, memory, planning, and social influence matter.</p>
+  <p><strong>Where your gap remains:</strong> Your data is observational and platform-based, not a controlled simulation. That gives ecological validity, while simulations give controllability.</p>
+
+  <h2 class="page-break">3. Paper-by-Paper Fit, Gap, and Strength Matrix</h2>
+  <p class="section-note">Match score is relative to your current project, not an absolute quality score.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="w-paper">Paper</th>
+        <th class="w-match">Match</th>
+        <th class="w-covers">What matches our work</th>
+        <th class="w-gap">Gap our project can fill</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>The Rise of AI Agent Communities: Large-Scale Analysis of Discourse and Interaction on MoltBook</strong><br><span class="small">arXiv:2602.12634</span></td>
+        <td><span class="tag high">Very high</span></td>
+        <td>Same platform; topics, discourse, broad sentiment tone, neutral writing patterns, positivity in community contexts, sparse interaction network, hubs, low reciprocity.</td>
+        <td>Does not appear to provide a focused test of parent-child sentiment alignment, thread-phase sentiment trajectories, neutral attractor behavior, negative de-escalation, author sentiment consistency, or sentiment-scorer robustness.</td>
+      </tr>
+      <tr>
+        <td><strong>Let There Be Claws: An Early Social Network Analysis of AI Agents on MoltBook</strong><br><span class="small">arXiv:2602.20044</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Strong overlap with RQ1: directed comment graphs, reciprocity, community structure, centrality, attention inequality, hub-authority roles, and technical topics like memory and identity.</td>
+        <td>Mostly structural. It does not explain how sentiment behaves inside reply chains or whether hubs stabilize discourse tonally.</td>
+      </tr>
+      <tr>
+        <td><strong>"Humans welcome to observe": A First Look at the Agent Social Network MoltBook</strong><br><span class="small">arXiv:2602.10127</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Same platform; large-scale empirical analysis; topic taxonomy; toxicity and risk; temporal development; centralization and platform-level safeguards.</td>
+        <td>Risk and toxicity framing dominates. It does not focus on ordinary sentiment distribution, parent-child alignment, or rule-based sentiment robustness.</td>
+      </tr>
+      <tr>
+        <td><strong>Agents in the Wild: Safety, Society, and the Illusion of Sociality on MoltBook</strong><br><span class="small">arXiv:2602.13284</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Same platform; safety and society framing; low reciprocity; shallow interaction; pro-human vs anti-human sentiment; critique of "sociality" claims.</td>
+        <td>Useful contrast, but its main object is safety and structural hollowness. It does not model sentiment homeostasis or thread-level affective regulation.</td>
+      </tr>
+      <tr>
+        <td><strong>Does Socialization Emerge in AI Agent Society? A Case Study of MoltBook</strong><br><span class="small">arXiv:2602.14299</span></td>
+        <td><span class="tag high">High</span></td>
+        <td>Same platform; semantic stabilization, individual inertia, weak mutual influence, lack of shared social memory. Very relevant to author-level sentiment consistency.</td>
+        <td>Studies semantic and socialization dynamics, not sentiment transitions. Your work can translate the inertia idea into measurable sentiment personas and reply alignment.</td>
+      </tr>
+      <tr>
+        <td><strong>Benchmarking Emergent Coordination in Large-Scale LLM Populations</strong><br><span class="small">arXiv:2603.03555</span></td>
+        <td><span class="tag medium">Medium</span></td>
+        <td>MoltBook archive; role specialization, information diffusion, core-periphery structure, coordination overhead.</td>
+        <td>Coordination-focused rather than sentiment-focused. Useful for background on agent populations, less direct as a novelty threat.</td>
+      </tr>
+      <tr>
+        <td><strong>Harm in AI-Driven Societies: An Audit of Toxicity Adoption on Chirper.ai</strong><br><span class="small">arXiv:2601.01090</span></td>
+        <td><span class="tag high">High method fit</span></td>
+        <td>Strong methodological parallel: models posts as stimuli and comments as responses; studies whether harmful exposure predicts harmful replies.</td>
+        <td>Different platform and toxicity-only outcome. Your work can adapt stimulus-response logic to general sentiment alignment and de-escalation in MoltBook.</td>
+      </tr>
+      <tr>
+        <td><strong>An Empirical Study of Collective Behaviors and Social Dynamics in LLM Agents</strong><br><span class="small">arXiv:2602.03775 / EACL 2026</span></td>
+        <td><span class="tag medium">Medium-high</span></td>
+        <td>AI-agent social network; homophily, social influence, toxicity, ideological leaning, polarization, longitudinal dynamics.</td>
+        <td>Chirper.ai, not MoltBook. Broader social dynamics, not thread-level sentiment homeostasis.</td>
+      </tr>
+      <tr>
+        <td><strong>Characterizing LLM-driven Social Network: The Chirper.ai Case</strong><br><span class="small">arXiv:2504.10286</span></td>
+        <td><span class="tag medium">Medium</span></td>
+        <td>AI-agent social network compared with human social network; posting behavior, abusive content, and social structure.</td>
+        <td>Different platform. Best used for comparative background, not as a direct competitor to MoltBook sentiment dynamics.</td>
+      </tr>
+      <tr>
+        <td><strong>Unveiling the Collective Behaviors of LLM-based Autonomous Agents in an Online Community</strong><br><span class="small">Data and Information Management, 2026</span></td>
+        <td><span class="tag medium">Medium</span></td>
+        <td>Chirper-based social network analysis; centralized interactions, power-law degree patterns, homophily, machine behavior framing.</td>
+        <td>Does not address MoltBook, sentiment alignment, or scorer robustness. Useful for theoretical support on AI-agent networks.</td>
+      </tr>
+      <tr>
+        <td><strong>Generative Agents: Interactive Simulacra of Human Behavior</strong><br><span class="small">arXiv:2304.03442</span></td>
+        <td><span class="tag low">Background</span></td>
+        <td>Foundational agent society architecture; memory, reflection, planning, emergent social behavior.</td>
+        <td>Simulation rather than observed platform data. It motivates the field but does not compete with your empirical MoltBook analysis.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. What Matches Our Research</h2>
+  <p>The strongest overlaps are concentrated in five areas.</p>
+
+  <h3>4.1 MoltBook as a legitimate AI-agent social platform</h3>
+  <p>Multiple papers now treat MoltBook as an empirical site for studying AI-agent communication. This supports your premise. You no longer need to spend a large part of the paper proving that MoltBook matters. Instead, you can cite the broader MoltBook literature and then define your narrower contribution.</p>
+
+  <h3>4.2 Non-random network structure</h3>
+  <p>Your RQ1 findings - hub agents, core-periphery structure, community clusters, unequal reply concentration, and low reciprocity - align strongly with existing MoltBook network papers. This is good, not bad. It means your data behaves consistently with larger snapshots. Your added value is not discovering hubs for the first time; it is using structure as context for sentiment dynamics.</p>
+
+  <h3>4.3 Neutral and technical communication style</h3>
+  <p>The broader literature reports that MoltBook discourse is often neutral, technical, infrastructure-oriented, or coordination-oriented. Your corpus shows a neutral-dominant sentiment distribution under the ensemble method. This matches the literature, but your stronger move is to explain <em>how</em> neutrality is reproduced in replies.</p>
+
+  <h3>4.4 Agent identity, memory, and infrastructure topics</h3>
+  <p>Your topic analysis shows high prevalence of agent behavior, system design, identity management, reasoning, memory management, cost, API performance, token usage, and validation. This matches existing descriptions of MoltBook as a space where agents discuss identity, tooling, memory, coordination, and infrastructure.</p>
+
+  <h3>4.5 Weak socialization and individual inertia</h3>
+  <p>Your author-level sentiment consistency fits well with papers that argue MoltBook agents show inertia and weak mutual influence. If sentiment is more strongly tied to author identity than to parent sentiment, that supports a view of agents as stable stylistic producers rather than fully adaptive social learners.</p>
+
+  <h2 class="page-break">5. What Does Not Match Our Research</h2>
+  <p>Some adjacent papers should be cited carefully because their focus is different from yours.</p>
+
+  <h3>5.1 Toxicity and safety are not the same as sentiment dynamics</h3>
+  <p>Safety papers are useful, but they focus on harmful content, prompt injection, anti-human rhetoric, or adversarial engagement. Your research is about everyday sentiment behavior across negative, neutral, and positive classes. You can mention toxicity work as adjacent, but do not let it define your contribution.</p>
+
+  <h3>5.2 Coordination benchmarks are not affective interaction studies</h3>
+  <p>Coordination papers examine role specialization, cascades, and task resolution. They are important for multi-agent systems, but they do not answer whether replies stabilize or amplify sentiment. Use them to frame MoltBook as a multi-agent environment, not as direct evidence about sentiment.</p>
+
+  <h3>5.3 Chirper.ai papers are comparative, not direct</h3>
+  <p>Chirper.ai is a valuable comparison because it is also an AI-agent social platform. However, platform design, interaction affordances, and agent populations differ. Findings about Chirper toxicity, gender homophily, or polarization should be treated as background rather than direct evidence for MoltBook.</p>
+
+  <h3>5.4 Simulation papers are theoretical background</h3>
+  <p>Generative-agent and LLM social simulation papers are useful for motivation. They show why agent societies, memory, planning, and social influence are important. But your project observes a public platform rather than constructing a simulated society, so the evidence type is different.</p>
+
+  <h2>6. The Main Research Gaps</h2>
+
+  <h3>Gap 1: Parent-child sentiment alignment is under-studied in MoltBook</h3>
+  <p>Existing MoltBook studies often treat posts or comments as aggregate units. Your work treats reply relationships as analytical events. This lets you ask whether negative parent comments lead to negative replies, whether positive replies accumulate, and whether neutral sentiment stabilizes discussions.</p>
+
+  <p><strong>Contribution language:</strong> "We move from platform-level sentiment description to reply-level sentiment transmission analysis."</p>
+
+  <h3>Gap 2: Neutral sentiment is usually reported, not theorized</h3>
+  <p>Prior work may observe that AI-agent writing is often neutral. Your project can theorize neutrality as a conversational mechanism: a stabilizing attractor that absorbs negative input and preserves discussion continuity. This turns a descriptive result into an explanatory contribution.</p>
+
+  <p><strong>Contribution language:</strong> "Neutrality is not merely the largest label; it functions as a stabilizing state in AI-agent reply chains."</p>
+
+  <h3>Gap 3: Negative de-escalation is distinct from absence of toxicity</h3>
+  <p>Low negative sentiment does not automatically prove de-escalation. Your parent-child contingency analysis can show that when negative sentiment appears, replies often shift toward neutral rather than replicating negativity. That is a stronger dynamic claim than saying "there is little negativity."</p>
+
+  <p><strong>Contribution language:</strong> "The system displays negative de-escalation rather than negative contagion."</p>
+
+  <h3>Gap 4: Author-level sentiment consistency needs more attention</h3>
+  <p>If individual agents maintain consistent sentiment profiles across contexts, sentiment may be partly an author-level style or persona feature. This is important because it complicates simple contagion models. A reply may be neutral not because the parent was neutral, but because the replying agent is generally neutral.</p>
+
+  <p><strong>Contribution language:</strong> "Sentiment in MoltBook is partly speaker-anchored, suggesting stable agent-level tonal personas."</p>
+
+  <h3>Gap 5: Sentiment method sensitivity is a major validity issue</h3>
+  <p>Your RQ4 is especially strong. The finding that VADER-only can produce a very different distribution than the ensemble is not a minor technical note. It changes the interpretation of the whole corpus. This gives your paper a methodological contribution: AI-generated social text may not behave like the human social-media text for which many lexicons were tuned.</p>
+
+  <p><strong>Contribution language:</strong> "Sentiment findings in AI-agent corpora are method-sensitive; single-lexicon conclusions can invert the dominant-class claim."</p>
+
+  <h2>7. Strong Points of Our Research</h2>
+  <ul>
+    <li><strong>Focused novelty:</strong> The project has a narrow and defensible gap: thread-level sentiment homeostasis in MoltBook comments.</li>
+    <li><strong>Reproducibility:</strong> The pipeline preserves raw data, staged comments, preprocessing outputs, feature extraction, sentiment labels, network artifacts, and manifests.</li>
+    <li><strong>Interpretability:</strong> Rule-based sentiment tools are transparent. This is useful for exploratory computational social science, especially when model-based labels may be difficult to audit.</li>
+    <li><strong>Robustness checks:</strong> Comparing baseline ensemble, cleaned text, strict filtering, VADER-only, and SentiWordNet-only is a real strength.</li>
+    <li><strong>Multi-level analysis:</strong> The study connects corpus-level distributions, post/thread/author variation, parent-child alignment, trajectory by thread phase, and network structure.</li>
+    <li><strong>Useful contrast with prior work:</strong> If earlier papers argue MoltBook is shallow or structurally hollow, your project can show that even shallow interaction networks contain measurable affective regularities.</li>
+  </ul>
+
+  <h2>8. Weak Points and Risks</h2>
+  <ul>
+    <li><strong>Novelty risk:</strong> The broad claim "MoltBook sentiment analysis" is already partially covered. Avoid that framing.</li>
+    <li><strong>Dataset scale risk:</strong> Your corpus is smaller than the large MoltBook papers. Counter this by emphasizing depth, transparency, and thread-level design.</li>
+    <li><strong>Threading risk:</strong> If MoltBook threading is shallow or parent IDs are incomplete, parent-child conclusions need careful qualification.</li>
+    <li><strong>Lexicon validity risk:</strong> VADER and SentiWordNet were not built for AI-agent discourse. Your robustness section helps, but a small manually annotated gold set would strengthen the paper.</li>
+    <li><strong>Causal language risk:</strong> Avoid claiming true contagion or psychological intent unless the design supports it. Use terms like alignment, transition, association, stabilization, and de-escalation.</li>
+  </ul>
+
+  <h2 class="page-break">9. Recommended Positioning</h2>
+  <p>Do not position the paper as:</p>
+  <div class="callout">
+    <p><strong>Weak framing:</strong> "This is the first sentiment analysis of MoltBook."</p>
+  </div>
+
+  <p>Use this instead:</p>
+  <div class="callout">
+    <p><strong>Strong framing:</strong> "This study provides a thread-level analysis of sentiment homeostasis in AI-to-AI MoltBook conversations, showing neutral stabilization, negative de-escalation, author-level sentiment consistency, and sensitivity of conclusions to sentiment-scoring choices."</p>
+  </div>
+
+  <h3>Possible title</h3>
+  <p><strong>Sentiment Homeostasis in AI-to-AI Social Networks: Thread-Level Evidence from MoltBook Conversations</strong></p>
+
+  <h3>Possible abstract claim</h3>
+  <p>"While recent MoltBook studies describe platform-scale topics, risks, and interaction networks, less is known about how sentiment behaves inside reply chains. We analyze MoltBook comments using rule-based sentiment tools and parent-child reply structure. Results suggest that neutral sentiment functions as a conversational attractor, negative sentiment is frequently de-escalated into neutral replies, and author-level tonal consistency is stronger than simple sentiment-contagion accounts would predict. Robustness checks show that preprocessing choices preserve the neutral-dominant pattern, while single-lexicon scorer choices can materially alter conclusions."</p>
+
+  <h2>10. Suggested Literature Review Structure</h2>
+  <ol>
+    <li><strong>AI-agent social platforms:</strong> Introduce MoltBook and Chirper.ai as emerging empirical sites.</li>
+    <li><strong>MoltBook discourse and network structure:</strong> Review large-scale MoltBook studies on topics, hubs, reciprocity, and safety.</li>
+    <li><strong>Socialization and influence in LLM-agent societies:</strong> Discuss individual inertia, weak mutual influence, homophily, and convergence.</li>
+    <li><strong>Sentiment, toxicity, and affective dynamics:</strong> Separate toxicity adoption from general sentiment transitions.</li>
+    <li><strong>Methodological sensitivity in sentiment analysis:</strong> Explain why VADER/SentiWordNet/ensemble robustness matters for AI-generated text.</li>
+    <li><strong>Research gap:</strong> State that prior work does not deeply model parent-child sentiment alignment and homeostatic sentiment behavior in MoltBook threads.</li>
+  </ol>
+
+  <h2>11. Practical Next Steps</h2>
+  <ul>
+    <li>Add a small manually annotated validation set if possible. Even 200 to 400 comments would strengthen the sentiment-labeling defense.</li>
+    <li>Report parent-child sentiment transition matrices clearly, including row-normalized percentages.</li>
+    <li>Model author effects separately from parent sentiment, even with a simple logistic or multinomial approach if feasible.</li>
+    <li>Use cautious language: "alignment" and "transition" are safer than "contagion" unless the temporal design is very strong.</li>
+    <li>Compare your findings explicitly against the closest MoltBook paper, especially <em>The Rise of AI Agent Communities</em>.</li>
+  </ul>
+
+  <h2>12. Source List</h2>
+  <ol class="source-list">
+    <li>Li et al. <em>The Rise of AI Agent Communities: Large-Scale Analysis of Discourse and Interaction on MoltBook</em>. arXiv:2602.12634. <a href="https://arxiv.org/abs/2602.12634">https://arxiv.org/abs/2602.12634</a></li>
+    <li>Jiang et al. <em>"Humans welcome to observe": A First Look at the Agent Social Network MoltBook</em>. arXiv:2602.10127. <a href="https://arxiv.org/abs/2602.10127">https://arxiv.org/abs/2602.10127</a></li>
+    <li>Price et al. <em>Let There Be Claws: An Early Social Network Analysis of AI Agents on MoltBook</em>. arXiv:2602.20044. <a href="https://arxiv.org/abs/2602.20044">https://arxiv.org/abs/2602.20044</a></li>
+    <li><em>Agents in the Wild: Safety, Society, and the Illusion of Sociality on MoltBook</em>. arXiv:2602.13284. <a href="https://arxiv.org/abs/2602.13284">https://arxiv.org/abs/2602.13284</a></li>
+    <li>Li, Li, and Zhou. <em>Does Socialization Emerge in AI Agent Society? A Case Study of MoltBook</em>. arXiv:2602.14299. <a href="https://arxiv.org/abs/2602.14299">https://arxiv.org/abs/2602.14299</a></li>
+    <li>Yee and Koh. <em>Benchmarking Emergent Coordination in Large-Scale LLM Populations: An Evaluation Framework on the MoltBook Archive</em>. arXiv:2603.03555. <a href="https://arxiv.org/abs/2603.03555">https://arxiv.org/abs/2603.03555</a></li>
+    <li>Hashemi and Macy. <em>An Empirical Study of Collective Behaviors and Social Dynamics in Large Language Model Agents</em>. arXiv:2602.03775. <a href="https://arxiv.org/abs/2602.03775">https://arxiv.org/abs/2602.03775</a></li>
+    <li>Coppolillo, Luceri, and Ferrara. <em>Harm in AI-Driven Societies: An Audit of Toxicity Adoption on Chirper.ai</em>. arXiv:2601.01090. <a href="https://arxiv.org/abs/2601.01090">https://arxiv.org/abs/2601.01090</a></li>
+    <li>Zhu et al. <em>Characterizing LLM-driven Social Network: The Chirper.ai Case</em>. arXiv:2504.10286. <a href="https://arxiv.org/abs/2504.10286">https://arxiv.org/abs/2504.10286</a></li>
+    <li>Chen, Wang, and Ren. <em>Unveiling the Collective Behaviors of Large Language Model-based Autonomous Agents in an Online Community: A Social Network Analysis Perspective</em>. <em>Data and Information Management</em>, 2026. <a href="https://www.sciencedirect.com/science/article/pii/S2543925125000154">https://www.sciencedirect.com/science/article/pii/S2543925125000154</a></li>
+    <li>Park et al. <em>Generative Agents: Interactive Simulacra of Human Behavior</em>. arXiv:2304.03442. <a href="https://arxiv.org/abs/2304.03442">https://arxiv.org/abs/2304.03442</a></li>
+  </ol>
+
+  <div class="footer-space"></div>
+</body>
+</html>

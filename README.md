@@ -98,6 +98,60 @@ Dashboard tabs:
 pip install -r requirements.txt
 ```
 
+## Pretrained Transformer Sentiment Models
+
+Transformer inference is an optional benchmark alongside the active rule-based pipeline. It scores
+the real Moltbook comments and synthetic conversation messages separately and does not modify either
+source file.
+
+Install the additional dependencies:
+
+```powershell
+python -m pip install -r requirements_transformers.txt
+```
+
+Run the three recommended 3-class social-text models on real Moltbook comments:
+
+```powershell
+python scripts/run_transformer_sentiment.py moltbook
+```
+
+Run the same models separately on synthetic conversation messages:
+
+```powershell
+python scripts/run_transformer_sentiment.py synthetic
+```
+
+The default models are `twitter-roberta`, `xlm-twitter`, and `bertweet`. Select models explicitly
+with `--models`; `distilbert-sst2` is available as a binary speed baseline:
+
+```powershell
+python scripts/run_transformer_sentiment.py moltbook --models twitter-roberta xlm-twitter bertweet
+python scripts/run_transformer_sentiment.py synthetic --models twitter-roberta xlm-twitter bertweet
+python scripts/run_transformer_sentiment.py synthetic --models distilbert-sst2 --device cpu
+```
+
+For long comments, average predictions over overlapping token windows instead of truncating:
+
+```powershell
+python scripts/run_transformer_sentiment.py moltbook --long-text-strategy window --stride 128
+```
+
+Use `--limit` for a small smoke test before a full run:
+
+```powershell
+python scripts/run_transformer_sentiment.py moltbook --models twitter-roberta --limit 20
+python scripts/run_transformer_sentiment.py synthetic --models twitter-roberta --limit 20
+```
+
+Results are kept in separate directories:
+
+```text
+data/transformer_sentiment/
+|-- moltbook/   # One prediction JSONL/CSV and summary per model
+`-- synthetic/  # One prediction JSONL/CSV and summary per model
+```
+
 ## Latest Run Snapshot
 
 - Staged comments: 1296
