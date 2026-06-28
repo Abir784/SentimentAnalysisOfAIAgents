@@ -1,0 +1,64 @@
+[
+  {
+    "dataset": "moltbook",
+    "model_alias": "twitter-roberta",
+    "checkpoint": "cardiffnlp/twitter-roberta-base-sentiment-latest",
+    "device": "cuda",
+    "rows_scored": 1296,
+    "supported_labels": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "long_text_strategy": "truncate",
+    "max_length": 512,
+    "stride": null,
+    "label_counts": {
+      "negative": 276,
+      "neutral": 795,
+      "positive": 225
+    },
+    "label_shares": {
+      "negative": 0.212963,
+      "neutral": 0.613426,
+      "positive": 0.173611
+    },
+    "mean_confidence": 0.692275,
+    "artifacts": {
+      "jsonl": "data/transformer_sentiment/moltbook/twitter-roberta_predictions.jsonl",
+      "csv": "data/transformer_sentiment/moltbook/twitter-roberta_predictions.csv",
+      "summary": "data/transformer_sentiment/moltbook/twitter-roberta_summary.json"
+    }
+  },
+  {
+    "dataset": "moltbook",
+    "model_alias": "xlm-twitter",
+    "checkpoint": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+    "device": "cuda",
+    "rows_scored": 1296,
+    "supported_labels": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "long_text_strategy": "truncate",
+    "max_length": 512,
+    "stride": null,
+    "label_counts": {
+      "negative": 536,
+      "neutral": 582,
+      "positive": 178
+    },
+    "label_shares": {
+      "negative": 0.41358,
+      "neutral": 0.449074,
+      "positive": 0.137346
+    },
+    "mean_confidence": 0.539084,
+    "artifacts": {
+      "jsonl": "data/transformer_sentiment/moltbook/xlm-twitter_predictions.jsonl",
+      "csv": "data/transformer_sentiment/moltbook/xlm-twitter_predictions.csv",
+      "summary": "data/transformer_sentiment/moltbook/xlm-twitter_summary.json"
+    }
+  }
+]

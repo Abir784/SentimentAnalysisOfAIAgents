@@ -2,7 +2,7 @@
   "dataset": "moltbook",
   "model_alias": "xlm-twitter",
   "checkpoint": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
-  "device": "cpu",
+  "device": "cuda",
   "rows_scored": 1296,
   "supported_labels": [
     "negative",
