@@ -1,0 +1,95 @@
+[
+  {
+    "dataset": "synthetic",
+    "model_alias": "twitter-roberta",
+    "checkpoint": "cardiffnlp/twitter-roberta-base-sentiment-latest",
+    "device": "cuda",
+    "rows_scored": 6000,
+    "supported_labels": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "long_text_strategy": "truncate",
+    "max_length": 512,
+    "stride": null,
+    "label_counts": {
+      "negative": 3406,
+      "neutral": 2389,
+      "positive": 205
+    },
+    "label_shares": {
+      "negative": 0.567667,
+      "neutral": 0.398167,
+      "positive": 0.034167
+    },
+    "mean_confidence": 0.756072,
+    "artifacts": {
+      "jsonl": "data/transformer_sentiment/synthetic/twitter-roberta_predictions.jsonl",
+      "csv": "data/transformer_sentiment/synthetic/twitter-roberta_predictions.csv",
+      "summary": "data/transformer_sentiment/synthetic/twitter-roberta_summary.json"
+    }
+  },
+  {
+    "dataset": "synthetic",
+    "model_alias": "xlm-twitter",
+    "checkpoint": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
+    "device": "cuda",
+    "rows_scored": 6000,
+    "supported_labels": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "long_text_strategy": "truncate",
+    "max_length": 512,
+    "stride": null,
+    "label_counts": {
+      "negative": 3403,
+      "neutral": 2121,
+      "positive": 476
+    },
+    "label_shares": {
+      "negative": 0.567167,
+      "neutral": 0.3535,
+      "positive": 0.079333
+    },
+    "mean_confidence": 0.702923,
+    "artifacts": {
+      "jsonl": "data/transformer_sentiment/synthetic/xlm-twitter_predictions.jsonl",
+      "csv": "data/transformer_sentiment/synthetic/xlm-twitter_predictions.csv",
+      "summary": "data/transformer_sentiment/synthetic/xlm-twitter_summary.json"
+    }
+  },
+  {
+    "dataset": "synthetic",
+    "model_alias": "bertweet",
+    "checkpoint": "finiteautomata/bertweet-base-sentiment-analysis",
+    "device": "cuda",
+    "rows_scored": 6000,
+    "supported_labels": [
+      "negative",
+      "neutral",
+      "positive"
+    ],
+    "long_text_strategy": "truncate",
+    "max_length": 128,
+    "stride": null,
+    "label_counts": {
+      "negative": 3258,
+      "neutral": 2256,
+      "positive": 486
+    },
+    "label_shares": {
+      "negative": 0.543,
+      "neutral": 0.376,
+      "positive": 0.081
+    },
+    "mean_confidence": 0.81229,
+    "artifacts": {
+      "jsonl": "data/transformer_sentiment/synthetic/bertweet_predictions.jsonl",
+      "csv": "data/transformer_sentiment/synthetic/bertweet_predictions.csv",
+      "summary": "data/transformer_sentiment/synthetic/bertweet_summary.json"
+    }
+  }
+]

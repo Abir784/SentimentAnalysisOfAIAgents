@@ -1,0 +1,31 @@
+{
+  "dataset": "synthetic",
+  "model_alias": "bertweet",
+  "checkpoint": "finiteautomata/bertweet-base-sentiment-analysis",
+  "device": "cuda",
+  "rows_scored": 6000,
+  "supported_labels": [
+    "negative",
+    "neutral",
+    "positive"
+  ],
+  "long_text_strategy": "truncate",
+  "max_length": 128,
+  "stride": null,
+  "label_counts": {
+    "negative": 3258,
+    "neutral": 2256,
+    "positive": 486
+  },
+  "label_shares": {
+    "negative": 0.543,
+    "neutral": 0.376,
+    "positive": 0.081
+  },
+  "mean_confidence": 0.81229,
+  "artifacts": {
+    "jsonl": "data/transformer_sentiment/synthetic/bertweet_predictions.jsonl",
+    "csv": "data/transformer_sentiment/synthetic/bertweet_predictions.csv",
+    "summary": "data/transformer_sentiment/synthetic/bertweet_summary.json"
+  }
+}

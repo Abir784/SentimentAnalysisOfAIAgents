@@ -1,0 +1,9 @@
+{
+  "run_id": "20260419T092754Z",
+  "input_file": "data/staged/moltbook_comments_all.jsonl",
+  "rows_before_language_filter": 1296,
+  "rows_after_language_filter": 1219,
+  "rows": 1219,
+  "output_csv": "data/preprocessed_rule_based/moltbook_preprocessed_rule_based_20260419T092754Z.csv",
+  "output_jsonl": "data/preprocessed_rule_based/moltbook_preprocessed_rule_based_20260419T092754Z.jsonl"
+}

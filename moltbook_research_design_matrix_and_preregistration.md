@@ -36,6 +36,8 @@ The outputs will include contingency tables, alignment heatmaps, trajectory visu
 ### RQ4 — Robustness to Preprocessing and Rule-Based Choices
 To validate the stability of our findings, we will rerun the analysis under alternative conditions, including raw versus cleaned text, stricter filtering thresholds, and multiple rule-based scoring views (VADER, SentiWordNet, and ensemble). The key question is whether the main conclusions remain directionally consistent across these variations. The output will be a robustness matrix clearly indicating which findings are stable and which are sensitive to methodological choices.
 
+As a supplementary benchmark (not part of the primary preregistered pipeline), we also score both corpora with three pretrained social-text transformers: `twitter-roberta`, `xlm-twitter`, and `bertweet`. Real Moltbook runs are stored under `data/transformer_sentiment/moltbook/`; synthetic conversation runs are stored under `data/transformer_sentiment/synthetic/`. These benchmarks assess whether neutral-dominance and low-negative patterns persist under neural classifiers trained on social text, and whether synthetic multi-model dialogue differs from observed Moltbook discourse.
+
 ## Data Source and Data Summary
 - Data source: public AI-to-AI conversations from MoltBook, collected in multiple crawl batches and consolidated into staged JSONL files.
 - MoltBook context: MoltBook is an AI-native social platform where AI agents publish posts and interact through threaded comments, making it a suitable environment for studying machine-to-machine discourse patterns.
@@ -52,6 +54,7 @@ To validate the stability of our findings, we will rerun the analysis under alte
 - Data handling: pandas, numpy
 - NLP preprocessing and sentiment: nltk, langdetect, vaderSentiment, SentiWordNet
 - Rule-based sentiment tools: VADER, SentiWordNet, conservative ensemble
+- Optional transformer benchmark: PyTorch (CUDA), Hugging Face `transformers`, `sentencepiece`, `emoji`
 - Statistical testing: scipy.stats
 - Graph analysis: networkx
 - Visualization: matplotlib, seaborn
@@ -159,6 +162,71 @@ To assess the stability of the corpus-level sentiment distribution reported in R
 
 The VADER-only variant (v3) diverges substantially, producing a distribution of 26.0% negative, 3.8% neutral, and 70.2% positive — effectively inverting the dominant class finding and nearly eliminating the neutral category. The SentiWordNet-only variant (v4) produces an intermediate distribution of 12.7% negative, 38.6% neutral, and 48.7% positive, shifting the dominant class to positive while preserving a more credible neutral proportion. The maximum absolute delta in the positive proportion across all variants is 0.312, and the coefficient of variation is 0.288, both driven by the single-lexicon configurations. These results demonstrate that the ensemble methodology is not merely a convenience but a substantive analytical choice: individual lexicons, particularly VADER, exhibit systematic biases toward positive classification when applied to AI-generated text, and their use in isolation would produce materially different and less stable conclusions. The convergence of three independent variant configurations on the same neutral-dominant pattern provides strong evidence for the reliability of the reported corpus-level findings.
 
+---
+
+## Supplementary: Pretrained Transformer Sentiment Benchmark
+
+Three pretrained 3-class social-text models were run on both corpora using CUDA inference.
+
+### Moltbook (real comments)
+
+Source: `data/staged/moltbook_comments_all.jsonl` (**1,296 comments**). Outputs: `data/transformer_sentiment/moltbook/`.
+
+| Model | Checkpoint | Max length | Mean confidence | Negative | Neutral | Positive |
+|---|---|---:|---:|---:|---:|---:|
+| `twitter-roberta` | `cardiffnlp/twitter-roberta-base-sentiment-latest` | 512 | 0.692 | 276 (21.3%) | 795 (61.3%) | 225 (17.4%) |
+| `xlm-twitter` | `cardiffnlp/twitter-xlm-roberta-base-sentiment` | 512 | 0.539 | 536 (41.4%) | 582 (44.9%) | 178 (13.7%) |
+| `bertweet` | `finiteautomata/bertweet-base-sentiment-analysis` | 128 | 0.766 | 147 (11.3%) | 874 (67.4%) | 275 (21.2%) |
+
+Comparison against the rule-based ensemble baseline (RQ2, 1,219 preprocessed comments):
+
+| Scorer | Negative | Neutral | Positive | Dominant class |
+|---|---|---|---|---|
+| Ensemble (primary) | 6.2% | **54.8%** | 39.0% | Neutral |
+| `twitter-roberta` | 21.3% | **61.3%** | 17.4% | Neutral |
+| `xlm-twitter` | 41.4% | **44.9%** | 13.7% | Neutral |
+| `bertweet` | 11.3% | **67.4%** | 21.2% | Neutral |
+
+**Moltbook interpretation:**
+
+- All three transformers agree with the ensemble on **neutral as the dominant class**, supporting the core RQ2 directional finding under neural scoring.
+- **Positive share is much lower** under transformers (13.7%–21.2%) than under the ensemble (39.0%), suggesting the rule-based stack may over-classify AI-agent text as positive relative to social-text fine-tuned models.
+- **`xlm-twitter` is the most divergent scorer**, shifting 41.4% of comments to negative versus 6.2%–21.3% for the other methods. Multilingual RoBERTa appears poorly calibrated for this English-heavy agent corpus.
+- **`bertweet` is the closest transformer to the ensemble neutral-dominant pattern** (67.4% neutral) but still assigns less positive sentiment and more negative sentiment than the ensemble.
+
+### Synthetic (generated conversations)
+
+Source: `data/sythetic/conversations.jsonl` (**6,000 messages** from generated multi-model dialogues). Outputs: `data/transformer_sentiment/synthetic/`.
+
+| Model | Checkpoint | Max length | Mean confidence | Negative | Neutral | Positive |
+|---|---|---:|---:|---:|---:|---:|
+| `twitter-roberta` | `cardiffnlp/twitter-roberta-base-sentiment-latest` | 512 | 0.756 | 3,406 (56.8%) | 2,389 (39.8%) | 205 (3.4%) |
+| `xlm-twitter` | `cardiffnlp/twitter-xlm-roberta-base-sentiment` | 512 | 0.703 | 3,403 (56.7%) | 2,121 (35.4%) | 476 (7.9%) |
+| `bertweet` | `finiteautomata/bertweet-base-sentiment-analysis` | 128 | 0.812 | 3,258 (54.3%) | 2,256 (37.6%) | 486 (8.1%) |
+
+**Synthetic interpretation:**
+
+- All three transformers classify **negative as the dominant class** on synthetic messages (54.3%–56.8%), inverting the neutral-dominant pattern observed on real Moltbook comments.
+- **Positive sentiment is rare** in synthetic output (3.4%–8.1%) versus 13.7%–21.2% on Moltbook under the same models.
+- **`twitter-roberta` and `xlm-twitter` agree closely on negative share** (~56.7%), suggesting stable negative classification for generated dialogue under RoBERTa-family models.
+- **`bertweet` is slightly less negative and more positive** than the RoBERTa models but still negative-dominant overall.
+
+### Moltbook vs. synthetic (cross-corpus comparison)
+
+| Model | Moltbook dominant class | Synthetic dominant class | Δ Negative (synthetic − Moltbook) |
+|---|---|---|---|
+| `twitter-roberta` | Neutral (61.3%) | Negative (56.8%) | +35.5 pp |
+| `xlm-twitter` | Neutral (44.9%) | Negative (56.7%) | +15.3 pp |
+| `bertweet` | Neutral (67.4%) | Negative (54.3%) | +43.0 pp |
+
+Generated multi-model conversations are scored as substantially more negative than real Moltbook agent discourse under every transformer tested. This suggests synthetic dialogue text differs systematically in lexical and pragmatic tone from observed platform comments, and that corpus choice—not only scorer choice—materially affects sentiment conclusions.
+
+**Run notes:**
+
+- `twitter-roberta` and `xlm-twitter` used `--max-length 512`; `bertweet` required `--max-length 128` because BERTweet supports only ~128 tokens per sequence.
+- Artifacts per model: `*_predictions.jsonl`, `*_predictions.csv`, `*_summary.json`; combined metadata in `all_models_summary.json`.
+- Full run documentation: `data/transformer_sentiment/moltbook/README.md`, `data/transformer_sentiment/synthetic/README.md`.
+
 # Key Findings Summary
 
 ---
@@ -225,7 +293,7 @@ Parent-child sentiment alignment is **non-deterministic** (χ² = 5.00, p = 0.28
 
 ## RQ4 — Robustness to Method Choices
 
-The neutral-dominant finding holds across preprocessing and filtering variants but is **sensitive to lexicon choice**.
+The neutral-dominant finding holds across preprocessing and filtering variants but is **sensitive to lexicon choice** and **sensitive to pretrained transformer choice**.
 
 | Variant | Negative | Neutral | Positive | Dominant Class |
 |---|---|---|---|---|
@@ -234,8 +302,14 @@ The neutral-dominant finding holds across preprocessing and filtering variants b
 | v3 — VADER only | 26.0% | 3.8% | **70.2%** | Positive ⚠️ |
 | v4 — SentiWordNet only | 12.7% | 38.6% | **48.7%** | Positive ⚠️ |
 | v5 — Strict filter | 6.3% | **55.0%** | 38.6% | Neutral ✅ |
+| Transformer (Moltbook) — `twitter-roberta` | 21.3% | **61.3%** | 17.4% | Neutral ✅ |
+| Transformer (Moltbook) — `xlm-twitter` | 41.4% | **44.9%** | 13.7% | Neutral ✅ |
+| Transformer (Moltbook) — `bertweet` | 11.3% | **67.4%** | 21.2% | Neutral ✅ |
+| Transformer (Synthetic) — `twitter-roberta` | **56.8%** | 39.8% | 3.4% | Negative ⚠️ |
+| Transformer (Synthetic) — `xlm-twitter` | **56.7%** | 35.4% | 7.9% | Negative ⚠️ |
+| Transformer (Synthetic) — `bertweet` | **54.3%** | 37.6% | 8.1% | Negative ⚠️ |
 
-> **Key point:** Three of five variants converge on the same neutral-dominant pattern. VADER alone would invert the finding entirely — justifying the ensemble approach as a methodological necessity, not a convenience.
+> **Key point:** Three of five rule-based variants converge on the same neutral-dominant pattern on real Moltbook comments. VADER alone would invert the finding entirely — justifying the ensemble approach as a methodological necessity, not a convenience. Transformer benchmarks on Moltbook confirm neutral dominance but with lower positive share (13.7%–21.2% vs. 39.0% ensemble). On synthetic conversations, all three transformers flip to **negative dominance** (54.3%–56.8%), showing that sentiment conclusions are sensitive to both scorer choice and corpus type.
 
 
 ## RQ-wise Graph Showcase 
@@ -289,7 +363,7 @@ Supporting matrix (table data): data/figures/rq4_robustness_matrix_20260419T0928
 - RQ1 supported: clustered interaction topology.
 - RQ2 not supported: neutral dominates, not positive.
 - RQ3 supported: sentiment homeostasis observed; neutral is conversational attractor; positive accumulates with thread depth.
-- RQ4 partially supported: preprocessing robust, scorer-sensitive.
+- RQ4 partially supported: preprocessing robust, scorer-sensitive; Moltbook transformer benchmarks confirm neutral dominance; synthetic transformer benchmarks flip to negative dominance (corpus-sensitive).
 
 
 
