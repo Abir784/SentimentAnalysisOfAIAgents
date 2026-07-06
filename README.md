@@ -152,6 +152,48 @@ data/transformer_sentiment/
 `-- synthetic/  # One prediction JSONL/CSV and summary per model
 ```
 
+### Moltbook Transformer Results
+
+Latest Moltbook transformer artifacts were generated on 2026-06-28 with CUDA inference. These are
+pretrained inference results, not supervised accuracy scores, because they are model predictions on
+the unlabeled Moltbook corpus.
+
+Run settings:
+
+- Dataset: `data/staged/moltbook_comments_all.jsonl`
+- Rows scored: 1296 comments per model
+- Labels: `negative`, `neutral`, `positive`
+- Long-text strategy: `truncate`
+- Output directory: `data/transformer_sentiment/moltbook/`
+
+| Model alias | Checkpoint | Max length | Negative | Neutral | Positive | Mean confidence |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `twitter-roberta` | `cardiffnlp/twitter-roberta-base-sentiment-latest` | 512 | 276 (21.30%) | 795 (61.34%) | 225 (17.36%) | 0.6923 |
+| `xlm-twitter` | `cardiffnlp/twitter-xlm-roberta-base-sentiment` | 512 | 536 (41.36%) | 582 (44.91%) | 178 (13.73%) | 0.5391 |
+| `bertweet` | `finiteautomata/bertweet-base-sentiment-analysis` | 128 | 147 (11.34%) | 874 (67.44%) | 275 (21.22%) | 0.7661 |
+
+Per-model artifacts:
+
+- `data/transformer_sentiment/moltbook/twitter-roberta_predictions.csv`
+- `data/transformer_sentiment/moltbook/twitter-roberta_predictions.jsonl`
+- `data/transformer_sentiment/moltbook/twitter-roberta_summary.json`
+- `data/transformer_sentiment/moltbook/xlm-twitter_predictions.csv`
+- `data/transformer_sentiment/moltbook/xlm-twitter_predictions.jsonl`
+- `data/transformer_sentiment/moltbook/xlm-twitter_summary.json`
+- `data/transformer_sentiment/moltbook/bertweet_predictions.csv`
+- `data/transformer_sentiment/moltbook/bertweet_predictions.jsonl`
+- `data/transformer_sentiment/moltbook/bertweet_summary.json`
+
+Interpretation notes:
+
+- All three models predict neutral as the plurality label.
+- `xlm-twitter` is substantially more negative-heavy than the two English/social checkpoints.
+- `bertweet` has the highest mean confidence in this run, but it used `max_length=128`; compare long
+  comments carefully against the 512-token RoBERTa/XLM runs.
+- `data/transformer_sentiment/moltbook/all_models_summary.json` currently contains the
+  `twitter-roberta` and `xlm-twitter` entries; use the per-model summary files above as the complete
+  source for this documented three-model snapshot.
+
 ## Latest Run Snapshot
 
 - Staged comments: 1296
@@ -168,6 +210,8 @@ data/transformer_sentiment/
 - RQ2 inferential stats artifact: `data/rule_based/moltbook_rq2_stats_20260419T092811Z.json`
 - Gold-set sample artifact: `data/gold/moltbook_goldset_sample_20260419T092811Z.csv`
 - Run manifests: `data/manifests/rq2_stats_manifest_20260419T092811Z.json`, `data/manifests/goldset_sample_manifest_20260419T092811Z.json`
+- Transformer Moltbook snapshot: 1296 comments scored with `twitter-roberta`, `xlm-twitter`, and
+  `bertweet`; summaries are in `data/transformer_sentiment/moltbook/`
 
 ## Notes
 
