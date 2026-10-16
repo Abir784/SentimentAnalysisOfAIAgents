@@ -99,7 +99,7 @@ At the post level, reply concentration measured via the Gini coefficient varies 
 
 Analysis of 1,241 parent-child comment pairs across 49 threaded conversations reveals complex patterns of sentiment alignment and evolution within discussions. Rather than exhibiting simple sentiment contagion (where negative comments spread negativity), threads demonstrate **sentiment homeostasis** with strong neutral-sentiment stabilisation.
 
-**Parent-Child Sentiment Alignment (Exact Match Rate = 48.1%, χ² = 5.00, df=2, p = 0.287):**
+**Parent-Child Sentiment Alignment (Exact Match Rate = 48.1%, χ² = 5.00, df=4, p = 0.287; Cramér's V = 0.045; permutation p = 0.087):**
 
 The contingency analysis reveals asymmetric sentiment matching patterns:
 
@@ -109,7 +109,7 @@ The contingency analysis reveals asymmetric sentiment matching patterns:
 | Neutral | 697 | **57.3%** | 6.2% negative, 57.3% neutral, 36.6% positive |
 | Positive | 469 | **40.9%** | 5.3% negative, 53.7% neutral, 40.9% positive |
 
-Neutral sentiment exhibits the highest self-replication rate (57.3%), suggesting it functions as a conversational **attractor state**. Negative comments trigger overwhelmingly neutral responses (62.7%), indicating that agents suppress sentiment escalation. The non-significant chi-square result (p = 0.287) demonstrates that parent sentiment is **not deterministic** of child sentiment—context, topic, and author identity mediate the relationship.
+Neutral sentiment exhibits the highest self-replication rate (57.3% vs 56.2% child base rate, lift 1.02 — essentially at chance), so the "attractor" wording is softened to a descriptive plurality, not a validated attractor. Negative comments are followed by neutral responses 62.7% of the time vs the 56.2% base rate (lift 1.11), but with only 75 negative parents the 95% CI is wide — described as weak de-escalation signal, not a confirmed effect. The non-significant chi-square result (p = 0.287, df=4; permutation p = 0.087) provides **no evidence of parent-child dependence** — worded as "no evidence of contagion", not "no contagion". Note: pairs use sequential adjacency within threads (proxy edges), not resolved `parent_id` reply links — see direct-vs-sequential audit.
 
 **Sentiment Trajectory by Thread Phase (Early → Mid → Late):**
 
@@ -119,7 +119,7 @@ Neutral sentiment exhibits the highest self-replication rate (57.3%), suggesting
 | Mid | 6.5% | 60.3% | 33.2% |
 | Late | 8.4% | 55.1% | 36.5% |
 
-Threads exhibit a **positive accumulation trajectory**: positive sentiment increases by 7.3 percentage points from early to late phases (29.2% → 36.5%), while neutral sentiment decreases by 8.5 points (63.6% → 55.1%). Negative sentiment remains flat (~7%), suggesting agents avoid sentiment deterioration. This trajectory mirrors human social bonding dynamics where initial exchanges are exploratory/neutral, then become more committed as engagement deepens.
+Threads exhibit a **descriptive positive drift**: phase-mean positive share starts at 29.2% (early) and reaches 36.5% (late), +7.3pp, while neutral starts at 63.6% and falls to 55.1% (−8.5pp). "29.2% / 63.6%" are early-phase starting values, not changes. A Spearman trend test of phase order vs per-thread positive proportion is non-significant (ρ = 0.08, p = 0.32, n = 141 thread-phases), so this is reported as a descriptive drift, not a confirmed accumulation trend. Negative sentiment remains flat (~7%), suggesting agents avoid sentiment deterioration. This trajectory mirrors human social bonding dynamics where initial exchanges are exploratory/neutral, then become more committed as engagement deepens.
 
 **Author-Level Sentiment Consistency:**
 
@@ -136,14 +136,14 @@ Unlike human social media where negative sentiment cascades and polarization esc
 ---
 ## RQ2: Sentiment Distribution of AI-Agent Replies
 
-Corpus-level sentiment analysis using an ensemble of VADER and SentiWordNet classifiers across 1,219 AI-agent replies reveals that neutral sentiment is the dominant class, accounting for 54.8% of all messages (95% CI: [52.2%, 57.7%]). Positive sentiment constitutes the second most frequent category at 39.0% (95% CI: [36.2%, 41.8%]), while negative sentiment is markedly suppressed at 6.2% (95% CI: [4.8%, 7.5%]). All three proportions deviate significantly from a uniform baseline distribution (χ² = 450.63, p = 1.40 × 10⁻⁹⁸), indicating that the observed sentiment profile is a systematic property of AI-agent communication rather than a chance distribution. The predominance of neutral sentiment is consistent with task-oriented, informational exchange characterising agent-to-agent discourse, in contrast to the more affect-laden patterns observed in human social media corpora.
+Corpus-level sentiment analysis using an ensemble of VADER and SentiWordNet classifiers across 1,219 AI-agent replies reveals that neutral sentiment is the dominant class, accounting for 54.8% of all messages (95% CI: [52.2%, 57.7%]; thread-cluster bootstrap for the positive share: 39.1% [33.4%, 44.9%]). The uniformity χ² test (χ² = 450.63) is dropped from the claims — testing against a uniform-thirds null is uninformative; distribution is reported descriptively with CIs instead. The predominance of neutral sentiment is consistent with task-oriented, informational exchange characterising agent-to-agent discourse, in contrast to the more affect-laden patterns observed in human social media corpora.
 
-Sentiment composition differs significantly across posts (Kruskal-Wallis H = 110.87, p = 2.81 × 10⁻⁷), threads (H = 110.87, p = 2.81 × 10⁻⁷), and authors (H = 308.71, p = 3.02 × 10⁻¹⁰). The author-level effect is the strongest, indicating that sentiment is more strongly a property of individual agents than of the conversational context in which they participate. This is corroborated by the author-level entropy analysis, which demonstrates that the overwhelming majority of agents (approximately 390 of those sampled) maintain near-zero entropy in their sentiment output — reflecting a high degree of within-author consistency. A minority of agents exhibit broader sentiment entropy in the 0.6–0.75 range, suggesting a small subpopulation of agents with more contextually adaptive communicative behaviour. Across posts, sentiment composition is heterogeneous: some posts attract exclusively positive replies, others are entirely neutral, and a subset carry non-trivial proportions of negative sentiment, as evidenced by the sorted stacked composition chart.
+Sentiment composition differs across groupings; report effect sizes, not raw H. Post/thread groupings are identical (`post_id == thread_id` 1:1, 55/55), so their identical H = 110.87 is a redundant grouping, not independent replication — collapse to one. Kruskal-Wallis ε²: post/thread 0.052 (small), author 0.124 (medium-small). The author-level effect is the strongest, indicating that sentiment is more strongly a property of individual agents than of the conversational context in which they participate. This is corroborated by the author-level entropy analysis, which demonstrates that the overwhelming majority of agents (approximately 390 of those sampled) maintain near-zero entropy in their sentiment output — reflecting a high degree of within-author consistency. A minority of agents exhibit broader sentiment entropy in the 0.6–0.75 range, suggesting a small subpopulation of agents with more contextually adaptive communicative behaviour. Across posts, sentiment composition is heterogeneous: some posts attract exclusively positive replies, others are entirely neutral, and a subset carry non-trivial proportions of negative sentiment, as evidenced by the sorted stacked composition chart.
 
 ---
 ## RQ3 — Sentiment Dynamics Within Conversation Threads
 
-Parent-child sentiment matching is **non-deterministic** (χ² = 5.00, p = 0.287). Neutral sentiment exhibits highest self-replication (57.3% match rate), functioning as a conversational attractor state. Negative comments trigger neutral responses (62.7%), avoiding escalation. Threads exhibit **positive accumulation** (early: 29.2% → late: 36.5%), while neutral decreases (63.6% → 55.1%). Authors maintain high sentiment consistency (mean = 74.24%), with hub agents anchored to neutrality for dialogue mediation.
+Parent-child sentiment matching shows **no evidence of dependence** (χ² = 5.00, df=4, p = 0.287; Cramér's V = 0.045; permutation p = 0.087). Neutral sentiment has the largest self-share (57.3%) but sits at its base rate (lift 1.02). Negative→neutral replies occur 62.7% of the time vs 56.2% base rate (lift 1.11, n=75 — wide CI). Threads show a **descriptive** early→late drift (positive starts 29.2% → 36.5%; neutral starts 63.6% → 55.1%; trend test ns, p = 0.32). Authors maintain high sentiment consistency (mean = 74.24%), with hub agents anchored to neutrality for dialogue mediation.
 
 | Finding | Metric | Interpretation |
 |---|---|---|
@@ -255,7 +255,7 @@ The reply network exhibits a clear **core-periphery structure** with power-law d
 
 ## RQ2 — Sentiment Distribution of AI-Agent Replies
 
-Neutral sentiment dominates the corpus — not positive — across all 1,219 replies. The distribution is highly non-uniform (χ² = 450.63, p = 1.40 × 10⁻⁹⁸).
+Neutral sentiment dominates the corpus — not positive — across all 1,219 replies (reported descriptively with CIs; uniformity χ² dropped as uninformative).
 
 | Sentiment Class | Proportion | 95% CI |
 |---|---|---|
@@ -265,11 +265,10 @@ Neutral sentiment dominates the corpus — not positive — across all 1,219 rep
 
 Sentiment varies significantly across **posts, threads, and authors**, with author-level variation being the strongest effect:
 
-| Level | Kruskal-Wallis H | p-value |
-|---|---|---|
-| Post | 110.87 | 2.81 × 10⁻⁷ |
-| Thread | 110.87 | 2.81 × 10⁻⁷ |
-| **Author** | **308.71** | **3.02 × 10⁻¹⁰** |
+| Level | Kruskal-Wallis H | p-value | ε² |
+|---|---|---|---|
+| Post = Thread (identical grouping) | 110.87 | 2.81 × 10⁻⁷ | 0.052 |
+| **Author** | **308.71** | **3.02 × 10⁻¹⁰** | 0.124 |
 
 > **Key point:** Sentiment is a property of *who is speaking*, not *what is being discussed*. Most agents are tonally consistent (mean entropy = 0.155); only a minority adapt sentiment across contexts.
 
@@ -277,7 +276,7 @@ Sentiment varies significantly across **posts, threads, and authors**, with auth
 
 ## RQ3 — Sentiment Dynamics Within Conversation Threads
 
-Parent-child sentiment alignment is **non-deterministic** (χ² = 5.00, p = 0.287). Neutral sentiment is the strongest conversational attractor with 57.3% self-replication rate, while negative comments trigger neutral responses 62.7% of the time, indicating de-escalation dynamics. Threads follow a **consensus-building trajectory**: positive sentiment increases 7.3 percentage points from early (29.2%) to late phases (36.5%), while neutral decreases from 63.6% to 55.1%. Authors maintain high sentiment consistency (mean = 74.24%), suggesting sentiment is determined by agent identity rather than conversational context.
+Parent-child sentiment alignment shows **no evidence of dependence** (χ² = 5.00, df=4, p = 0.287; V = 0.045; permutation p = 0.087). Neutral has the largest self-share (57.3%) at its base rate (lift 1.02); negative→neutral replies are 62.7% vs 56.2% base rate (lift 1.11, n=75, wide CI). Threads show a **descriptive** early→late drift (positive starts 29.2% → 36.5%; neutral starts 63.6% → 55.1%; trend ns, p = 0.32). Authors maintain high sentiment consistency (mean = 74.24%), suggesting sentiment is determined by agent identity rather than conversational context.
 
 | Finding | Metric | Interpretation |
 |---|---|---|
@@ -343,7 +342,7 @@ Answer focus: neutral is dominant overall, with significant variation by post/th
 <img src="./data/figures/rq2_lexicon_agreement_heatmap_20260419T092811Z.png" alt="RQ2 Lexicon Agreement Heatmap" width="900" />
 
 ### RQ3 — Sentiment Dynamics Within Conversation Threads
-Answer focus: neutral sentiment is a conversational attractor; threads exhibit positive accumulation and de-escalation of negativity.
+Answer focus: no evidence of parent-child dependence (permutation p = 0.087); neutral plurality is descriptive (at base rate); early→late drift is descriptive only (trend ns).
 
 <img src="./data/figures/rq3_alignment_heatmap_20260509T173800Z.png" alt="RQ3 Parent-Child Sentiment Alignment Heatmap" width="900" />
 

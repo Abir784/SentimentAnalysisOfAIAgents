@@ -1,0 +1,168 @@
+{
+  "n_gold": 250,
+  "gold_dist": {
+    "negative": 58,
+    "positive": 125,
+    "neutral": 67
+  },
+  "caveat": "PROVISIONAL single-rater reference (rater-1 only, n=250). Kappa not computable; adjudication pending.",
+  "benchmark": {
+    "vader_label": {
+      "n": 250,
+      "accuracy": 0.48,
+      "macro_f1": 0.3718,
+      "counts": {
+        "positive": 141,
+        "negative": 97,
+        "neutral": 12
+      }
+    },
+    "swn_label": {
+      "n": 250,
+      "accuracy": 0.4,
+      "macro_f1": 0.3766,
+      "counts": {
+        "neutral": 86,
+        "negative": 53,
+        "positive": 111
+      }
+    },
+    "ensemble_label": {
+      "n": 250,
+      "accuracy": 0.388,
+      "macro_f1": 0.3682,
+      "counts": {
+        "neutral": 147,
+        "negative": 27,
+        "positive": 76
+      }
+    },
+    "twitter_roberta_label": {
+      "n": 250,
+      "accuracy": 0.448,
+      "macro_f1": 0.4508,
+      "counts": {
+        "negative": 57,
+        "neutral": 150,
+        "positive": 43
+      }
+    },
+    "xlm_twitter_label": {
+      "n": 250,
+      "accuracy": 0.392,
+      "macro_f1": 0.3918,
+      "counts": {
+        "negative": 112,
+        "neutral": 100,
+        "positive": 38
+      }
+    },
+    "bertweet_label": {
+      "n": 250,
+      "accuracy": 0.452,
+      "macro_f1": 0.4403,
+      "counts": {
+        "neutral": 167,
+        "negative": 31,
+        "positive": 52
+      }
+    }
+  },
+  "ensemble_tuning": {
+    "dev_n": 124,
+    "test_n": 126,
+    "best_dev": {
+      "vader_t": 0.0,
+      "swn_t": 0.0,
+      "macro_f1": 0.3898
+    },
+    "default_on_test": {
+      "macro_f1": 0.4217,
+      "accuracy": 0.4286
+    },
+    "tuned_on_test": {
+      "macro_f1": 0.4593,
+      "accuracy": 0.4841
+    }
+  },
+  "stats": {
+    "parent_child": {
+      "n_pairs": 1241,
+      "chi2": 5.004,
+      "dof": 4,
+      "p_chi2": 0.2869,
+      "cramers_V": 0.0449,
+      "exact_match": 0.4811,
+      "permutation_p_gte": 0.0865
+    },
+    "lift": {
+      "base_rate_child_neutral": 0.5624,
+      "p_neutral_given_negative_parent": 0.6267,
+      "lift_neg_to_neu": 1.114,
+      "p_neutral_given_neutral_parent": 0.5725,
+      "lift_neu_to_neu": 1.018,
+      "note": "n_negative_parents=75: CIs wide; report with cluster bootstrap"
+    },
+    "kruskal_post_thread": {
+      "H": 110.8733,
+      "k_groups": 47,
+      "N": 1296,
+      "epsilon_squared": 0.0519
+    },
+    "kruskal_author": {
+      "H": 308.711,
+      "k_groups": 170,
+      "N": 1296,
+      "epsilon_squared": 0.1241
+    },
+    "kruskal_note": "post_id==thread_id 1:1 (55/55); identical H is redundant grouping, not replication",
+    "trend": {
+      "means": {
+        "early": 0.2912,
+        "late": 0.3644,
+        "mid": 0.3425
+      },
+      "note": "scipy missing; report means + add trend test after install"
+    },
+    "cluster_bootstrap_pos_share": {
+      "threads": 55,
+      "point": 0.3905,
+      "ci95": [
+        0.334,
+        0.4492
+      ]
+    }
+  },
+  "provisional_ranking": [
+    [
+      "twitter_roberta_label",
+      0.4508,
+      0.448
+    ],
+    [
+      "bertweet_label",
+      0.4403,
+      0.452
+    ],
+    [
+      "xlm_twitter_label",
+      0.3918,
+      0.392
+    ],
+    [
+      "swn_label",
+      0.3766,
+      0.4
+    ],
+    [
+      "vader_label",
+      0.3718,
+      0.48
+    ],
+    [
+      "ensemble_label",
+      0.3682,
+      0.388
+    ]
+  ]
+}

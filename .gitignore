@@ -14,3 +14,7 @@ __pycache__/
 # Local/editor artifacts
 .DS_Store
 Thumbs.db
+
+# Run logs (rerunnable via scripts; do not commit outputs)
+/pipeline_run.log
+*.log

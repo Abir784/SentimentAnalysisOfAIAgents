@@ -1,4 +1,15 @@
-# SentimentAnalysis
+# MoltBook Sentiment Analysis of AI Agents
+
+Rule-based + transformer sentiment analysis of AI-agent conversations on
+MoltBook, answering RQ1–RQ4 (interaction structure, sentiment distribution,
+sentiment dynamics, robustness). Design and preregistration:
+`moltbook_research_design_matrix_and_preregistration.md`.
+
+> Validation status (Oct 2026): the VADER+SentiWordNet ensemble is **not**
+> the validated scorer. Provisional single-rater benchmark (n=250,
+> `data/gold/provisional_benchmark_250.json`): twitter-roberta macro-F1 0.451
+> > bertweet 0.440 > ensemble 0.368. Choose the main scorer from
+> adjudicated-gold results (`docs/ensemble_spec.md`), not in advance.
 
 ## Rule-Based Pipeline Overview
 

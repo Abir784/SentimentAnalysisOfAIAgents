@@ -1,0 +1,87 @@
+{
+  "gold_file": "MoltBook_Gold_Annotation_250_with_transformers.xlsx",
+  "gold_sheet": "Annotation",
+  "gold_column": "final_label",
+  "n_gold": 246,
+  "gold_dist": {
+    "negative": 55,
+    "positive": 125,
+    "neutral": 66
+  },
+  "n_blank_final": 4,
+  "rater1": {
+    "negative": 56,
+    "positive": 125,
+    "neutral": 69
+  },
+  "rater2": {
+    "n": 50,
+    "negative": 9,
+    "positive": 25,
+    "neutral": 16
+  },
+  "overlap_Y": 49,
+  "agreement": {
+    "agree": 31,
+    "DISAGREE": 19
+  },
+  "adjudicated": {
+    "n": 15,
+    "negative": 3,
+    "positive": 7,
+    "neutral": 5
+  },
+  "paired_for_kappa": 50,
+  "raw_agreement": 0.62,
+  "cohen_kappa": 0.393,
+  "caveat": "rater-2/adjudication provenance in this copy is unverified; kappa is fair (0.393) on 50 paired rows (49 overlap + 1 outside); 4 DISAGREE rows still lack adjudication (final blank)",
+  "benchmark": {
+    "vader_label": {
+      "n": 246,
+      "accuracy": 0.4878,
+      "macro_f1": 0.3765
+    },
+    "swn_label": {
+      "n": 246,
+      "accuracy": 0.3943,
+      "macro_f1": 0.3682
+    },
+    "ensemble_label": {
+      "n": 246,
+      "accuracy": 0.3862,
+      "macro_f1": 0.368
+    },
+    "twitter_roberta_label": {
+      "n": 246,
+      "accuracy": 0.4553,
+      "macro_f1": 0.4592
+    },
+    "xlm_twitter_label": {
+      "n": 246,
+      "accuracy": 0.4024,
+      "macro_f1": 0.4024
+    },
+    "bertweet_label": {
+      "n": 246,
+      "accuracy": 0.4675,
+      "macro_f1": 0.4589
+    }
+  },
+  "ensemble_tuning_dev_test_split": {
+    "dev_n": 122,
+    "test_n": 124,
+    "best_dev": {
+      "vader_t": 0.0,
+      "swn_t": 0.0,
+      "macro_f1": 0.3856
+    },
+    "default_on_test": {
+      "macro_f1": 0.3865,
+      "accuracy": 0.3952
+    },
+    "tuned_on_test": {
+      "macro_f1": 0.467,
+      "accuracy": 0.4919
+    }
+  }
+}
